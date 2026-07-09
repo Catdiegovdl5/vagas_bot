@@ -21,6 +21,8 @@ echo.
 echo =======================================================================
 echo LOGS DO SISTEMA:
 echo =======================================================================
+echo [+] Limpando processos fantasmas na porta 8080...
+FOR /F "tokens=5" %%a in ('netstat -aon ^| find ":8080" ^| find "LISTENING"') do taskkill /f /pid %%a >nul 2>&1
 python render_bot.py
 echo.
 echo =======================================================================

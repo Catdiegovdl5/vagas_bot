@@ -12,7 +12,8 @@ from logging.handlers import RotatingFileHandler
 app = FastAPI()
 
 # Configuração do Logger Segura (Limpa arquivos maiores que 1MB, guarda apenas 1 backup)
-log_path = "C:\\Users\\99196\\OneDrive\\Documentos\\vagas_bot\\system.log"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+log_path = os.path.join(BASE_DIR, "system.log")
 logger = logging.getLogger("SniperBot")
 logger.setLevel(logging.INFO)
 handler = RotatingFileHandler(log_path, maxBytes=1000000, backupCount=1, encoding='utf-8')
@@ -33,7 +34,7 @@ app.add_middleware(
 # Inicializa o banco de dados caso nao exista
 init_db()
 
-STATIC_DIR = "C:\\Users\\99196\\OneDrive\\Documentos\\vagas_bot\\static"
+STATIC_DIR = os.path.join(BASE_DIR, "static")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/", response_class=HTMLResponse)
@@ -52,7 +53,7 @@ async def n8n_webhook(request: Request):
     """ Webhook chamado pelo n8n a cada 24h contendo as vagas raspadas """
     data = await request.json()
     jobs = data.get("jobs", [])
-    inserted = insert_jobs(jobs)
+    inserted = await asyncio.to_thread(insert_jobs, jobs)
     return {"status": "success", "inserted": inserted, "total_received": len(jobs)}
 
 @app.post("/api/trigger")
@@ -67,16 +68,21 @@ async def trigger_scrapers(request: Request):
     
     all_jobs = []
     
-    for plat in platforms:
+    async def run_scraper(plat):
         try:
             logger.info(f"[{plat.upper()}] Inicializando Scraper...")
             module = importlib.import_module(f"scrapers.{plat}")
             jobs = await asyncio.to_thread(module.scrape, keyword=keyword, level=level)
-            all_jobs.extend(jobs)
             logger.info(f"[{plat.upper()}] Sucesso! {len(jobs)} vagas capturadas.")
+            return jobs
         except Exception as e:
             logger.error(f"[{plat.upper()}] ERRO CRÍTICO no scraper: {str(e)}")
-            
+            return []
+
+    results = await asyncio.gather(*(run_scraper(p) for p in platforms), return_exceptions=True)
+    for jobs in results:
+        if isinstance(jobs, list):
+            all_jobs.extend(jobs)
     try:
         inserted = await asyncio.to_thread(insert_jobs, all_jobs)
         logger.info(f"Varredura Finalizada! {len(all_jobs)} vagas totais recebidas. {inserted} novas vagas gravadas no banco de dados.")

@@ -24,8 +24,11 @@ async def start_web_server():
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', port)
     
-    logger.info(f"🌐 Servidor Web iniciado na porta {port}")
-    await site.start()
+    try:
+        await site.start()
+        logger.info(f"🌐 Servidor Web iniciado na porta {port}")
+    except OSError:
+        logger.warning(f"⚠️ Porta {port} já está em uso (Erro 10048). Ignorando Web Server e rodando apenas o Bot!")
     
     # Mantém o servidor rodando para sempre
     while True:
@@ -44,8 +47,14 @@ async def main():
     # Cria a tarefa do bot do Telegram
     bot_task = asyncio.create_task(bot.dp.start_polling(bot.bot))
     
-    # Aguarda ambas as tarefas (elas rodam para sempre)
-    await asyncio.gather(web_task, bot_task)
+    # Aguarda ambas as tarefas e encerra se uma falhar
+    done, pending = await asyncio.wait(
+        [web_task, bot_task],
+        return_when=asyncio.FIRST_COMPLETED
+    )
+    
+    for task in pending:
+        task.cancel()
 
 if __name__ == '__main__':
     try:

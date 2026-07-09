@@ -1,0 +1,949 @@
+erros_robo.log:130: File "C:\Users\99196\OneDrive\Documentos\vagas_bot\bot.py", line 359, in handle_free_text
+erros_robo.log:132: File "C:\Users\99196\OneDrive\Documentos\vagas_bot\bot.py", line 296, in _do_hunt
+erros_robo.log:133: await message.answer(f"✅ *Filtro Concluído!*\n\nDe {len(raw_jobs)} vagas brutas, apenas **{len(premium_jobs)} vagas** passaram pela Guilhotina da IA. Enviando as Top 5...", parse_mode="Markdown")
+erros_robo.log:415: File "C:\Users\99196\OneDrive\Documentos\vagas_bot\bot.py", line 212, in process_hunt
+erros_robo.log:417: File "C:\Users\99196\OneDrive\Documentos\vagas_bot\bot.py", line 276, in _do_hunt
+erros_robo.log:418: await message.answer(f"🛡️ *Escudo PT-BR Ativado!*\nLimpando vagas gringas antes de enviar para a IA...", parse_mode="Markdown")
+erros_robo.log:490: 2026-07-07 14:44:16 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:492: 2026-07-07 14:44:17 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:493: 2026-07-07 14:44:17 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:495: 2026-07-07 14:44:17 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:497: 2026-07-07 14:44:17 | INFO | ✅ Scraper META_ADS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:500: 2026-07-07 14:44:18 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:502: 2026-07-07 14:44:18 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:503: 2026-07-07 14:44:18 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:504: 2026-07-07 14:44:18 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 6
+erros_robo.log:505: 2026-07-07 14:44:19 | INFO | ✅ Scraper NOVENOVE finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:506: 2026-07-07 14:44:19 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 14
+erros_robo.log:507: 2026-07-07 14:44:21 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:508: 2026-07-07 14:44:34 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 7
+erros_robo.log:509: 2026-07-07 14:44:59 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 20
+erros_robo.log:510: 2026-07-07 14:45:19 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:511: 2026-07-07 14:50:12 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:513: 2026-07-07 14:50:12 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:514: 2026-07-07 14:50:12 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:516: 2026-07-07 14:50:12 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:518: 2026-07-07 14:50:12 | INFO | ✅ Scraper META_ADS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:521: 2026-07-07 14:50:13 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:523: 2026-07-07 14:50:13 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:524: 2026-07-07 14:50:13 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:525: 2026-07-07 14:50:13 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 6
+erros_robo.log:526: 2026-07-07 14:50:14 | INFO | ✅ Scraper NOVENOVE finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:527: 2026-07-07 14:50:15 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 14
+erros_robo.log:528: 2026-07-07 14:50:16 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:529: 2026-07-07 14:50:18 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:530: 2026-07-07 14:50:30 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:531: 2026-07-07 14:51:10 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:532: 2026-07-07 14:52:03 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:533: 2026-07-07 14:57:50 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:535: 2026-07-07 14:57:50 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:536: 2026-07-07 14:57:50 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:538: 2026-07-07 14:57:50 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:540: 2026-07-07 14:57:51 | INFO | ✅ Scraper META_ADS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:543: 2026-07-07 14:57:51 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:545: 2026-07-07 14:57:51 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:546: 2026-07-07 14:57:51 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:547: 2026-07-07 14:57:51 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:548: 2026-07-07 14:57:51 | INFO | ✅ Scraper NOVENOVE finalizado. Vagas encontradas (brutas): 6
+erros_robo.log:549: 2026-07-07 14:57:52 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:550: 2026-07-07 14:57:55 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:551: 2026-07-07 14:57:56 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:552: 2026-07-07 14:58:07 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:553: 2026-07-07 14:58:49 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:554: 2026-07-07 15:00:00 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:555: 2026-07-07 15:19:33 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:557: 2026-07-07 15:19:34 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:558: 2026-07-07 15:19:34 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:559: 2026-07-07 15:19:34 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:561: 2026-07-07 15:19:34 | INFO | ✅ Scraper META_ADS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:564: 2026-07-07 15:19:34 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:566: 2026-07-07 15:19:34 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:567: 2026-07-07 15:19:35 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:568: 2026-07-07 15:19:35 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:569: 2026-07-07 15:19:36 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 7
+erros_robo.log:570: 2026-07-07 15:19:37 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:571: 2026-07-07 15:19:53 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:572: 2026-07-07 15:20:20 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 20
+erros_robo.log:573: 2026-07-07 15:20:40 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:574: 2026-07-07 15:21:38 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:576: 2026-07-07 15:38:50 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:579: 2026-07-07 15:40:18 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:582: 2026-07-07 15:41:40 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:585: 2026-07-07 15:42:20 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:588: 2026-07-07 15:44:05 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:591: 2026-07-07 15:44:16 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:594: 2026-07-07 15:58:16 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:597: 2026-07-07 15:58:21 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:599: 2026-07-07 15:58:22 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:601: 2026-07-07 15:58:22 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:606: 2026-07-07 15:59:31 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:608: 2026-07-07 15:59:31 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:611: 2026-07-07 15:59:38 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:613: 2026-07-07 15:59:40 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:616: 2026-07-07 15:59:40 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:619: 2026-07-07 15:59:40 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:620: 2026-07-07 15:59:40 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:621: 2026-07-07 15:59:40 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:623: 2026-07-07 16:00:08 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:625: 2026-07-07 16:00:10 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:627: 2026-07-07 16:00:11 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:629: 2026-07-07 16:00:12 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:631: 2026-07-07 16:00:12 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:633: 2026-07-07 16:00:14 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:636: 2026-07-07 16:00:14 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:639: 2026-07-07 16:00:14 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:640: 2026-07-07 16:00:14 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:641: 2026-07-07 16:00:14 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:643: 2026-07-07 16:00:14 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:645: 2026-07-07 16:00:16 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:647: 2026-07-07 16:00:18 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:649: 2026-07-07 16:00:19 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:651: 2026-07-07 16:00:21 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:656: 2026-07-07 16:00:23 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:658: 2026-07-07 16:00:23 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:659: 2026-07-07 16:00:23 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:660: 2026-07-07 16:00:23 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:661: 2026-07-07 16:00:23 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:663: 2026-07-07 16:00:24 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:666: 2026-07-07 16:00:51 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:668: 2026-07-07 16:00:52 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:670: 2026-07-07 16:00:53 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:672: 2026-07-07 16:00:53 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:674: 2026-07-07 16:00:54 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:676: 2026-07-07 16:00:54 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:678: 2026-07-07 16:00:55 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:679: 2026-07-07 16:00:55 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:681: 2026-07-07 16:00:55 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:685: 2026-07-07 16:00:55 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:686: 2026-07-07 16:00:55 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:691: 2026-07-07 16:00:55 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:696: 2026-07-07 16:00:55 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:701: 2026-07-07 16:00:55 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:705: 2026-07-07 16:00:55 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:706: 2026-07-07 16:00:55 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:707: 2026-07-07 16:00:55 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:708: 2026-07-07 16:00:55 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:709: 2026-07-07 16:00:55 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:710: 2026-07-07 16:00:55 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:711: 2026-07-07 16:00:55 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:712: 2026-07-07 16:00:55 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:713: 2026-07-07 16:00:55 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:714: 2026-07-07 16:00:55 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:715: 2026-07-07 16:00:55 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:716: 2026-07-07 16:00:55 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:717: 2026-07-07 16:00:55 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:718: 2026-07-07 16:00:55 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:719: 2026-07-07 16:00:55 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:720: 2026-07-07 16:00:55 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:721: 2026-07-07 16:00:55 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:722: 2026-07-07 16:00:55 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:723: 2026-07-07 16:00:55 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:724: 2026-07-07 16:00:55 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:725: 2026-07-07 16:00:55 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:726: 2026-07-07 16:00:55 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:728: 2026-07-07 16:01:07 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:730: 2026-07-07 16:01:10 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:732: 2026-07-07 16:01:12 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:734: 2026-07-07 16:01:13 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:736: 2026-07-07 16:01:15 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:738: 2026-07-07 16:01:17 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:741: 2026-07-07 16:01:19 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:745: 2026-07-07 16:01:19 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:746: 2026-07-07 16:01:19 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:747: 2026-07-07 16:01:19 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:748: 2026-07-07 16:01:19 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:750: 2026-07-07 16:02:10 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:752: 2026-07-07 16:02:11 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:754: 2026-07-07 16:02:11 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:756: 2026-07-07 16:02:12 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:758: 2026-07-07 16:02:12 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:760: 2026-07-07 16:02:13 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:762: 2026-07-07 16:02:13 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:763: 2026-07-07 16:02:13 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:768: 2026-07-07 16:02:13 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:769: 2026-07-07 16:02:13 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:774: 2026-07-07 16:02:13 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:779: 2026-07-07 16:02:13 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:784: 2026-07-07 16:02:13 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:788: 2026-07-07 16:02:13 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:789: 2026-07-07 16:02:13 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:790: 2026-07-07 16:02:13 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:791: 2026-07-07 16:02:13 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:792: 2026-07-07 16:02:13 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:793: 2026-07-07 16:02:13 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:794: 2026-07-07 16:02:13 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:795: 2026-07-07 16:02:13 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:796: 2026-07-07 16:02:13 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:797: 2026-07-07 16:02:13 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:798: 2026-07-07 16:02:13 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:799: 2026-07-07 16:02:13 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:800: 2026-07-07 16:02:13 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:801: 2026-07-07 16:02:13 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:802: 2026-07-07 16:02:13 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:803: 2026-07-07 16:02:13 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:804: 2026-07-07 16:02:13 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:805: 2026-07-07 16:02:13 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:806: 2026-07-07 16:02:13 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:807: 2026-07-07 16:02:13 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:808: 2026-07-07 16:02:13 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:809: 2026-07-07 16:02:13 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:810: 2026-07-07 16:02:13 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:812: 2026-07-07 16:02:18 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:815: 2026-07-07 16:03:23 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:817: 2026-07-07 16:03:24 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:819: 2026-07-07 16:03:24 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:821: 2026-07-07 16:03:25 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:823: 2026-07-07 16:03:25 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:825: 2026-07-07 16:03:26 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:827: 2026-07-07 16:03:27 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:828: 2026-07-07 16:03:27 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:830: 2026-07-07 16:03:27 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:834: 2026-07-07 16:03:27 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:839: 2026-07-07 16:03:27 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:844: 2026-07-07 16:03:27 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:845: 2026-07-07 16:03:27 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:850: 2026-07-07 16:03:27 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:854: 2026-07-07 16:03:27 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:855: 2026-07-07 16:03:27 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:856: 2026-07-07 16:03:27 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:857: 2026-07-07 16:03:27 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:858: 2026-07-07 16:03:27 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:859: 2026-07-07 16:03:27 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:860: 2026-07-07 16:03:27 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:861: 2026-07-07 16:03:27 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:862: 2026-07-07 16:03:27 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:863: 2026-07-07 16:03:27 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:864: 2026-07-07 16:03:27 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:865: 2026-07-07 16:03:27 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:866: 2026-07-07 16:03:27 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:867: 2026-07-07 16:03:27 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:868: 2026-07-07 16:03:27 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:869: 2026-07-07 16:03:27 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:870: 2026-07-07 16:03:27 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:871: 2026-07-07 16:03:27 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:872: 2026-07-07 16:03:27 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:873: 2026-07-07 16:03:27 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:874: 2026-07-07 16:03:27 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:875: 2026-07-07 16:03:27 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:877: 2026-07-07 16:03:31 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:880: 2026-07-07 16:03:37 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:882: 2026-07-07 16:04:15 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:884: 2026-07-07 16:20:46 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:886: 2026-07-07 16:20:47 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:888: 2026-07-07 16:20:48 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:890: 2026-07-07 16:20:48 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:892: 2026-07-07 16:20:49 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:894: 2026-07-07 16:20:49 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:896: 2026-07-07 16:20:50 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:897: 2026-07-07 16:20:50 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:899: 2026-07-07 16:20:50 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:903: 2026-07-07 16:20:50 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:904: 2026-07-07 16:20:50 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:909: 2026-07-07 16:20:50 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:914: 2026-07-07 16:20:50 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:919: 2026-07-07 16:20:50 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:923: 2026-07-07 16:20:50 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:924: 2026-07-07 16:20:50 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:925: 2026-07-07 16:20:50 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:926: 2026-07-07 16:20:50 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:927: 2026-07-07 16:20:50 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:928: 2026-07-07 16:20:50 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:929: 2026-07-07 16:20:50 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:930: 2026-07-07 16:20:50 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:931: 2026-07-07 16:20:50 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:932: 2026-07-07 16:20:50 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:933: 2026-07-07 16:20:50 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:934: 2026-07-07 16:20:50 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:935: 2026-07-07 16:20:50 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:936: 2026-07-07 16:20:50 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:937: 2026-07-07 16:20:50 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:938: 2026-07-07 16:20:50 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:939: 2026-07-07 16:20:50 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:940: 2026-07-07 16:20:50 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:941: 2026-07-07 16:20:50 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:942: 2026-07-07 16:20:50 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:943: 2026-07-07 16:20:50 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:944: 2026-07-07 16:20:50 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:946: 2026-07-07 16:20:54 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:949: 2026-07-07 16:21:21 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:951: 2026-07-07 16:21:22 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:953: 2026-07-07 16:21:23 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:955: 2026-07-07 16:21:23 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:957: 2026-07-07 16:21:24 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:959: 2026-07-07 16:21:24 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:961: 2026-07-07 16:21:25 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:962: 2026-07-07 16:21:25 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:964: 2026-07-07 16:21:25 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:968: 2026-07-07 16:21:25 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:973: 2026-07-07 16:21:25 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:978: 2026-07-07 16:21:25 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:983: 2026-07-07 16:21:25 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:987: 2026-07-07 16:21:25 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:988: 2026-07-07 16:21:25 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:989: 2026-07-07 16:21:25 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:990: 2026-07-07 16:21:25 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:991: 2026-07-07 16:21:25 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:992: 2026-07-07 16:21:25 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:993: 2026-07-07 16:21:25 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:994: 2026-07-07 16:21:25 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:995: 2026-07-07 16:21:25 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:996: 2026-07-07 16:21:25 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:997: 2026-07-07 16:21:25 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:998: 2026-07-07 16:21:25 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:999: 2026-07-07 16:21:25 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1000: 2026-07-07 16:21:25 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1001: 2026-07-07 16:21:25 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1002: 2026-07-07 16:21:25 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1003: 2026-07-07 16:21:25 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1004: 2026-07-07 16:21:25 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1005: 2026-07-07 16:21:25 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1006: 2026-07-07 16:21:25 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1007: 2026-07-07 16:21:25 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1008: 2026-07-07 16:21:25 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1009: 2026-07-07 16:21:25 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1011: 2026-07-07 16:21:29 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1014: 2026-07-07 16:21:50 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1016: 2026-07-07 16:21:51 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1018: 2026-07-07 16:21:51 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1020: 2026-07-07 16:21:52 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1022: 2026-07-07 16:21:52 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1024: 2026-07-07 16:21:53 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1026: 2026-07-07 16:21:54 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1027: 2026-07-07 16:21:54 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1029: 2026-07-07 16:21:54 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1033: 2026-07-07 16:21:54 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1037: 2026-07-07 16:21:54 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1039: 2026-07-07 16:21:54 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1044: 2026-07-07 16:21:54 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1049: 2026-07-07 16:21:54 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1053: 2026-07-07 16:21:54 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1054: 2026-07-07 16:21:54 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1055: 2026-07-07 16:21:54 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1056: 2026-07-07 16:21:54 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1057: 2026-07-07 16:21:54 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1058: 2026-07-07 16:21:54 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1059: 2026-07-07 16:21:54 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1060: 2026-07-07 16:21:54 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1061: 2026-07-07 16:21:54 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1062: 2026-07-07 16:21:54 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1063: 2026-07-07 16:21:54 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1064: 2026-07-07 16:21:54 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1065: 2026-07-07 16:21:54 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1066: 2026-07-07 16:21:54 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1067: 2026-07-07 16:21:54 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1068: 2026-07-07 16:21:54 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1069: 2026-07-07 16:21:54 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1070: 2026-07-07 16:21:54 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1071: 2026-07-07 16:21:54 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1072: 2026-07-07 16:21:54 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1073: 2026-07-07 16:21:54 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1074: 2026-07-07 16:21:54 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1076: 2026-07-07 16:21:58 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1079: 2026-07-07 16:25:03 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1081: 2026-07-07 16:25:04 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1083: 2026-07-07 16:25:05 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1085: 2026-07-07 16:25:05 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1087: 2026-07-07 16:25:06 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1089: 2026-07-07 16:25:06 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1091: 2026-07-07 16:25:07 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1092: 2026-07-07 16:25:07 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1094: 2026-07-07 16:25:07 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1098: 2026-07-07 16:25:07 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1103: 2026-07-07 16:25:07 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1105: 2026-07-07 16:25:07 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1109: 2026-07-07 16:25:07 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1114: 2026-07-07 16:25:07 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1118: 2026-07-07 16:25:07 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1119: 2026-07-07 16:25:07 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1120: 2026-07-07 16:25:07 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1121: 2026-07-07 16:25:07 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1122: 2026-07-07 16:25:07 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1123: 2026-07-07 16:25:07 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1124: 2026-07-07 16:25:07 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1125: 2026-07-07 16:25:07 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1126: 2026-07-07 16:25:07 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1127: 2026-07-07 16:25:07 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1128: 2026-07-07 16:25:07 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1129: 2026-07-07 16:25:07 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1130: 2026-07-07 16:25:07 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1131: 2026-07-07 16:25:07 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1132: 2026-07-07 16:25:07 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1133: 2026-07-07 16:25:07 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1134: 2026-07-07 16:25:07 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1135: 2026-07-07 16:25:07 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1136: 2026-07-07 16:25:07 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1137: 2026-07-07 16:25:07 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1138: 2026-07-07 16:25:07 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1139: 2026-07-07 16:25:07 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1141: 2026-07-07 16:25:11 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1143: 2026-07-07 16:37:55 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:1145: 2026-07-07 16:37:56 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:1146: 2026-07-07 16:37:56 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:1147: 2026-07-07 16:37:56 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:1151: 2026-07-07 16:37:58 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1153: 2026-07-07 16:37:58 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1154: 2026-07-07 16:37:58 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1155: 2026-07-07 16:37:58 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1156: 2026-07-07 16:37:59 | INFO | ✅ Scraper META_ADS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1157: 2026-07-07 16:37:59 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 7
+erros_robo.log:1158: 2026-07-07 16:38:00 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 2
+erros_robo.log:1159: 2026-07-07 16:38:00 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1160: 2026-07-07 16:38:07 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1161: 2026-07-07 16:38:53 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1162: 2026-07-07 16:40:39 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1163: 2026-07-07 16:42:01 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:1165: 2026-07-07 16:42:01 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:1166: 2026-07-07 16:42:01 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:1167: 2026-07-07 16:42:01 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:1171: 2026-07-07 16:42:01 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1173: 2026-07-07 16:42:02 | INFO | ✅ Scraper META_ADS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1174: 2026-07-07 16:42:02 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1175: 2026-07-07 16:42:03 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1176: 2026-07-07 16:42:03 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1177: 2026-07-07 16:42:04 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1178: 2026-07-07 16:42:06 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1179: 2026-07-07 16:42:06 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1180: 2026-07-07 16:42:09 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:1181: 2026-07-07 16:42:50 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1182: 2026-07-07 16:44:50 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1183: 2026-07-07 20:17:33 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:1185: 2026-07-07 20:17:37 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:1186: 2026-07-07 20:17:37 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:1187: 2026-07-07 20:17:37 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:1191: 2026-07-07 20:17:39 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1193: 2026-07-07 20:17:39 | INFO | 🚀 Iniciando scraper: GUPY
+erros_robo.log:1195: 2026-07-07 20:17:39 | INFO | 🚀 Iniciando scraper: VAGAS_COM
+erros_robo.log:1196: 2026-07-07 20:17:39 | INFO | 🚀 Iniciando scraper: PROGRAMATHOR
+erros_robo.log:1197: 2026-07-07 20:17:39 | INFO | 🚀 Iniciando scraper: COODESH
+erros_robo.log:1198: 2026-07-07 20:17:39 | INFO | 🚀 Iniciando scraper: GEEKHUNTER
+erros_robo.log:1199: 2026-07-07 20:17:39 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1200: 2026-07-07 20:17:39 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1201: 2026-07-07 20:17:39 | INFO | ✅ Scraper META_ADS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1202: 2026-07-07 20:17:39 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1203: 2026-07-07 20:17:40 | INFO | ✅ Scraper COODESH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1204: 2026-07-07 20:17:40 | INFO | ✅ Scraper GUPY finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1205: 2026-07-07 20:17:41 | INFO | ✅ Scraper PROGRAMATHOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1206: 2026-07-07 20:17:41 | INFO | ✅ Scraper VAGAS_COM finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1207: 2026-07-07 20:17:42 | INFO | ✅ Scraper GEEKHUNTER finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1208: 2026-07-07 20:17:43 | INFO | ✅ Scraper CATHO finalizado. Vagas encontradas (brutas): 20
+erros_robo.log:1209: 2026-07-07 20:17:48 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1210: 2026-07-07 20:17:48 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1211: 2026-07-07 20:17:49 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:1212: 2026-07-07 20:17:50 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1213: 2026-07-07 20:18:53 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1214: 2026-07-07 20:21:11 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1216: 2026-07-07 20:26:23 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1218: 2026-07-07 20:26:23 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1220: 2026-07-07 20:26:24 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1222: 2026-07-07 20:26:24 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1224: 2026-07-07 20:26:25 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1226: 2026-07-07 20:26:25 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1228: 2026-07-07 20:26:26 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1229: 2026-07-07 20:26:26 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1231: 2026-07-07 20:26:26 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1235: 2026-07-07 20:26:26 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1240: 2026-07-07 20:26:26 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1244: 2026-07-07 20:26:26 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1246: 2026-07-07 20:26:26 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1251: 2026-07-07 20:26:26 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1255: 2026-07-07 20:26:26 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1256: 2026-07-07 20:26:26 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1257: 2026-07-07 20:26:26 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1258: 2026-07-07 20:26:26 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1259: 2026-07-07 20:26:26 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1260: 2026-07-07 20:26:26 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1261: 2026-07-07 20:26:26 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1262: 2026-07-07 20:26:26 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1263: 2026-07-07 20:26:26 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1264: 2026-07-07 20:26:26 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1265: 2026-07-07 20:26:26 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1266: 2026-07-07 20:26:26 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1267: 2026-07-07 20:26:26 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1268: 2026-07-07 20:26:26 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1269: 2026-07-07 20:26:26 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1270: 2026-07-07 20:26:26 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1271: 2026-07-07 20:26:26 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1272: 2026-07-07 20:26:26 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1273: 2026-07-07 20:26:26 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1274: 2026-07-07 20:26:26 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1275: 2026-07-07 20:26:26 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1276: 2026-07-07 20:26:26 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1278: 2026-07-07 20:26:28 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1281: 2026-07-07 20:31:57 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1283: 2026-07-07 20:31:58 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1285: 2026-07-07 20:31:59 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1287: 2026-07-07 20:31:59 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1289: 2026-07-07 20:32:00 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1291: 2026-07-07 20:32:00 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1293: 2026-07-07 20:32:01 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1294: 2026-07-07 20:32:01 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1296: 2026-07-07 20:32:01 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1300: 2026-07-07 20:32:01 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1305: 2026-07-07 20:32:01 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1310: 2026-07-07 20:32:01 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1312: 2026-07-07 20:32:01 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1316: 2026-07-07 20:32:01 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1320: 2026-07-07 20:32:01 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1321: 2026-07-07 20:32:01 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1322: 2026-07-07 20:32:01 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1323: 2026-07-07 20:32:01 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1324: 2026-07-07 20:32:01 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1325: 2026-07-07 20:32:01 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1326: 2026-07-07 20:32:01 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1327: 2026-07-07 20:32:01 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1328: 2026-07-07 20:32:01 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1329: 2026-07-07 20:32:01 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1330: 2026-07-07 20:32:01 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1331: 2026-07-07 20:32:01 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1332: 2026-07-07 20:32:01 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1333: 2026-07-07 20:32:01 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1334: 2026-07-07 20:32:01 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1335: 2026-07-07 20:32:01 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1336: 2026-07-07 20:32:01 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1337: 2026-07-07 20:32:01 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1338: 2026-07-07 20:32:01 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1339: 2026-07-07 20:32:01 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1340: 2026-07-07 20:32:01 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1341: 2026-07-07 20:32:01 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1343: 2026-07-07 20:32:02 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1346: 2026-07-07 20:33:29 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1348: 2026-07-07 20:33:30 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1350: 2026-07-07 20:33:31 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1352: 2026-07-07 20:33:31 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1354: 2026-07-07 20:33:32 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1356: 2026-07-07 20:33:32 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1358: 2026-07-07 20:33:33 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1359: 2026-07-07 20:33:33 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1361: 2026-07-07 20:33:33 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1365: 2026-07-07 20:33:33 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1366: 2026-07-07 20:33:33 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1371: 2026-07-07 20:33:33 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1376: 2026-07-07 20:33:33 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1381: 2026-07-07 20:33:33 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1383: 2026-07-07 20:33:33 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1386: 2026-07-07 20:33:33 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1387: 2026-07-07 20:33:33 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1388: 2026-07-07 20:33:33 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1389: 2026-07-07 20:33:33 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1390: 2026-07-07 20:33:33 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1391: 2026-07-07 20:33:33 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1392: 2026-07-07 20:33:33 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1393: 2026-07-07 20:33:33 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1394: 2026-07-07 20:33:33 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1395: 2026-07-07 20:33:33 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1396: 2026-07-07 20:33:33 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1397: 2026-07-07 20:33:33 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1398: 2026-07-07 20:33:33 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1399: 2026-07-07 20:33:33 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1400: 2026-07-07 20:33:33 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1401: 2026-07-07 20:33:33 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1402: 2026-07-07 20:33:33 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1403: 2026-07-07 20:33:33 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1404: 2026-07-07 20:33:33 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1405: 2026-07-07 20:33:33 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1406: 2026-07-07 20:33:33 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1408: 2026-07-07 20:33:37 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1411: 2026-07-07 20:34:53 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1413: 2026-07-07 20:34:54 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1415: 2026-07-07 20:34:54 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1417: 2026-07-07 20:34:55 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1419: 2026-07-07 20:34:55 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1421: 2026-07-07 20:34:56 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1423: 2026-07-07 20:34:57 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1424: 2026-07-07 20:34:57 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1426: 2026-07-07 20:34:57 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1430: 2026-07-07 20:34:57 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1435: 2026-07-07 20:34:57 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1436: 2026-07-07 20:34:57 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1441: 2026-07-07 20:34:57 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1446: 2026-07-07 20:34:57 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1450: 2026-07-07 20:34:57 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1451: 2026-07-07 20:34:57 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1452: 2026-07-07 20:34:57 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1453: 2026-07-07 20:34:57 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1454: 2026-07-07 20:34:57 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1455: 2026-07-07 20:34:57 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1456: 2026-07-07 20:34:57 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1457: 2026-07-07 20:34:57 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1458: 2026-07-07 20:34:57 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1459: 2026-07-07 20:34:57 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1460: 2026-07-07 20:34:57 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1461: 2026-07-07 20:34:57 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1462: 2026-07-07 20:34:57 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1463: 2026-07-07 20:34:57 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1464: 2026-07-07 20:34:57 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1465: 2026-07-07 20:34:57 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1466: 2026-07-07 20:34:57 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1467: 2026-07-07 20:34:57 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1468: 2026-07-07 20:34:57 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1469: 2026-07-07 20:34:57 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1470: 2026-07-07 20:34:57 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1471: 2026-07-07 20:34:57 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1473: 2026-07-07 20:35:01 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1476: 2026-07-07 20:37:32 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1478: 2026-07-07 20:37:33 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1480: 2026-07-07 20:37:33 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1482: 2026-07-07 20:37:34 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1484: 2026-07-07 20:37:34 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1486: 2026-07-07 20:37:35 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1488: 2026-07-07 20:37:36 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1489: 2026-07-07 20:37:36 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1491: 2026-07-07 20:37:36 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1495: 2026-07-07 20:37:36 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1500: 2026-07-07 20:37:36 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1501: 2026-07-07 20:37:36 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1506: 2026-07-07 20:37:36 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1511: 2026-07-07 20:37:36 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1515: 2026-07-07 20:37:36 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1516: 2026-07-07 20:37:36 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1517: 2026-07-07 20:37:36 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1518: 2026-07-07 20:37:36 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1519: 2026-07-07 20:37:36 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1520: 2026-07-07 20:37:36 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1521: 2026-07-07 20:37:36 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1522: 2026-07-07 20:37:36 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1523: 2026-07-07 20:37:36 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1524: 2026-07-07 20:37:36 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1525: 2026-07-07 20:37:36 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1526: 2026-07-07 20:37:36 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1527: 2026-07-07 20:37:36 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1528: 2026-07-07 20:37:36 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1529: 2026-07-07 20:37:36 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1530: 2026-07-07 20:37:36 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1531: 2026-07-07 20:37:36 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1532: 2026-07-07 20:37:36 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1533: 2026-07-07 20:37:36 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1534: 2026-07-07 20:37:36 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1535: 2026-07-07 20:37:36 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1536: 2026-07-07 20:37:36 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1538: 2026-07-07 20:37:39 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1541: 2026-07-07 20:38:23 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1543: 2026-07-07 20:38:26 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1545: 2026-07-07 20:38:27 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1547: 2026-07-07 20:38:29 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1549: 2026-07-07 20:38:31 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1551: 2026-07-07 20:38:33 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1555: 2026-07-07 20:38:34 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1558: 2026-07-07 20:38:34 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1559: 2026-07-07 20:38:34 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1560: 2026-07-07 20:38:34 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1561: 2026-07-07 20:38:34 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1562: 2026-07-07 20:41:18 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:1564: 2026-07-07 20:41:18 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:1565: 2026-07-07 20:41:18 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:1566: 2026-07-07 20:41:18 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:1570: 2026-07-07 20:41:19 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1572: 2026-07-07 20:41:19 | INFO | 🚀 Iniciando scraper: GUPY
+erros_robo.log:1574: 2026-07-07 20:41:19 | INFO | 🚀 Iniciando scraper: VAGAS_COM
+erros_robo.log:1575: 2026-07-07 20:41:19 | INFO | 🚀 Iniciando scraper: PROGRAMATHOR
+erros_robo.log:1576: 2026-07-07 20:41:19 | INFO | 🚀 Iniciando scraper: COODESH
+erros_robo.log:1577: 2026-07-07 20:41:19 | INFO | 🚀 Iniciando scraper: GEEKHUNTER
+erros_robo.log:1578: 2026-07-07 20:41:20 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1579: 2026-07-07 20:41:20 | INFO | ✅ Scraper COODESH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1580: 2026-07-07 20:41:21 | INFO | ✅ Scraper GUPY finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1581: 2026-07-07 20:41:21 | INFO | ✅ Scraper PROGRAMATHOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1582: 2026-07-07 20:41:21 | INFO | ✅ Scraper CATHO finalizado. Vagas encontradas (brutas): 20
+erros_robo.log:1583: 2026-07-07 20:41:22 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1584: 2026-07-07 20:41:24 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1585: 2026-07-07 20:41:27 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1586: 2026-07-07 20:41:28 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1587: 2026-07-07 20:41:28 | INFO | ✅ Scraper VAGAS_COM finalizado. Vagas encontradas (brutas): 7
+erros_robo.log:1588: 2026-07-07 20:41:30 | INFO | ✅ Scraper GEEKHUNTER finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1589: 2026-07-07 20:41:35 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1590: 2026-07-07 20:41:37 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:1591: 2026-07-07 20:41:45 | INFO | ✅ Scraper META_ADS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1592: 2026-07-07 20:42:54 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1593: 2026-07-07 20:44:15 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 14
+erros_robo.log:1594: 2026-07-07 20:54:45 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:1596: 2026-07-07 20:54:46 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:1597: 2026-07-07 20:54:46 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:1598: 2026-07-07 20:54:46 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:1601: 2026-07-07 20:54:46 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1603: 2026-07-07 20:54:46 | INFO | 🚀 Iniciando scraper: GUPY
+erros_robo.log:1605: 2026-07-07 20:54:46 | INFO | 🚀 Iniciando scraper: VAGAS_COM
+erros_robo.log:1606: 2026-07-07 20:54:46 | INFO | 🚀 Iniciando scraper: PROGRAMATHOR
+erros_robo.log:1607: 2026-07-07 20:54:46 | INFO | 🚀 Iniciando scraper: COODESH
+erros_robo.log:1608: 2026-07-07 20:54:46 | INFO | 🚀 Iniciando scraper: GEEKHUNTER
+erros_robo.log:1609: 2026-07-07 20:54:46 | INFO | ✅ Scraper CATHO finalizado. Vagas encontradas (brutas): 20
+erros_robo.log:1610: 2026-07-07 20:54:47 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1611: 2026-07-07 20:54:47 | INFO | ✅ Scraper COODESH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1612: 2026-07-07 20:54:47 | INFO | ✅ Scraper VAGAS_COM finalizado. Vagas encontradas (brutas): 7
+erros_robo.log:1613: 2026-07-07 20:54:48 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1614: 2026-07-07 20:54:48 | INFO | ✅ Scraper GUPY finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1615: 2026-07-07 20:54:50 | INFO | ✅ Scraper PROGRAMATHOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1616: 2026-07-07 20:54:56 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1617: 2026-07-07 20:55:01 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1618: 2026-07-07 20:55:02 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1619: 2026-07-07 20:55:04 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1620: 2026-07-07 20:55:05 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:1621: 2026-07-07 20:55:23 | INFO | ✅ Scraper GEEKHUNTER finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1622: 2026-07-07 20:55:51 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 14
+erros_robo.log:1623: 2026-07-07 20:56:05 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1624: 2026-07-07 20:56:36 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:1626: 2026-07-07 20:56:36 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:1627: 2026-07-07 20:56:36 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:1628: 2026-07-07 20:56:36 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:1631: 2026-07-07 20:56:36 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1633: 2026-07-07 20:56:36 | INFO | 🚀 Iniciando scraper: GUPY
+erros_robo.log:1635: 2026-07-07 20:56:36 | INFO | 🚀 Iniciando scraper: VAGAS_COM
+erros_robo.log:1636: 2026-07-07 20:56:36 | INFO | 🚀 Iniciando scraper: PROGRAMATHOR
+erros_robo.log:1637: 2026-07-07 20:56:36 | INFO | 🚀 Iniciando scraper: COODESH
+erros_robo.log:1638: 2026-07-07 20:56:36 | INFO | 🚀 Iniciando scraper: GEEKHUNTER
+erros_robo.log:1639: 2026-07-07 20:56:37 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1640: 2026-07-07 20:56:37 | INFO | ✅ Scraper GUPY finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1641: 2026-07-07 20:56:38 | INFO | ✅ Scraper PROGRAMATHOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1642: 2026-07-07 20:56:38 | INFO | ✅ Scraper COODESH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1643: 2026-07-07 20:56:38 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1644: 2026-07-07 20:56:38 | INFO | ✅ Scraper CATHO finalizado. Vagas encontradas (brutas): 20
+erros_robo.log:1645: 2026-07-07 20:56:41 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1646: 2026-07-07 20:56:43 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1647: 2026-07-07 20:56:43 | INFO | ✅ Scraper GEEKHUNTER finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1648: 2026-07-07 20:56:45 | INFO | ✅ Scraper VAGAS_COM finalizado. Vagas encontradas (brutas): 7
+erros_robo.log:1649: 2026-07-07 20:56:46 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1650: 2026-07-07 20:56:49 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1651: 2026-07-07 20:56:57 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1652: 2026-07-07 20:57:49 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1653: 2026-07-07 20:58:01 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 14
+erros_robo.log:1654: 2026-07-07 20:59:33 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:1656: 2026-07-07 20:59:33 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:1657: 2026-07-07 20:59:33 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:1658: 2026-07-07 20:59:33 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:1661: 2026-07-07 20:59:33 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1663: 2026-07-07 20:59:33 | INFO | 🚀 Iniciando scraper: GUPY
+erros_robo.log:1665: 2026-07-07 20:59:33 | INFO | 🚀 Iniciando scraper: VAGAS_COM
+erros_robo.log:1666: 2026-07-07 20:59:33 | INFO | 🚀 Iniciando scraper: PROGRAMATHOR
+erros_robo.log:1667: 2026-07-07 20:59:33 | INFO | 🚀 Iniciando scraper: COODESH
+erros_robo.log:1668: 2026-07-07 20:59:33 | INFO | 🚀 Iniciando scraper: GEEKHUNTER
+erros_robo.log:1669: 2026-07-07 20:59:33 | INFO | ✅ Scraper GUPY finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1670: 2026-07-07 20:59:34 | INFO | ✅ Scraper COODESH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1671: 2026-07-07 20:59:34 | INFO | ✅ Scraper PROGRAMATHOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1672: 2026-07-07 20:59:34 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1673: 2026-07-07 20:59:34 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1674: 2026-07-07 20:59:36 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1675: 2026-07-07 20:59:37 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1676: 2026-07-07 20:59:39 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1677: 2026-07-07 20:59:43 | INFO | ✅ Scraper CATHO finalizado. Vagas encontradas (brutas): 20
+erros_robo.log:1678: 2026-07-07 20:59:44 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1679: 2026-07-07 20:59:44 | INFO | ✅ Scraper VAGAS_COM finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1680: 2026-07-07 20:59:50 | INFO | ✅ Scraper GEEKHUNTER finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1681: 2026-07-07 21:00:00 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:1682: 2026-07-07 21:00:34 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1683: 2026-07-07 21:00:50 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1684: 2026-07-07 21:01:54 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:1686: 2026-07-07 21:01:54 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:1687: 2026-07-07 21:01:54 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:1688: 2026-07-07 21:01:54 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:1691: 2026-07-07 21:01:54 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1693: 2026-07-07 21:01:54 | INFO | 🚀 Iniciando scraper: GUPY
+erros_robo.log:1695: 2026-07-07 21:01:54 | INFO | 🚀 Iniciando scraper: VAGAS_COM
+erros_robo.log:1696: 2026-07-07 21:01:54 | INFO | 🚀 Iniciando scraper: PROGRAMATHOR
+erros_robo.log:1697: 2026-07-07 21:01:54 | INFO | 🚀 Iniciando scraper: COODESH
+erros_robo.log:1698: 2026-07-07 21:01:54 | INFO | 🚀 Iniciando scraper: GEEKHUNTER
+erros_robo.log:1699: 2026-07-07 21:01:54 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1700: 2026-07-07 21:01:55 | INFO | ✅ Scraper GUPY finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1701: 2026-07-07 21:01:55 | INFO | ✅ Scraper PROGRAMATHOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1702: 2026-07-07 21:01:55 | INFO | ✅ Scraper COODESH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1703: 2026-07-07 21:01:57 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 7
+erros_robo.log:1704: 2026-07-07 21:01:58 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1705: 2026-07-07 21:02:00 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1706: 2026-07-07 21:02:04 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1707: 2026-07-07 21:02:05 | INFO | ✅ Scraper VAGAS_COM finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1708: 2026-07-07 21:02:05 | INFO | ✅ Scraper CATHO finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1709: 2026-07-07 21:02:05 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1710: 2026-07-07 21:02:11 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:1711: 2026-07-07 21:02:27 | INFO | ✅ Scraper GEEKHUNTER finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1712: 2026-07-07 21:02:59 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1713: 2026-07-07 21:03:08 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1714: 2026-07-08 09:00:18 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:1716: 2026-07-08 09:00:19 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:1717: 2026-07-08 09:00:19 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:1718: 2026-07-08 09:00:19 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:1721: 2026-07-08 09:00:19 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1723: 2026-07-08 09:00:19 | INFO | 🚀 Iniciando scraper: GUPY
+erros_robo.log:1725: 2026-07-08 09:00:19 | INFO | 🚀 Iniciando scraper: VAGAS_COM
+erros_robo.log:1726: 2026-07-08 09:00:19 | INFO | 🚀 Iniciando scraper: PROGRAMATHOR
+erros_robo.log:1727: 2026-07-08 09:00:19 | INFO | 🚀 Iniciando scraper: COODESH
+erros_robo.log:1728: 2026-07-08 09:00:19 | INFO | 🚀 Iniciando scraper: GEEKHUNTER
+erros_robo.log:1729: 2026-07-08 09:00:19 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1730: 2026-07-08 09:00:20 | INFO | ✅ Scraper VAGAS_COM finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1731: 2026-07-08 09:00:20 | INFO | ✅ Scraper GUPY finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1732: 2026-07-08 09:00:20 | INFO | ✅ Scraper CATHO finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1733: 2026-07-08 09:00:20 | INFO | ✅ Scraper GEEKHUNTER finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1734: 2026-07-08 09:00:20 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1735: 2026-07-08 09:00:20 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1736: 2026-07-08 09:00:20 | INFO | ✅ Scraper COODESH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1737: 2026-07-08 09:00:20 | INFO | ✅ Scraper PROGRAMATHOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1738: 2026-07-08 09:00:21 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1739: 2026-07-08 09:00:22 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1740: 2026-07-08 09:00:25 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:1741: 2026-07-08 09:00:28 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1742: 2026-07-08 09:01:09 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1743: 2026-07-08 09:01:24 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 5
+erros_robo.log:1744: 2026-07-08 09:02:10 | INFO | 🚀 Iniciando scraper: JSEARCH
+erros_robo.log:1746: 2026-07-08 09:02:10 | INFO | 🚀 Iniciando scraper: WORKANA
+erros_robo.log:1747: 2026-07-08 09:02:10 | INFO | 🚀 Iniciando scraper: REMOTAR
+erros_robo.log:1748: 2026-07-08 09:02:10 | INFO | 🚀 Iniciando scraper: GITHUB_VAGAS
+erros_robo.log:1751: 2026-07-08 09:02:10 | INFO | 🚀 Iniciando scraper: GLASSDOOR
+erros_robo.log:1753: 2026-07-08 09:02:10 | INFO | 🚀 Iniciando scraper: GUPY
+erros_robo.log:1755: 2026-07-08 09:02:10 | INFO | 🚀 Iniciando scraper: VAGAS_COM
+erros_robo.log:1756: 2026-07-08 09:02:10 | INFO | 🚀 Iniciando scraper: PROGRAMATHOR
+erros_robo.log:1757: 2026-07-08 09:02:10 | INFO | 🚀 Iniciando scraper: COODESH
+erros_robo.log:1758: 2026-07-08 09:02:10 | INFO | 🚀 Iniciando scraper: GEEKHUNTER
+erros_robo.log:1759: 2026-07-08 09:02:10 | INFO | ✅ Scraper VAGAS_COM finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1760: 2026-07-08 09:02:11 | INFO | ✅ Scraper GUPY finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1761: 2026-07-08 09:02:11 | INFO | ✅ Scraper PROGRAMATHOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1762: 2026-07-08 09:02:11 | INFO | ✅ Scraper GEEKHUNTER finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1763: 2026-07-08 09:02:11 | INFO | ✅ Scraper CATHO finalizado. Vagas encontradas (brutas): 20
+erros_robo.log:1764: 2026-07-08 09:02:11 | INFO | ✅ Scraper COODESH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1765: 2026-07-08 09:02:11 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1766: 2026-07-08 09:02:11 | INFO | ✅ Scraper JOOBLE finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1767: 2026-07-08 09:02:11 | INFO | ✅ Scraper GITHUB_VAGAS finalizado. Vagas encontradas (brutas): 1
+erros_robo.log:1768: 2026-07-08 09:02:13 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1769: 2026-07-08 09:02:15 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1770: 2026-07-08 09:02:15 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0
+erros_robo.log:1771: 2026-07-08 09:02:20 | INFO | ✅ Scraper LINKEDIN finalizado. Vagas encontradas (brutas): 10
+erros_robo.log:1772: 2026-07-08 09:03:00 | INFO | ✅ Scraper INFOJOBS finalizado. Vagas encontradas (brutas): 15
+erros_robo.log:1773: 2026-07-08 09:03:13 | INFO | ✅ Scraper INDEED finalizado. Vagas encontradas (brutas): 15
+system.log:2: 2026-06-29 11:22:44 - INFO - Recebida ordem de Varredura! Plataformas: ['workana', 'linkedin', 'indeed', 'catho', 'remotar'] | Keyword: Python | Nível: Júnior
+system.log:3: 2026-06-29 11:22:44 - INFO - [WORKANA] Inicializando Scraper...
+system.log:5: 2026-06-29 12:51:12 - INFO - Recebida ordem de Varredura! Plataformas: ['workana', 'linkedin', 'indeed'] | Keyword: Python | Nível: Todos
+system.log:6: 2026-06-29 12:51:12 - INFO - [WORKANA] Inicializando Scraper...
+system.log:8: 2026-06-29 13:01:59 - INFO - Recebida ordem de Varredura! Plataformas: ['workana', 'linkedin', 'indeed'] | Keyword: Python | Nível: Todos
+system.log:9: 2026-06-29 13:01:59 - INFO - [WORKANA] Inicializando Scraper...
+system.log:11: 2026-06-29 13:40:02 - INFO - Recebida ordem de Varredura! Plataformas: ['workana', 'linkedin', 'indeed'] | Keyword: Python | Nível: Todos
+system.log:12: 2026-06-29 13:40:02 - INFO - [WORKANA] Inicializando Scraper...
+system.log:15: 2026-06-29 13:58:38 - INFO - Recebida ordem de Varredura! Plataformas: ['jsearch', 'jooble'] | Keyword: Python | Nível: Todos
+system.log:16: 2026-06-29 13:58:38 - INFO - [JSEARCH] Inicializando Scraper...
+system.log:17: 2026-06-29 13:58:40 - INFO - [JSEARCH] Sucesso! 1 vagas capturadas.
+system.log:19: 2026-06-29 13:58:42 - INFO - [JOOBLE] Sucesso! 1 vagas capturadas.
+system.log:20: 2026-06-29 13:58:42 - INFO - Varredura Finalizada! 2 vagas totais recebidas. 1 novas vagas gravadas no banco de dados.
+system.log:24: 2026-07-04 10:52:40 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:25: 2026-07-04 10:52:40 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:30: 2026-07-04 10:56:03 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:31: 2026-07-04 10:56:03 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:36: 2026-07-04 10:59:32 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:37: 2026-07-04 10:59:32 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:42: 2026-07-04 11:00:37 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:43: 2026-07-04 11:00:37 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:48: 2026-07-04 11:01:40 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:49: 2026-07-04 11:01:40 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:54: 2026-07-04 11:03:34 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:55: 2026-07-04 11:03:34 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:60: 2026-07-04 11:04:48 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:61: 2026-07-04 11:04:48 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:66: 2026-07-04 11:08:23 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:67: 2026-07-04 11:08:23 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:72: 2026-07-04 11:10:20 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:73: 2026-07-04 11:10:20 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:78: 2026-07-04 12:37:25 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:79: 2026-07-04 12:37:25 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:84: 2026-07-04 12:39:21 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:85: 2026-07-04 12:39:21 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:90: 2026-07-04 12:40:01 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:91: 2026-07-04 12:40:01 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:96: 2026-07-04 12:42:40 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:97: 2026-07-04 12:42:40 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:102: 2026-07-04 12:43:17 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:103: 2026-07-04 12:43:17 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:109: 2026-07-04 12:45:19 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:110: 2026-07-04 12:45:19 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:115: 2026-07-04 12:45:28 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:116: 2026-07-04 12:45:28 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:122: 2026-07-04 12:45:39 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:123: 2026-07-04 12:45:39 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:127: 2026-07-04 12:45:53 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:128: 2026-07-04 12:45:53 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:132: 2026-07-04 12:45:58 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:133: 2026-07-04 12:45:58 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:140: 2026-07-04 12:49:17 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:141: 2026-07-04 12:49:17 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:145: 2026-07-04 12:49:29 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:146: 2026-07-04 12:49:29 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:151: 2026-07-04 12:50:41 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:152: 2026-07-04 12:50:41 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:157: 2026-07-04 12:53:09 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:158: 2026-07-04 12:53:09 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:163: 2026-07-04 12:54:35 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:164: 2026-07-04 12:54:35 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:169: 2026-07-04 12:58:06 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:170: 2026-07-04 12:58:06 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:175: 2026-07-04 12:59:38 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:176: 2026-07-04 12:59:38 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:181: 2026-07-04 13:01:31 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:182: 2026-07-04 13:01:31 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:187: 2026-07-04 13:03:50 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:188: 2026-07-04 13:03:50 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:193: 2026-07-06 16:11:14 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:194: 2026-07-06 16:11:14 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:199: 2026-07-06 16:12:17 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:200: 2026-07-06 16:12:17 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:205: 2026-07-06 16:13:15 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:206: 2026-07-06 16:13:15 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:211: 2026-07-06 16:44:08 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:212: 2026-07-06 16:44:08 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:217: 2026-07-06 16:58:24 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:218: 2026-07-06 16:58:24 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:223: 2026-07-06 17:43:15 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:224: 2026-07-06 17:43:15 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:229: 2026-07-06 18:03:37 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:230: 2026-07-06 18:03:37 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:235: 2026-07-06 18:58:06 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:236: 2026-07-06 18:58:06 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:241: 2026-07-07 15:10:46 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:242: 2026-07-07 15:10:46 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:247: 2026-07-07 15:12:35 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:248: 2026-07-07 15:12:35 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:253: 2026-07-07 15:14:28 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:254: 2026-07-07 15:14:28 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:259: 2026-07-07 15:16:59 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:260: 2026-07-07 15:16:59 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:265: 2026-07-07 15:34:29 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:266: 2026-07-07 15:34:29 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:271: 2026-07-07 15:36:07 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:272: 2026-07-07 15:36:07 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:277: 2026-07-07 15:39:00 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:278: 2026-07-07 15:39:00 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:283: 2026-07-07 15:40:28 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:284: 2026-07-07 15:40:28 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:289: 2026-07-07 15:41:50 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:290: 2026-07-07 15:41:50 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:295: 2026-07-07 15:42:31 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:296: 2026-07-07 15:42:31 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:302: 2026-07-07 15:44:16 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:303: 2026-07-07 15:44:16 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:307: 2026-07-07 15:44:37 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:308: 2026-07-07 15:44:37 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:316: 2026-07-07 15:58:25 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:317: 2026-07-07 15:58:25 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:321: 2026-07-07 15:58:39 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:322: 2026-07-07 15:58:40 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:326: 2026-07-07 15:58:41 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:327: 2026-07-07 15:58:41 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:331: 2026-07-07 15:58:42 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:332: 2026-07-07 15:58:42 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:337: 2026-07-07 15:59:40 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:338: 2026-07-07 15:59:40 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:343: 2026-07-07 16:00:42 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:344: 2026-07-07 16:00:42 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:349: 2026-07-07 16:02:27 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:350: 2026-07-07 16:02:27 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:355: 2026-07-07 16:03:39 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:356: 2026-07-07 16:03:39 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:361: 2026-07-07 16:21:03 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:362: 2026-07-07 16:21:03 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:367: 2026-07-07 16:21:38 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:368: 2026-07-07 16:21:38 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:373: 2026-07-07 16:22:06 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:374: 2026-07-07 16:22:06 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:379: 2026-07-07 16:25:20 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:380: 2026-07-07 16:25:20 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:385: 2026-07-07 20:26:37 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:386: 2026-07-07 20:26:37 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:391: 2026-07-07 20:32:11 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:392: 2026-07-07 20:32:11 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:397: 2026-07-07 20:33:46 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:398: 2026-07-07 20:33:46 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:403: 2026-07-07 20:35:09 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:404: 2026-07-07 20:35:09 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.
+system.log:409: 2026-07-07 20:37:48 - INFO - [INDEED] Sucesso! 0 vagas capturadas.
+system.log:410: 2026-07-07 20:37:48 - INFO - Varredura Finalizada! 0 vagas totais recebidas. 0 novas vagas gravadas no banco de dados.

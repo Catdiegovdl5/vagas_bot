@@ -94,10 +94,9 @@ def scrape(keyword, level="Todos", country="Brasil"):
                 # Fetch full description using guest API
                 desc_url = f"https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/{job_id}"
                 description_text = ""
-                is_full_time = False
                 
                 try:
-                    desc_response = requests.get(desc_url, headers=headers, impersonate="chrome110", timeout=15)
+                    desc_response = requests.get(desc_url, headers=headers, impersonate="chrome110", timeout=10)
                     if desc_response.status_code == 200:
                         desc_soup = BeautifulSoup(desc_response.text, "html.parser")
                         
@@ -107,28 +106,11 @@ def scrape(keyword, level="Todos", country="Brasil"):
                         
                         description_text = desc_container.get_text(separator="\n").strip()
                         
-                        # Filter for full-time jobs only
-                        criteria_items = desc_soup.find_all(class_=re.compile(r"job-criteria|criteria-text"))
-                        for item in criteria_items:
-                            text = item.get_text().strip().lower()
-                            if "tempo integral" in text or "full-time" in text or "full time" in text:
-                                is_full_time = True
-                                break
-                                
-                        if not is_full_time:
-                            desc_lower = description_text.lower()
-                            if "tempo integral" in desc_lower or "full-time" in desc_lower or "full time" in desc_lower:
-                                is_full_time = True
-                                
-                    time.sleep(1)
                 except Exception as desc_e:
                     print(f"Erro ao buscar detalhes da vaga {job_id}: {desc_e}")
                     
-                # Ensure the description text has >= 500 characters and is full-time
-                if is_full_time and len(description_text) >= 500:
-                    desc_lower = description_text.lower()
-                    if not any(k in desc_lower for k in ["tempo integral", "full-time", "full time"]):
-                        description_text += "\n\nTipo de vaga: Tempo integral"
+                # Aceita vaga se tiver pelo menos alguma descrição (removendo filtro is_full_time que era muito restritivo)
+                if description_text and len(description_text) >= 100:
                     jobs.append({
                         "platform": "LinkedIn",
                         "title": title,
@@ -140,10 +122,21 @@ def scrape(keyword, level="Todos", country="Brasil"):
                         "level": level,
                         "requirements": description_text
                     })
+                else:
+                    # Aceita sem descrição ou desc muito curta se o título e empresa são válidos
+                    jobs.append({
+                        "platform": "LinkedIn",
+                        "title": title,
+                        "company": company,
+                        "budget": "A Combinar",
+                        "link": link,
+                        "job_type": "CLT",
+                        "profession": keyword,
+                        "level": level,
+                        "requirements": f"Vaga de {title} na empresa {company}. Acesse o link para candidatura."
+                    })
                     
-            time.sleep(1)
         except Exception as e:
             print(f"Erro no scraper LinkedIn na página {start}: {e}")
-            time.sleep(2)
             
     return jobs

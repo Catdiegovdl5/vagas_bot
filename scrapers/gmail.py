@@ -42,47 +42,77 @@ def scrape(keyword, level="Todos", country="Brasil"):
         messages = results.get('messages', [])
 
         for msg in messages:
-            msg_data = service.users().messages().get(userId='me', id=msg['id'], format='full').execute()
-            
-            payload = msg_data.get('payload', {})
-            parts = payload.get('parts', [])
-            
-            body = ""
-            if parts:
-                for part in parts:
-                    if part.get('mimeType') == 'text/html':
-                        data = part['body'].get('data')
-                        if data:
-                            body = base64.urlsafe_b64decode(data).decode('utf-8')
-                        break
-            else:
-                data = payload.get('body', {}).get('data')
-                if data:
-                    body = base64.urlsafe_b64decode(data).decode('utf-8')
-
-            if not body:
-                continue
-
-            soup = BeautifulSoup(body, 'html.parser')
-            links = soup.find_all('a')
-            
-            for a in links:
-                href = a.get('href', '')
-                text = a.text.strip()
+            try:
+                msg_data = service.users().messages().get(userId='me', id=msg['id'], format='full').execute()
                 
-                if ("jobs/view" in href or "viewjob" in href or "job-post" in href or "rc/clk" in href):
-                    if len(text) > 4:
-                        jobs.append({
-                            "platform": "Gmail API",
-                            "title": text,
-                            "company": "Notificação por E-mail",
-                            "budget": "A Combinar",
-                            "link": href,
-                            "job_type": "Diversos",
-                            "profession": keyword,
-                            "level": level,
-                            "requirements": "Vaga coletada pela API Oficial do Google."
-                        })
+                payload = msg_data.get('payload', {})
+                parts = payload.get('parts', [])
+                
+                body = ""
+                
+                def decode_gmail_body(raw_data):
+                    if not raw_data:
+                        return ""
+                    try:
+                        if isinstance(raw_data, bytes):
+                            raw_data = raw_data.decode('utf-8', errors='ignore')
+                        # Fix base64 padding
+                        rem = len(raw_data) % 4
+                        if rem:
+                            raw_data += '=' * (4 - rem)
+                        decoded_bytes = base64.urlsafe_b64decode(raw_data)
+                    except Exception:
+                        try:
+                            decoded_bytes = base64.urlsafe_b64decode(raw_data)
+                        except Exception:
+                            return ""
+                    
+                    # Try alternative encodings
+                    for encoding in ['utf-8', 'iso-8859-1', 'latin-1', 'cp1252', 'ascii']:
+                        try:
+                            return decoded_bytes.decode(encoding)
+                        except Exception:
+                            continue
+                    return decoded_bytes.decode('utf-8', errors='ignore')
+
+                if parts:
+                    for part in parts:
+                        if part.get('mimeType') == 'text/html':
+                            data = part['body'].get('data')
+                            if data:
+                                body = decode_gmail_body(data)
+                            break
+                else:
+                    data = payload.get('body', {}).get('data')
+                    if data:
+                        body = decode_gmail_body(data)
+
+                if not body:
+                    continue
+
+                soup = BeautifulSoup(body, 'html.parser')
+                links = soup.find_all('a')
+                
+                for a in links:
+                    href = a.get('href', '')
+                    text = a.text.strip()
+                    
+                    if ("jobs/view" in href or "viewjob" in href or "job-post" in href or "rc/clk" in href):
+                        if len(text) > 4:
+                            jobs.append({
+                                "platform": "Gmail API",
+                                "title": text,
+                                "company": "Notificação por E-mail",
+                                "budget": "A Combinar",
+                                "link": href,
+                                "job_type": "Diversos",
+                                "profession": keyword,
+                                "level": level,
+                                "requirements": "Vaga coletada pela API Oficial do Google."
+                            })
+            except Exception as item_err:
+                print(f"Erro ao parsear mensagem {msg.get('id')}: {item_err}")
+                continue
 
     except Exception as e:
         print(f"Erro no scraper Gmail API: {e}")

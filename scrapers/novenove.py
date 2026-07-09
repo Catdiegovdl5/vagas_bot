@@ -9,7 +9,7 @@ def scrape(keyword, level="Todos", country="Brasil"):
         url = f"https://www.99freelas.com.br/projects?q={encoded_kw}"
         
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
@@ -22,7 +22,7 @@ def scrape(keyword, level="Todos", country="Brasil"):
                     
                 title = title_el.text.strip()
                 link_el = title_el.find('a')
-                link = "https://www.99freelas.com.br" + link_el['href'] if link_el else url
+                link = "https://www.99freelas.com.br" + link_el.get('href', '') if link_el and link_el.get('href') else url
                 
                 desc_el = item.find('div', class_='description')
                 desc = desc_el.text.strip() if desc_el else "Sem descrição"

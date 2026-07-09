@@ -5,7 +5,7 @@ import os
 APIFY_TOKEN = os.environ.get("APIFY_API_TOKEN", "")
 
 def scrape(keyword, level="Todos", country="Brasil"):
-    if country != "Brasil":
+    if "Brasil" not in country:
         return []
 
     client = ApifyClient(APIFY_TOKEN)

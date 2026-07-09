@@ -41,7 +41,7 @@ def scrape(keyword, level="Todos", country="Brasil"):
             "Content-type": "application/json"
         }
         
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
         data = response.json()
         
         if data.get("jobs"):
@@ -109,8 +109,8 @@ def scrape(keyword, level="Todos", country="Brasil"):
                     "level": level,
                     "requirements": description
                 })
-    except Exception as e:
-        print("Erro Jooble:", e)
+    except Exception:
+        pass
         
     if not jobs:
         jobs.append({

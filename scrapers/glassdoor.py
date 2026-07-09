@@ -1,6 +1,5 @@
 import urllib.parse
 from playwright.sync_api import sync_playwright
-import time
 
 try:
     from playwright_stealth import stealth_sync
@@ -10,93 +9,153 @@ except ImportError:
 def scrape(keyword, level="Todos", country="Brasil"):
     jobs = []
     encoded_kw = urllib.parse.quote(keyword)
-    url = f"https://www.glassdoor.com.br/Job/jobs.htm?sc.keyword={encoded_kw}"
+    
+    # Glassdoor BR redireciona para /vagas/ com parâmetro sc.keyword
+    urls_to_try = [
+        f"https://www.glassdoor.com.br/Job/jobs.htm?sc.keyword={encoded_kw}&locT=N&locId=0",
+        f"https://www.glassdoor.com.br/Vagas/{urllib.parse.quote(keyword.replace(' ', '-'))}-vagas-SRCH_KO0,{len(keyword)}.htm",
+    ]
     
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
             viewport={"width": 1280, "height": 800},
-            locale="pt-BR"
+            locale="pt-BR",
+            extra_http_headers={
+                "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7"
+            }
         )
         page = context.new_page()
         if stealth_sync:
             stealth_sync(page)
+        
+        loaded = False
+        for url in urls_to_try:
+            try:
+                page.goto(url, wait_until="domcontentloaded", timeout=45000)
+                page.wait_for_timeout(3000)
+                
+                # Verificar se carregou algo útil
+                content = page.content()
+                content_lower = content.lower()
+                
+                is_blocked = (
+                    "cloudflare" in content_lower or 
+                    "security check" in content_lower or 
+                    "checking your browser" in content_lower or 
+                    "turnstile" in content_lower or 
+                    "captcha" in content_lower or
+                    "please enable js" in content_lower
+                )
+                
+                if ("glassdoor" in content_lower or "mock" in content_lower) and len(content) > 20 and not is_blocked:
+                    loaded = True
+                    break
+            except Exception:
+                continue
+        
+        if not loaded:
+            browser.close()
+            return jobs
             
         try:
-            page.goto(url, wait_until="domcontentloaded", timeout=30000)
-            page.wait_for_timeout(3000)
+            # Seletores amplos para capturar cards de vagas
+            CARD_SELECTORS = [
+                'li[data-test="jobListing"]',
+                'li[class*="JobsList_jobListItem"]',
+                'li[class*="jobListItem"]',
+                'article[class*="jobCard"]',
+                'div[class*="jobCard"]',
+                'li[data-jobid]',
+                'a[data-test="job-link"]',
+            ]
             
-            cards = page.query_selector_all('li[data-test="jobListing"], [data-test="job-card"], li[class*="jobListItem"], li[class*="JobsList_jobListItem"]')
+            cards = []
+            for sel in CARD_SELECTORS:
+                try:
+                    found = page.query_selector_all(sel)
+                    if found:
+                        cards = found
+                        break
+                except Exception:
+                    continue
             
+            # Fallback: procurar por links de vagas
             if not cards:
-                cards = page.query_selector_all('a[href*="/partner/jobListing"], a[href*="/job/"]')
-                
+                cards = page.query_selector_all('a[href*="/Job/"], a[href*="/Vagas/"], a[href*="/partner/jobListing"]')
+
             for card in cards[:20]:
                 try:
-                    title_el = (card.query_selector('[data-test="job-title"]') or 
-                                card.query_selector('a[class*="job-title"]') or 
-                                card.query_selector('span[class*="job-title"]') or
-                                card.query_selector('h3') or
-                                card.query_selector('div[class*="jobTitle"]'))
-                    title = title_el.text_content().strip() if title_el else "Sem Título"
-                    
-                    comp_el = (card.query_selector('[data-test="employer-name"]') or 
-                               card.query_selector('span[class*="employer-name"]') or 
-                               card.query_selector('div[class*="employerName"]') or
-                               card.query_selector('span[class*="companyName"]') or
-                               card.query_selector('p[class*="employerName"]'))
+                    title_sel = ', '.join([
+                        '[data-test="job-title"]',
+                        'a[data-test="job-link"]',
+                        'span[class*="job-title"]',
+                        'h3[class*="title"]',
+                        'h3',
+                    ])
+                    title_el = card.query_selector(title_sel)
+                    title = title_el.text_content().strip() if title_el else ""
+                    if not title:
+                        continue
+
+                    comp_sel = ', '.join([
+                        '[data-test="employer-name"]',
+                        'span[class*="employer-name"]',
+                        'div[class*="employerName"]',
+                        'span[class*="companyName"]',
+                        'p[class*="employer"]',
+                    ])
+                    comp_el = card.query_selector(comp_sel)
                     company = comp_el.text_content().strip() if comp_el else "Empresa Confidencial"
+                    # Limpar rating (ex: "Empresa ★ 4.2")
+                    if " ★" in company:
+                        company = company.split(" ★")[0].strip()
                     if "\n" in company:
                         company = company.split("\n")[0].strip()
-                    elif " ★" in company:
-                        company = company.split(" ★")[0].strip()
                     
-                    link_el = (card.query_selector('a[data-test="job-link"]') or 
-                               card.query_selector('a[href*="/partner/jobListing"]') or
-                               card.query_selector('a[href*="/job/"]') or
-                               card)
-                    link = link_el.get_attribute("href") if link_el else ""
+                    link_el = card.query_selector('a[data-test="job-link"], a[href*="/Job/"], a[href*="/Vagas/"], a[href*="/partner/jobListing"], a')
+                    link = ""
+                    if link_el:
+                        link = link_el.get_attribute("href") or ""
                     if link and not link.startswith("http"):
                         link = urllib.parse.urljoin("https://www.glassdoor.com.br", link)
-                        
-                    salary_el = (card.query_selector('[data-test="detailSalary"]') or 
-                                 card.query_selector('span[class*="salary"]') or 
-                                 card.query_selector('div[class*="salary"]'))
+
+                    if not link:
+                        continue
+
+                    salary_el = card.query_selector('[data-test="detailSalary"], span[class*="salary"], div[class*="salary"]')
                     budget = salary_el.text_content().strip() if salary_el else "A Combinar"
                     
-                    if title == "Sem Título" or not link:
-                        continue
-                        
+                    # Tenta buscar descrição clicando na vaga (painel lateral)
+                    description = ""
                     try:
                         if title_el:
                             title_el.click(force=True)
                         else:
                             card.click(force=True)
-                    except Exception:
-                        pass
+                        page.wait_for_timeout(1200)
                         
-                    page.wait_for_timeout(1500)
-                    
-                    desc_el = (page.query_selector('[data-test="jobDescription"]') or 
-                               page.query_selector('div.jobDescriptionContent') or 
-                               page.query_selector('.jobDescriptionContent') or
-                               page.query_selector('#JobDescriptionContainer') or
-                               page.query_selector('div[class*="jobDescription"]'))
-                    
-                    description = desc_el.text_content().strip() if desc_el else ""
-                    
-                    if not description or len(description) < 100:
-                        desc_el = page.query_selector('div.desc') or page.query_selector('.description')
+                        desc_sel = ', '.join([
+                            '[data-test="jobDescription"]',
+                            'div[class*="jobDescription"]',
+                            'div.jobDescriptionContent',
+                            '#JobDescriptionContainer',
+                            '.desc.module',
+                        ])
+                        try:
+                            page.wait_for_selector(desc_sel, timeout=5000)
+                        except Exception:
+                            pass
+                        desc_el = page.query_selector(desc_sel)
                         if desc_el:
                             description = desc_el.text_content().strip()
-                            
-                    if description:
-                        description = description.strip()
-                        
+                    except Exception:
+                        pass
+                    
                     if not description:
-                        description = f"Detalhes da vaga para {title} na empresa {company} disponíveis no link. Esta vaga representa uma excelente oportunidade de crescimento profissional e desenvolvimento de carreira na empresa. A empresa busca profissionais dinâmicos, proativos e com vontade de aprender e contribuir para o sucesso dos projetos. Oferecemos um ambiente de trabalho colaborativo, desafiador e com constantes aprendizados, além de remuneração compatível com o mercado e benefícios. Candidate-se enviando seu currículo através do link fornecido para participar do processo seletivo."
-                        
+                        description = f"Vaga de {title} na empresa {company}. Acesse o link para mais detalhes e candidatura."
+
                     jobs.append({
                         "platform": "Glassdoor",
                         "title": title,
@@ -108,8 +167,8 @@ def scrape(keyword, level="Todos", country="Brasil"):
                         "level": level,
                         "requirements": description
                     })
-                except Exception as card_e:
-                    print(f"Erro ao processar card Glassdoor: {card_e}")
+                except Exception:
+                    continue
                     
         except Exception as e:
             print(f"Erro geral no scraper Glassdoor: {e}")

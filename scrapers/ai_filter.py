@@ -38,7 +38,7 @@ class JobEvaluation(BaseModel):
     bonus: str
     benefits: str
     model: str
-    proposal: str = Field(default="N/A", description="Se a vaga for freelancer e aprovada, escreva uma proposta longa e detalhada. Caso contrário, retorne 'N/A'.")
+    proposal: str = Field(default="N/A", description="Se a vaga for freelancer, escreva OBRIGATORIAMENTE uma proposta longa e detalhada, mesmo se for reprovada. Caso não seja freelancer, retorne 'N/A'.")
 
 async def score_job_match(resume_text: str, job: dict, target_keyword: str = None, target_location: str = None, target_level: str = "Todos", target_education: str = "Todos", target_contract: str = "Todos") -> dict:
     if not resume_text or len(resume_text) < 10:
@@ -74,7 +74,7 @@ Regras de Reprovação Imediata:
 5. Se a descrição for um snippet cortado com reticências (ex: "Our sales team is growing quickly..."), NÃO invente os requisitos. Escreva "Resumo curto fornecido pela plataforma" nos campos reqs e benefits.
 6. Modalidade do candidato: "{target_contract}". Avalie a modalidade da vaga. Se for projeto temporário/freela, defina is_freelance=true, senão false. SEJA RÍGIDO NA APROVAÇÃO: Se o candidato pedir "CLT", REPROVE vagas "PJ" ou "Freelancer". Se pedir "PJ", REPROVE vagas "CLT" ou "Freelancer". Se pedir "Freelancer", REPROVE vagas fixas (CLT ou PJ). Se for "Todos", não reprove por modalidade. Em caso de reprovação, aprovado=false.
 7. Formação do candidato: "{target_education}". SEJA IMPIEDOSO: Se a formação do candidato for "Sem Formação", REPROVE IMEDIATAMENTE qualquer vaga que cite Ensino Superior, Faculdade, Graduação, Bacharelado ou Cursando como requisito OBRIGATÓRIO. Só aprove se a faculdade for tratada como "Diferencial", "Desejável" ou não for mencionada. Se a formação for "Todos", não reprove por educação. Em caso de reprovação, defina exige_faculdade=true e aprovado=false.
-8. Regra de Ouro IA: Se a busca ({target_keyword}) for relacionada a Inteligência Artificial (ex: "Especialista em IA", "AI Coder", "Engenheiro de Prompt", "Consultor de IA"), a vaga DEVE ser OBRIGATORIAMENTE técnica (Desenvolvimento, Engenharia de Dados, Python, LLMs, Machine Learning) OU de Criação de Conteúdo Avançada exigindo explicitamente ferramentas de IA (Midjourney, Runway, Stable Diffusion, IA para vídeo/áudio/imagem). REPROVE SUMARIAMENTE vagas de Marketing de Performance (Google Ads, Meta Ads) e Chatbots simples (ManyChat). Se for "Criação de Conteúdo", SÓ APROVE se citar o uso direto de Inteligência Artificial generativa, senão REPROVE (vaga_corresponde_ao_cargo=false, aprovado=false).
+8. Regra de Ouro IA: Se a busca ({target_keyword}) for relacionada a Inteligência Artificial (ex: "Especialista em IA", "AI Coder", "Engenheiro de Prompt", "Consultor de IA"), a vaga DEVE ser OBRIGATORIAMENTE técnica (Desenvolvimento, Engenharia de Dados, Python, LLMs, Machine Learning) OU de Criação de Conteúdo ou Marketing de Performance (Google Ads, Meta Ads, copy, criação de anúncios, redes sociais) que integre ou exija explicitamente o uso de ferramentas de IA Generativa (ChatGPT, Midjourney, Claude, etc.) para copy, criação ou geração de anúncios. REPROVE vagas de Marketing de Performance, Criação de Conteúdo e Chatbots apenas se elas NÃO fizerem uso e NÃO exigirem ferramentas de Inteligência Artificial generativa (vaga_corresponde_ao_cargo=false, aprovado=false).
 
 Organize a resposta ESTRITAMENTE em JSON que satisfaça o seguinte schema (todos os campos obrigatórios):
 - "aprovado" (bool)
@@ -91,12 +91,12 @@ Organize a resposta ESTRITAMENTE em JSON que satisfaça o seguinte schema (todos
 - "bonus": (string) Diferenciais/Desejaveis. Procure por seções como "Diferenciais", "Será um diferencial", "Desejável", "Nice to have". Se não encontrar, escreva "Não mencionado".
 - "benefits": (string) Salário e Benefícios. Procure por seções como "Benefícios", "O que oferecemos", "Remuneração". Liste todos os benefícios encontrados (VR, VA, VT, plano de saúde, auxílio creche, etc.). Se não encontrar, escreva "Não informado".
 - "model": (string) Modelo de Trabalho e Cidade (Remoto, Presencial, Híbrido + cidade se mencionar).
-- "proposal": (string) RETORNE UMA ÚNICA STRING CONTÍNUA (TEXTO PLANO). NÃO RETORNE UM OBJETO JSON! SE a vaga for APROVADA E a Plataforma for Workana, 99Freelas ou Freelancer, crie uma Proposta Comercial HÍBRIDA (em Português do Brasil) com limite estrito de 1500 caracteres. Siga EXATAMENTE esta estrutura:
+- "proposal": (string) RETORNE UMA ÚNICA STRING CONTÍNUA (TEXTO PLANO). NÃO RETORNE UM OBJETO JSON! SE a Plataforma for freelancer (Workana, 99Freelas, Freelancer), ESCREVA A PROPOSTA SEMPRE, mesmo que a vaga seja reprovada pelas regras acima. O usuário quer tentar a sorte. Crie uma Proposta Comercial HÍBRIDA (em Português do Brasil) com limite estrito de 1500 caracteres. Siga EXATAMENTE esta estrutura:
   1. Abertura Humana e Conversacional: "Oi! Vi seu projeto sobre [Tema] e percebi que o seu principal desafio hoje é [Gargalo real]". Fale de forma empática e próxima, como se estivesse conversando com o cliente no WhatsApp.
   2. Plano S-Tier (Tabela Markdown OBRIGATÓRIA): Mostre sua autoridade técnica. Diga "Para resolver isso rápido, montei esse plano de execução:" e crie uma tabela (FASE | ARQUITETURA | IMPACTO) com 3 etapas práticas usando suas habilidades do currículo (GTM, Meta CAPI, Python, Automação, etc).
   3. Autoridade e Orçamento: Fale brevemente (1 frase) sobre sua experiência/certificações que garantem o resultado. Opcionalmente, ancore opções de investimento se fizer sentido.
   4. Xeque-Mate (CTA Amigável): Finalize com UMA PERGUNTA TÉCNICA E ESPECÍFICA sobre o projeto para puxar assunto, seguida de um convite caloroso: "Vamos bater um papo rápido sobre isso? Confira meu portfólio e cases de sucesso aqui: https://linktr.ee/diegogrowth". Assine como "Abraço, Diego - Growth Engineer".
-  Se a vaga for REPROVADA ou se a Plataforma NÃO for de freelancer (ex: LinkedIn, Gupy, Infojobs), escreva apenas "N/A".
+  Se a Plataforma NÃO for de freelancer (ex: LinkedIn, Gupy, Infojobs), escreva apenas "N/A".
 
 --- CURRÍCULO ---
 {resume_trunc}
@@ -114,7 +114,7 @@ Desc: {req_trunc}
             
             try:
                 response = await client.chat.completions.create(
-                    model="llama3-70b-8192", 
+                    model="llama-3.3-70b-versatile", 
                     messages=[
                         {"role": "system", "content": "Você é um validador impiedoso que responde APENAS em JSON seguindo exatamente os booleanos e as chaves exigidas."},
                         {"role": "user", "content": prompt}
@@ -122,104 +122,100 @@ Desc: {req_trunc}
                     temperature=0.1,
                     response_format={ "type": "json_object" }
                 )
-                
                 result_text = response.choices[0].message.content
-                result_json = json.loads(result_text)
-                
-                # Validação estrita via Pydantic
-                eval_obj = JobEvaluation(**result_json)
-                
-                aprovado = eval_obj.aprovado
-                score = eval_obj.score
-                reason = eval_obj.justificativa_curta
-
-                if aprovado:
-                    violated = []
-                    if eval_obj.vaga_corresponde_ao_cargo == False:
-                        violated.append("vaga_corresponde_ao_cargo == False")
-                    if eval_obj.is_freelance == True and target_contract not in ["Freelancer", "Todos"]:
-                        violated.append("is_freelance == True (candidato quer fixo)")
-                    if eval_obj.localidade_correta == False:
-                        violated.append("localidade_correta == False")
-                    if eval_obj.exige_faculdade == True and target_education == "Sem Formação":
-                        violated.append("exige_faculdade == True")
-                    if eval_obj.exige_experiencia == True and target_level == "Júnior":
-                        violated.append("exige_experiencia == True")
-                    
-                    if target_level == "Júnior":
-                        import re
-                        title_raw = job.get('title', '') or ''
-                        budget_raw = job.get('budget', '') or ''
-                        reqs_raw = job.get('requirements', '') or ''
-                        
-                        texts_to_check = [title_raw, budget_raw, reqs_raw]
-                        
-                        # Check foreign currency
-                        has_foreign_currency = False
-                        for text in texts_to_check:
-                            text_lower = text.lower()
-                            if "€" in text or any(kw in text_lower for kw in ["usd", "euro", "euros", "dollar", "dollars"]) or re.search(r'(?<![Rr])\$', text):
-                                has_foreign_currency = True
-                                break
-                        if has_foreign_currency:
-                            violated.append("foreign_currency_detected")
-                            
-                        # Check fluent English
-                        has_fluent_english = False
-                        fluent_english_kws = ["inglês fluente", "ingles fluente", "fluent english", "fluency in english", "english fluent", "english: fluent", "ingles: fluente", "inglês: fluente"]
-                        for text in texts_to_check:
-                            text_lower = text.lower()
-                            if any(kw in text_lower for kw in fluent_english_kws):
-                                has_fluent_english = True
-                                break
-                        if has_fluent_english:
-                            violated.append("fluent_english_detected")
-                    
-                    if violated:
-                        aprovado = False
-                        score = 0
-                        reason = f"[Hard-Lock Override] Violated conditions: {', '.join(violated)}"
-
-                return {
-                    "aprovado": aprovado,
-                    "score": score,
-                    "reason": reason,
-                    "reqs": eval_obj.reqs,
-                    "bonus": eval_obj.bonus,
-                    "benefits": eval_obj.benefits,
-                    "model": eval_obj.model,
-                    "salary_declared": eval_obj.salary_declared,
-                    "has_benefits": eval_obj.has_benefits,
-                    "exige_faculdade": eval_obj.exige_faculdade,
-                    "is_freelance": eval_obj.is_freelance,
-                    "vaga_corresponde_ao_cargo": eval_obj.vaga_corresponde_ao_cargo,
-                    "localidade_correta": eval_obj.localidade_correta,
-                    "exige_experiencia": eval_obj.exige_experiencia,
-                    "proposal": getattr(eval_obj, 'proposal', '')
-                }
-                
             except Exception as e:
                 err_msg = str(e).lower()
                 if "429" in err_msg or "rate limit" in err_msg:
                     await asyncio.sleep(2 + tentativa)
                 else:
-                    logger.error(f"Erro ao extrair JSON: {e}")
-                    return {
-                        "aprovado": False,
-                        "score": 0,
-                        "reason": "Erro no modelo estruturado.",
-                        "reqs": "",
-                        "bonus": "",
-                        "benefits": "",
-                        "model": "",
-                        "salary_declared": False,
-                        "has_benefits": False,
-                        "exige_faculdade": False,
-                        "is_freelance": False,
-                        "vaga_corresponde_ao_cargo": True,
-                        "localidade_correta": True,
-                        "exige_experiencia": False
-                    }
+                    logger.warning(f"Erro na API Groq (não-429): {e}. Tentando próxima chave...")
+                continue
+                
+            try:
+                result_json = json.loads(result_text)
+                eval_obj = JobEvaluation(**result_json)
+            except Exception as e:
+                logger.error(f"Groq retornou JSON malformado ou esquema invalido: {e}")
+                return {
+                    "aprovado": False,
+                    "score": 0,
+                    "reason": "Erro no modelo estruturado.",
+                    "reqs": "", "bonus": "", "benefits": "", "model": "",
+                    "salary_declared": False, "has_benefits": False, "exige_faculdade": False,
+                    "is_freelance": False, "vaga_corresponde_ao_cargo": False, "localidade_correta": False,
+                    "exige_experiencia": False, "proposal": ""
+                }
+                
+            aprovado = eval_obj.aprovado
+            score = eval_obj.score
+            reason = eval_obj.justificativa_curta
+
+            if aprovado:
+                violated = []
+                if eval_obj.vaga_corresponde_ao_cargo == False:
+                    violated.append("vaga_corresponde_ao_cargo == False")
+                if eval_obj.is_freelance == True and target_contract not in ["Freelancer", "Todos"]:
+                    violated.append("is_freelance == True (candidato quer fixo)")
+                if eval_obj.is_freelance == False and target_contract == "Freelancer":
+                    violated.append("is_freelance == False (candidato quer freelance)")
+                if eval_obj.localidade_correta == False:
+                    violated.append("localidade_correta == False")
+                if eval_obj.exige_faculdade == True and target_education == "Sem Formação":
+                    violated.append("exige_faculdade == True")
+                if eval_obj.exige_experiencia == True and target_level == "Júnior":
+                    violated.append("exige_experiencia == True")
+                
+                if target_level == "Júnior":
+                    import re
+                    title_raw = job.get('title', '') or ''
+                    budget_raw = job.get('budget', '') or ''
+                    reqs_raw = job.get('requirements', '') or ''
+                    
+                    texts_to_check = [title_raw, budget_raw, reqs_raw]
+                    
+                    # Check foreign currency
+                    has_foreign_currency = False
+                    for text in texts_to_check:
+                        text_lower = text.lower()
+                        if "€" in text or any(kw in text_lower for kw in ["usd", "euro", "euros", "dollar", "dollars"]) or re.search(r'(?<![Rr])\$', text):
+                            has_foreign_currency = True
+                            break
+                    if has_foreign_currency:
+                        violated.append("foreign_currency_detected")
+                        
+                    # Check fluent English
+                    has_fluent_english = False
+                    fluent_english_kws = ["inglês fluente", "ingles fluente", "fluent english", "fluency in english", "english fluent", "english: fluent", "ingles: fluente", "inglês: fluente"]
+                    for text in texts_to_check:
+                        text_lower = text.lower()
+                        if any(kw in text_lower for kw in fluent_english_kws):
+                            has_fluent_english = True
+                            break
+                    if has_fluent_english:
+                        violated.append("fluent_english_detected")
+                
+                if violated:
+                    aprovado = False
+                    score = 0
+                    reason = f"[Hard-Lock Override] Violated conditions: {', '.join(violated)}"
+
+            return {
+                "aprovado": aprovado,
+                "score": score,
+                "reason": reason,
+                "reqs": eval_obj.reqs,
+                "bonus": eval_obj.bonus,
+                "benefits": eval_obj.benefits,
+                "model": eval_obj.model,
+                "salary_declared": eval_obj.salary_declared,
+                "has_benefits": eval_obj.has_benefits,
+                "exige_faculdade": eval_obj.exige_faculdade,
+                "is_freelance": eval_obj.is_freelance,
+                "vaga_corresponde_ao_cargo": eval_obj.vaga_corresponde_ao_cargo,
+                "localidade_correta": eval_obj.localidade_correta,
+                "exige_experiencia": eval_obj.exige_experiencia,
+                "proposal": getattr(eval_obj, 'proposal', '')
+            }
                     
         return {
             "aprovado": False,
@@ -260,7 +256,7 @@ Retorne APENAS um objeto JSON com a chave "keywords" contendo um array de 3 stri
             
             try:
                 response = await client.chat.completions.create(
-                    model="llama3-70b-8192", 
+                    model="llama-3.3-70b-versatile", 
                     messages=[
                         {"role": "system", "content": "Responda ESTRITAMENTE em formato JSON contendo a chave 'keywords' com 3 strings."},
                         {"role": "user", "content": prompt}
@@ -279,7 +275,7 @@ Retorne APENAS um objeto JSON com a chave "keywords" contendo um array de 3 stri
                 if "429" in err_msg or "rate limit" in err_msg:
                     await asyncio.sleep(2 + tentativa)
                 else:
-                    logger.error(f"Erro ao gerar keywords: {e}")
+                    logger.warning(f"Groq API offline. Usando keywords de fallback.")
                     return ["Gestor de Tráfego", "Python", "Analista"]
                     
         return ["Freelancer", "Dev", "Marketing"]
@@ -309,7 +305,7 @@ Exemplo: {{"keyword": "vendedor", "location": "Londrina/PR", "level": "Júnior",
             client = AsyncGroq(api_key=key)
             try:
                 response = await client.chat.completions.create(
-                    model="llama3-70b-8192", 
+                    model="llama-3.3-70b-versatile", 
                     messages=[
                         {"role": "system", "content": "Você é um extrator de intenções JSON estrito."},
                         {"role": "user", "content": prompt}
@@ -334,7 +330,7 @@ Exemplo: {{"keyword": "vendedor", "location": "Londrina/PR", "level": "Júnior",
                 if "429" in err_msg or "rate limit" in err_msg:
                     await asyncio.sleep(2 + tentativa)
                 else:
-                    logger.error(f"Erro ao extrair intenção: {e}")
+                    logger.warning(f"Groq API offline. Buscando vagas de forma ampla.")
                     return {"keyword": "Vagas", "location": "Brasil (Remoto)"}
                     
         return {"keyword": "Vagas", "location": "Brasil (Remoto)"}

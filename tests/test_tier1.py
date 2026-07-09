@@ -355,3 +355,116 @@ def test_auto_apply_fails_gracefully_on_network_error():
     conn.close()
     
     assert status == "failed"
+
+@pytest.mark.asyncio
+async def test_bot_centralized_seniority_level_filtering():
+    """
+    Test that bot.py correctly appends user seniority level to keyword,
+    passes "Todos" to scrapers, and overwrites the level of the returned jobs
+    in the database to match the user's settings level.
+    """
+    from bot import _do_hunt, get_user_settings
+    from unittest.mock import AsyncMock
+    import scrapers.infojobs
+    import database
+    import sqlite3
+    
+    # 1. Setup mock message
+    mock_chat = MagicMock()
+    mock_chat.id = 99999
+    
+    mock_message = MagicMock()
+    mock_message.chat = mock_chat
+    
+    mock_status_msg = AsyncMock()
+    mock_status_msg.edit_text = AsyncMock()
+    mock_status_msg.reply = AsyncMock()
+    mock_message.answer = AsyncMock(return_value=mock_status_msg)
+    
+    # 2. Configure settings
+    settings = get_user_settings(99999)
+    settings["level"] = "Sênior"
+    settings["platforms"] = {p: False for p in settings["platforms"]}
+    settings["platforms"]["infojobs"] = True
+    
+    # 3. Patch scraper to return a job that matches our keywords and doesn't get filtered
+    original_scrape = scrapers.infojobs.scrape
+    scrapers.infojobs.scrape = lambda keyword, level="Todos", country="Brasil": [
+        {
+            "platform": "InfoJobs",
+            "title": "Python Developer",
+            "company": "Test Company",
+            "budget": "A Combinar",
+            "link": "https://example.com/job/test-1",
+            "job_type": "CLT",
+            "profession": "Python",
+            "level": level,
+            "requirements": "Procura-se desenvolvedor Python Sênior experiente com conhecimentos de Django e APIs REST."
+        }
+    ]
+    
+    try:
+        # Trigger _do_hunt
+        await _do_hunt("Python", mock_message)
+    finally:
+        scrapers.infojobs.scrape = original_scrape
+    
+    # 4. Check jobs in test database
+    conn = sqlite3.connect(database.DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT title, level, platform FROM jobs")
+    jobs = c.fetchall()
+    conn.close()
+    
+    # Assert jobs were found and their level in database is 'Sênior' (not 'Todos')
+    assert len(jobs) > 0, "No jobs inserted in DB during test"
+    for title, level, platform in jobs:
+        assert level == "Sênior", f"Job '{title}' has level '{level}', expected 'Sênior'"
+
+
+def test_especialista_ia_generativa_keywords():
+    from bot import is_job_relevant, DEFAULT_SETTINGS
+    
+    # 1. Test case: Copywriter ChatGPT
+    job1 = {
+        "title": "Copywriter ChatGPT",
+        "requirements": "Criação de textos usando inteligência artificial."
+    }
+    assert is_job_relevant(job1, "Especialista em IA Generativa", DEFAULT_SETTINGS) is True
+
+    # 2. Test case: Designer Midjourney
+    job2 = {
+        "title": "Designer Midjourney",
+        "requirements": "Gerar imagens criativas com IA."
+    }
+    assert is_job_relevant(job2, "Especialista em IA Generativa", DEFAULT_SETTINGS) is True
+
+    # 3. Test case: Editor de Vídeo - IA
+    job3 = {
+        "title": "Editor de Vídeo - IA",
+        "requirements": "Uso de ferramentas de inteligência artificial para edição de vídeo."
+    }
+    assert is_job_relevant(job3, "Especialista em IA Generativa", DEFAULT_SETTINGS) is True
+
+    # 4. Test case: Gestor de Tráfego com IA
+    job4 = {
+        "title": "Gestor de Tráfego com IA",
+        "requirements": "Performance marketing e automações ChatGPT."
+    }
+    assert is_job_relevant(job4, "Especialista em IA Generativa", DEFAULT_SETTINGS) is True
+
+    # 5. Test case: Analista de Marketing Digital com ChatGPT
+    job5 = {
+        "title": "Analista de Marketing Digital com ChatGPT",
+        "requirements": "Criação de anúncios e estratégias de conteúdo."
+    }
+    assert is_job_relevant(job5, "Especialista em IA Generativa", DEFAULT_SETTINGS) is True
+
+    # 6. Test case: Normal content writer without AI keywords
+    job6 = {
+        "title": "Redator de Conteúdo Web",
+        "requirements": "Escrever posts para blogs de saúde."
+    }
+    # This should be False since it lacks both Group 1 (IA tools/terms) and does not match keyword directly
+    assert is_job_relevant(job6, "Especialista em IA Generativa", DEFAULT_SETTINGS) is False
+

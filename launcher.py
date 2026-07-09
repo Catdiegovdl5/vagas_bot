@@ -26,6 +26,9 @@ def main():
     try:
         while True:
             time.sleep(1)
+            if bot_process.poll() is not None or app_process.poll() is not None:
+                print("\n[ERRO CRÍTICO] Um dos processos do sistema parou inesperadamente. Reiniciando ecossistema...")
+                break
     except KeyboardInterrupt:
         print("\nDesligando sistema de forma manual (Ctrl+C)...")
     except Exception as e:

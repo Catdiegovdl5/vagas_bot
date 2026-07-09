@@ -31,14 +31,15 @@ def scrape(keyword, level="Todos", country="Brasil"):
             stealth_sync(page)
             
         try:
-            page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            page.goto(url, wait_until="domcontentloaded", timeout=60000)
             page.wait_for_timeout(3000)
             
             cards = page.query_selector_all('div.element-vaga, div[class*="js_vacancyCard"], div[class*="vacancyCard"], [data-type="vacancy"]')
             if not cards:
                 cards = page.query_selector_all('a[href*="vaga-de-"], a[href*="/vaga-"]')
                 
-            for card in cards[:20]:
+            consecutive_timeouts = 0
+            for card in cards[:15]:
                 try:
                     link_el = card.query_selector('a[href*="vaga-de-"], a[href*="/vaga-"], a')
                     link = link_el.get_attribute("href") if link_el else ""
@@ -84,46 +85,53 @@ def scrape(keyword, level="Todos", country="Brasil"):
                     description = ""
                     fetched_by_cffi = False
                     
-                    if requests_cffi:
-                        try:
-                            headers = {
-                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-                                "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7"
-                            }
-                            resp = requests_cffi.get(link, impersonate="chrome110", headers=headers, timeout=12)
-                            if resp.status_code == 200 and "Cloudflare" not in resp.text:
-                                soup = BeautifulSoup(resp.text, "html.parser")
-                                desc_container = (soup.find("div", class_="description") or 
-                                                  soup.find("div", class_="vaga-desc") or 
-                                                  soup.find("div", class_=re.compile(r"description|vaga-desc|job-desc")))
-                                if desc_container:
-                                    description = desc_container.get_text(separator="\n").strip()
-                                    fetched_by_cffi = True
-                        except Exception as cffi_e:
-                            print(f"curl_cffi failed for Infojobs details: {cffi_e}")
-                            
-                    if not fetched_by_cffi or not description or len(description) < 100:
+                    if consecutive_timeouts >= 2:
+                        description = "Detalhes não puderam ser carregados devido a bloqueio temporário."
+                    else:
+                        if requests_cffi:
+                            try:
+                                headers = {
+                                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                                    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7"
+                                }
+                                resp = requests_cffi.get(link, impersonate="chrome110", headers=headers, timeout=10)
+                                if resp.status_code == 200 and "Cloudflare" not in resp.text:
+                                    soup = BeautifulSoup(resp.text, "html.parser")
+                                    desc_container = (soup.find("div", class_="description") or 
+                                                      soup.find("div", class_="vaga-desc") or 
+                                                      soup.find("div", class_=re.compile(r"description|vaga-desc|job-desc")))
+                                    if desc_container:
+                                        description = desc_container.get_text(separator="\n").strip()
+                                        fetched_by_cffi = True
+                                        consecutive_timeouts = 0
+                            except Exception as cffi_e:
+                                consecutive_timeouts += 1
+                                print(f"curl_cffi timeout infojobs ({consecutive_timeouts}/2)")
+                                
                         detail_page = None
-                        try:
-                            detail_page = context.new_page()
-                            if stealth_sync:
-                                stealth_sync(detail_page)
-                            detail_page.goto(link, wait_until="domcontentloaded", timeout=15000)
-                            detail_page.wait_for_timeout(2000)
-                            
-                            desc_el = (detail_page.query_selector('div.description') or 
-                                       detail_page.query_selector('div.vaga-desc') or 
-                                       detail_page.query_selector('div[class*="description"]') or
-                                       detail_page.query_selector('div[class*="vaga-desc"]') or
-                                       detail_page.query_selector('section[class*="description"]'))
-                            if desc_el:
-                                description = desc_el.text_content().strip()
-                        except Exception as pw_detail_e:
-                            print(f"Playwright fallback failed for Infojobs details: {pw_detail_e}")
-                        finally:
-                            if detail_page:
-                                detail_page.close()
+                        if not fetched_by_cffi or not description or len(description) < 100:
+                            try:
+                                detail_page = context.new_page()
+                                if stealth_sync:
+                                    stealth_sync(detail_page)
+                                detail_page.goto(link, wait_until="domcontentloaded", timeout=30000)
+                                detail_page.wait_for_timeout(1000)
+                                
+                                desc_el = (detail_page.query_selector('div.description') or 
+                                           detail_page.query_selector('div.vaga-desc') or 
+                                           detail_page.query_selector('div[class*="description"]') or
+                                           detail_page.query_selector('div[class*="vaga-desc"]') or
+                                           detail_page.query_selector('section[class*="description"]'))
+                                if desc_el:
+                                    description = desc_el.text_content().strip()
+                                    consecutive_timeouts = 0
+                            except Exception as pw_detail_e:
+                                consecutive_timeouts += 1
+                                print(f"Playwright fallback timeout infojobs ({consecutive_timeouts}/2)")
+                            finally:
+                                if detail_page:
+                                    detail_page.close()
                                 
                     if description:
                         description = description.strip()
@@ -142,7 +150,7 @@ def scrape(keyword, level="Todos", country="Brasil"):
                         "requirements": description
                     })
                     
-                    time.sleep(1)
+
                 except Exception as card_e:
                     print(f"Erro ao processar card Infojobs: {card_e}")
                     

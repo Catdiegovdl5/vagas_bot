@@ -1,9 +1,17 @@
 import requests
 import urllib.parse
+import os
 
 def scrape(keyword, level, country="Brasil"):
     jobs = []
     try:
+        # JSearch requer uma API Key válida do RapidAPI
+        # Configure JSEARCH_API_KEY no seu .env ou nas variáveis de ambiente
+        api_key = os.environ.get("JSEARCH_API_KEY", "")
+        if not api_key:
+            print("JSearch: JSEARCH_API_KEY não configurada. Pulando scraper.")
+            return jobs
+        
         search_kw = f"{keyword}"
         if level != "Todos":
             search_kw += f" {level}"
@@ -18,12 +26,29 @@ def scrape(keyword, level, country="Brasil"):
             url = f"https://jsearch.p.rapidapi.com/search?query={encoded_kw}&page=1&num_pages=3&date_posted=month"
         
         headers = {
-            "x-rapidapi-key": "7af3cebf37mshb1adb579644f3d1p1f605fjsn26d9e7a63fe0",
+            "x-rapidapi-key": api_key,
             "x-rapidapi-host": "jsearch.p.rapidapi.com"
         }
         
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 404:
+            print("JSearch: Endpoint não encontrado (404). Verifique se sua API Key é válida e está ativa no RapidAPI.")
+            return jobs
+        elif response.status_code == 403:
+            print("JSearch: Acesso negado (403). Verifique se sua API Key do RapidAPI está correta.")
+            return jobs
+        elif response.status_code == 429:
+            print("JSearch: Limite de requisições atingido (429). Aguarde antes de tentar novamente.")
+            return jobs
+        elif response.status_code != 200:
+            print(f"JSearch: Erro HTTP {response.status_code}.")
+            return jobs
+            
         data = response.json()
+        if "message" in data:
+            print(f"JSearch API mensagem: {data['message']}")
+            return jobs
         
         if data.get("data"):
             for item in data["data"][:30]:
@@ -55,16 +80,4 @@ def scrape(keyword, level, country="Brasil"):
     except Exception as e:
         print("Erro JSearch:", e)
     
-    if not jobs:
-        jobs.append({
-            "platform": "JSearch",
-            "title": f"Sem vagas API JSearch para {keyword} ({level})",
-            "company": "N/A",
-            "budget": "N/A",
-            "link": "#",
-            "job_type": "N/A",
-            "profession": keyword,
-            "level": level,
-            "requirements": "Não houve resultados."
-        })
     return jobs

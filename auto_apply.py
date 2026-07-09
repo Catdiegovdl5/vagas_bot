@@ -23,8 +23,9 @@ def extract_email_from_text(text: str) -> str:
     return match.group(0) if match else None
 
 
-def prepare_candidate_data(curriculo_path: str = "curriculo.txt") -> dict:
+def prepare_candidate_data(user_id: str = None) -> dict:
     """Lê o currículo e extrai dados básicos do candidato para preenchimento de formulários."""
+    curriculo_path = f"curriculo_{user_id}.txt" if user_id else "curriculo.txt"
     data = {
         "name": "",
         "email": "",
@@ -116,12 +117,12 @@ Atenciosamente,
     }
 
 
-def auto_apply(job: dict) -> dict:
+def auto_apply(job: dict, user_id: str = None) -> dict:
     """
     Motor principal de Auto-Apply. Decide a melhor estratégia de candidatura
     baseada na plataforma de origem da vaga.
     """
-    candidate = prepare_candidate_data()
+    candidate = prepare_candidate_data(user_id)
     platform = job.get("platform", "").lower()
     link = job.get("link", "")
     
@@ -161,10 +162,14 @@ def auto_apply(job: dict) -> dict:
     return result
 
 
-def apply_to_job(job_link: str, resume_path: str, mock_ats_url: str = None) -> bool:
+def apply_to_job(job_link: str, resume_path: str, candidate: dict, mock_ats_url: str = None) -> bool:
     """
     Submits a job application with the resume PDF to the local mock ATS server.
     """
+    if isinstance(candidate, str):
+        mock_ats_url = candidate
+        candidate = {"name": "Diego Candidate", "email": "diego@example.com"}
+
     if not mock_ats_url:
         mock_ats_url = os.getenv("MOCK_ATS_URL", "http://127.0.0.1:8081/apply")
 
@@ -178,8 +183,8 @@ def apply_to_job(job_link: str, resume_path: str, mock_ats_url: str = None) -> b
             files = {"resume": (os.path.basename(resume_path), f, "application/pdf")}
             data = {
                 "job_link": job_link,
-                "name": "Diego Candidate",
-                "email": "diego@example.com"
+                "name": candidate.get("name", "Diego Candidate"),
+                "email": candidate.get("email", "diego@example.com")
             }
             # Post to the mock ATS server
             response = requests.post(mock_ats_url, data=data, files=files, timeout=5)
@@ -192,39 +197,52 @@ def apply_to_job(job_link: str, resume_path: str, mock_ats_url: str = None) -> b
         return False
 
 
-def run_auto_apply(db_path: str, resume_path: str, mock_ats_url: str = None) -> int:
+def run_auto_apply(db_path: str, resume_path: str, candidate: dict, mock_ats_url: str = None) -> int:
     """
     Main entry point for mock auto-apply.
     Selects high-scoring pending/approved jobs from the db and submits them.
     """
-    conn = sqlite3.connect(db_path)
-    c = conn.cursor()
-    
-    # Ensure tables and columns exist
-    try:
-        c.execute("ALTER TABLE jobs ADD COLUMN status TEXT DEFAULT 'pending'")
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass
-        
-    try:
-        c.execute("ALTER TABLE jobs ADD COLUMN score INTEGER DEFAULT 0")
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass
+    if isinstance(candidate, str):
+        mock_ats_url = candidate
+        candidate = {"name": "Diego Candidate", "email": "diego@example.com"}
 
-    # Find jobs with score >= 80 and status 'pending' (or null)
-    c.execute("SELECT link FROM jobs WHERE score >= 80 AND (status = 'pending' OR status IS NULL)")
-    jobs = c.fetchall()
-    
-    applied_count = 0
-    for (link,) in jobs:
-        success = apply_to_job(link, resume_path, mock_ats_url)
-        new_status = "applied" if success else "failed"
-        c.execute("UPDATE jobs SET status = ? WHERE link = ?", (new_status, link))
-        conn.commit()
-        if success:
-            applied_count += 1
+    import uuid
+    batch_id = str(uuid.uuid4())
+    conn = sqlite3.connect(db_path, timeout=10)
+    conn.execute('PRAGMA journal_mode=WAL')
+    try:
+        c = conn.cursor()
+        
+        # Ensure tables and columns exist
+        try:
+            c.execute("ALTER TABLE jobs ADD COLUMN status TEXT DEFAULT 'pending'")
+        except sqlite3.OperationalError:
+            pass
             
-    conn.close()
+        try:
+            c.execute("ALTER TABLE jobs ADD COLUMN score INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
+            
+        # Lock pending jobs for this batch to prevent race conditions
+        c.execute("UPDATE jobs SET status = ? WHERE score >= 80 AND (status = 'pending' OR status IS NULL)", (f"applying_{batch_id}",))
+        conn.commit()
+
+        # Retrieve jobs locked by this batch
+        c.execute("SELECT link FROM jobs WHERE status = ?", (f"applying_{batch_id}",))
+        jobs = c.fetchall()
+        
+        applied_count = 0
+        for (link,) in jobs:
+            # Sync call; safe to block here if run_auto_apply is called in a threadpool
+            success = apply_to_job(link, resume_path, candidate, mock_ats_url)
+            if success:
+                applied_count += 1
+            new_status = "applied" if success else "failed"
+            c.execute("UPDATE jobs SET status = ? WHERE link = ?", (new_status, link))
+            
+        conn.commit()
+    finally:
+        conn.close()
+            
     return applied_count

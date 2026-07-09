@@ -21,7 +21,7 @@ def scrape(keyword, level="Todos", country="Brasil"):
             "User-Agent": "SniperBot"
         }
         
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         if response.status_code == 200:
             data = response.json()
             items = data.get("items", [])
