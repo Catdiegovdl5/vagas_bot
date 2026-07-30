@@ -1,0 +1,559 @@
+{
+  "workModelStats": {
+    "total": 37,
+    "passed": 28,
+    "failed": 9,
+    "rate": "75.7%"
+  },
+  "locationStats": {
+    "total": 19,
+    "passed": 12,
+    "failed": 7,
+    "rate": "63.2%"
+  },
+  "workModelResults": [
+    {
+      "id": 1,
+      "category": "Feminine forms",
+      "title": "Vaga Remota",
+      "requirements": "Oportunidade para desenvolvedor",
+      "location": "",
+      "expected": "remoto",
+      "actual": "remoto",
+      "pass": true
+    },
+    {
+      "id": 2,
+      "category": "Feminine forms",
+      "title": "Engenheiro de Software",
+      "requirements": "Modalidade Híbrida em São Paulo",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "hibrido",
+      "pass": true
+    },
+    {
+      "id": 3,
+      "category": "Feminine forms",
+      "title": "Analista de TI",
+      "requirements": "Atuação Presencial no escritório",
+      "location": "São Paulo",
+      "expected": "presencial",
+      "actual": "presencial",
+      "pass": true
+    },
+    {
+      "id": 4,
+      "category": "Feminine forms",
+      "title": "Vaga Híbrida",
+      "requirements": "3 dias presenciais, 2 em casa",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "hibrido",
+      "pass": true
+    },
+    {
+      "id": 5,
+      "category": "Plural forms",
+      "title": "Vagas Remotas para Devs",
+      "requirements": "",
+      "location": "",
+      "expected": "remoto",
+      "actual": "remoto",
+      "pass": true
+    },
+    {
+      "id": 6,
+      "category": "Plural forms",
+      "title": "Trabalhos Híbridos em Tech",
+      "requirements": "",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "hibrido",
+      "pass": true
+    },
+    {
+      "id": 7,
+      "category": "Plural forms",
+      "title": "Vagas Presenciais na Matriz",
+      "requirements": "",
+      "location": "Curitiba",
+      "expected": "presencial",
+      "actual": "presencial",
+      "pass": true
+    },
+    {
+      "id": 8,
+      "category": "Plural forms",
+      "title": "Oportunidades Remotas",
+      "requirements": "",
+      "location": "",
+      "expected": "remoto",
+      "actual": "remoto",
+      "pass": true
+    },
+    {
+      "id": 9,
+      "category": "Accented variations",
+      "title": "Dev Híbrido",
+      "requirements": "",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "hibrido",
+      "pass": true
+    },
+    {
+      "id": 10,
+      "category": "Accented variations",
+      "title": "Dev Hibrido",
+      "requirements": "",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "hibrido",
+      "pass": true
+    },
+    {
+      "id": 11,
+      "category": "Accented variations",
+      "title": "Dev Híbrida",
+      "requirements": "",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "hibrido",
+      "pass": true
+    },
+    {
+      "id": 12,
+      "category": "Accented variations",
+      "title": "Dev Hibrida",
+      "requirements": "",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "hibrido",
+      "pass": true
+    },
+    {
+      "id": 13,
+      "category": "Accented variations",
+      "title": "Trabalho Remóto",
+      "requirements": "",
+      "location": "",
+      "expected": "remoto",
+      "actual": "remoto",
+      "pass": true
+    },
+    {
+      "id": 14,
+      "category": "Accented variations",
+      "title": "Vaga Presêncial",
+      "requirements": "",
+      "location": "",
+      "expected": "presencial",
+      "actual": "presencial",
+      "pass": true
+    },
+    {
+      "id": 15,
+      "category": "English terms",
+      "title": "Software Engineer - Work from home",
+      "requirements": "",
+      "location": "",
+      "expected": "remoto",
+      "actual": "remoto",
+      "pass": true
+    },
+    {
+      "id": 16,
+      "category": "English terms",
+      "title": "Fullstack Developer (WFH)",
+      "requirements": "",
+      "location": "",
+      "expected": "remoto",
+      "actual": "remoto",
+      "pass": true
+    },
+    {
+      "id": 17,
+      "category": "English terms",
+      "title": "Backend Engineer Onsite",
+      "requirements": "",
+      "location": "",
+      "expected": "presencial",
+      "actual": "presencial",
+      "pass": true
+    },
+    {
+      "id": 18,
+      "category": "English terms",
+      "title": "Data Analyst (On-site)",
+      "requirements": "",
+      "location": "",
+      "expected": "presencial",
+      "actual": "presencial",
+      "pass": true
+    },
+    {
+      "id": 19,
+      "category": "English terms",
+      "title": "DevOps Hybrid",
+      "requirements": "",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "hibrido",
+      "pass": true
+    },
+    {
+      "id": 20,
+      "category": "English terms",
+      "title": "Senior Developer - Remote",
+      "requirements": "",
+      "location": "",
+      "expected": "remoto",
+      "actual": "remoto",
+      "pass": true
+    },
+    {
+      "id": 21,
+      "category": "English terms",
+      "title": "Analista de Sistemas - Teletrabalho",
+      "requirements": "",
+      "location": "",
+      "expected": "remoto",
+      "actual": "remoto",
+      "pass": true
+    },
+    {
+      "id": 22,
+      "category": "English terms",
+      "title": "Product Owner - Anywhere",
+      "requirements": "",
+      "location": "",
+      "expected": "remoto",
+      "actual": "remoto",
+      "pass": true
+    },
+    {
+      "id": 23,
+      "category": "Negative phrases",
+      "title": "Analista de Dados",
+      "requirements": "Trabalho 100% home office, não é presencial",
+      "location": "",
+      "expected": "remoto",
+      "actual": "remoto",
+      "pass": true
+    },
+    {
+      "id": 24,
+      "category": "Negative phrases",
+      "title": "Engenheiro de Software",
+      "requirements": "Atuação no escritório. Não aceita remoto.",
+      "location": "São Paulo",
+      "expected": "presencial",
+      "actual": "remoto",
+      "pass": false
+    },
+    {
+      "id": 25,
+      "category": "Negative phrases",
+      "title": "Dev Python",
+      "requirements": "Vaga 100% presencial, não é remoto",
+      "location": "Curitiba",
+      "expected": "presencial",
+      "actual": "remoto",
+      "pass": false
+    },
+    {
+      "id": 26,
+      "category": "Negative phrases",
+      "title": "Suporte TI",
+      "requirements": "Sem opção de trabalho remoto, presença obrigatória",
+      "location": "",
+      "expected": "presencial",
+      "actual": "remoto",
+      "pass": false
+    },
+    {
+      "id": 27,
+      "category": "Negative phrases",
+      "title": "Vaga de QA",
+      "requirements": "Não presencial",
+      "location": "",
+      "expected": "remoto",
+      "actual": "outros",
+      "pass": false
+    },
+    {
+      "id": 28,
+      "category": "Negative phrases",
+      "title": "Desenvolvedor Java",
+      "requirements": "Não e presencial",
+      "location": "",
+      "expected": "remoto",
+      "actual": "outros",
+      "pass": false
+    },
+    {
+      "id": 29,
+      "category": "Hybrid vs Remote overlaps",
+      "title": "Dev React",
+      "requirements": "Modelo Híbrido com 2 dias em home office",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "hibrido",
+      "pass": true
+    },
+    {
+      "id": 30,
+      "category": "Hybrid vs Remote overlaps",
+      "title": "Gerente de Projetos",
+      "requirements": "Trabalho híbrido: 3 dias no escritório e 2 dias remote / WFH",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "hibrido",
+      "pass": true
+    },
+    {
+      "id": 31,
+      "category": "Hybrid vs Remote overlaps",
+      "title": "Tech Lead",
+      "requirements": "Híbrido (escritório em SP + teletrabalho)",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "hibrido",
+      "pass": true
+    },
+    {
+      "id": 32,
+      "category": "Hybrid vs Remote overlaps",
+      "title": "Analista Financeiro",
+      "requirements": "Vaga remota com visitas presenciais eventuais (1x por mês)",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "remoto",
+      "pass": false
+    },
+    {
+      "id": 33,
+      "category": "Hybrid vs Remote overlaps",
+      "title": "DevOps",
+      "requirements": "Atuação presencial 1 dia na semana e 4 dias home office",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "remoto",
+      "pass": false
+    },
+    {
+      "id": 34,
+      "category": "Edge cases",
+      "title": "",
+      "requirements": "",
+      "location": "",
+      "expected": "outros",
+      "actual": "outros",
+      "pass": true
+    },
+    {
+      "id": 35,
+      "category": "Edge cases",
+      "title": "Vaga Geral",
+      "requirements": "Salário a combinar, regime CLT",
+      "location": "São Paulo",
+      "expected": "outros",
+      "actual": "outros",
+      "pass": true
+    },
+    {
+      "id": 36,
+      "category": "Edge cases",
+      "title": "Desenvolvedor C++",
+      "requirements": "Atuação presencial ou remota a combinar",
+      "location": "",
+      "expected": "hibrido",
+      "actual": "remoto",
+      "pass": false
+    },
+    {
+      "id": 37,
+      "category": "Edge cases",
+      "title": "Vaga na empresa Home Office S.A.",
+      "requirements": "Trabalho no escritório em São Paulo",
+      "location": "",
+      "expected": "presencial",
+      "actual": "remoto",
+      "pass": false
+    }
+  ],
+  "locationResults": [
+    {
+      "id": 1,
+      "filterInput": "São Paulo",
+      "jobLocation": "São Paulo",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Exact match with accents"
+    },
+    {
+      "id": 2,
+      "filterInput": "Sao Paulo",
+      "jobLocation": "São Paulo",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Filter without accent vs location with accent"
+    },
+    {
+      "id": 3,
+      "filterInput": "SÃO PAULO",
+      "jobLocation": "São Paulo",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Filter UPPERCASE vs location titlecase"
+    },
+    {
+      "id": 4,
+      "filterInput": "sao paulo",
+      "jobLocation": "São Paulo",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Filter lowercase vs location titlecase"
+    },
+    {
+      "id": 5,
+      "filterInput": "São Paulo",
+      "jobLocation": "Sao Paulo/SP",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Filter vs City/UF format"
+    },
+    {
+      "id": 6,
+      "filterInput": "São Paulo",
+      "jobLocation": "SP",
+      "expectedMatch": true,
+      "actualMatch": false,
+      "pass": false,
+      "note": "Filter 'São Paulo' vs location 'SP'"
+    },
+    {
+      "id": 7,
+      "filterInput": "SP",
+      "jobLocation": "São Paulo",
+      "expectedMatch": true,
+      "actualMatch": false,
+      "pass": false,
+      "note": "Filter 'SP' vs location 'São Paulo'"
+    },
+    {
+      "id": 8,
+      "filterInput": "Rio de Janeiro",
+      "jobLocation": "rio de janeiro",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Filter vs lowercase"
+    },
+    {
+      "id": 9,
+      "filterInput": "Rio de Janeiro",
+      "jobLocation": "RJ",
+      "expectedMatch": true,
+      "actualMatch": false,
+      "pass": false,
+      "note": "Filter 'Rio de Janeiro' vs location 'RJ'"
+    },
+    {
+      "id": 10,
+      "filterInput": "Rio de Janeiro",
+      "jobLocation": "Rio de Janeiro/RJ",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Filter vs City/UF"
+    },
+    {
+      "id": 11,
+      "filterInput": "Rio",
+      "jobLocation": "Rio de Janeiro",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Short filter 'Rio' vs 'Rio de Janeiro'"
+    },
+    {
+      "id": 12,
+      "filterInput": "Rio",
+      "jobLocation": "Rio Claro",
+      "expectedMatch": false,
+      "actualMatch": true,
+      "pass": false,
+      "note": "Short filter 'Rio' vs 'Rio Claro' (False Positive risk)"
+    },
+    {
+      "id": 13,
+      "filterInput": "Curitiba",
+      "jobLocation": "curitiba",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Filter vs lowercase"
+    },
+    {
+      "id": 14,
+      "filterInput": "Curitiba",
+      "jobLocation": "Curitiba/PR",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Filter vs City/UF"
+    },
+    {
+      "id": 15,
+      "filterInput": "Curitiba",
+      "jobLocation": "PR",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Filter 'Curitiba' vs state abbreviation 'PR'"
+    },
+    {
+      "id": 16,
+      "filterInput": "Exterior",
+      "jobLocation": "exterior",
+      "expectedMatch": true,
+      "actualMatch": true,
+      "pass": true,
+      "note": "Filter vs lowercase"
+    },
+    {
+      "id": 17,
+      "filterInput": "Exterior",
+      "jobLocation": "EUA",
+      "expectedMatch": true,
+      "actualMatch": false,
+      "pass": false,
+      "note": "Filter 'Exterior' vs location 'EUA'"
+    },
+    {
+      "id": 18,
+      "filterInput": "Exterior",
+      "jobLocation": "Portugal",
+      "expectedMatch": true,
+      "actualMatch": false,
+      "pass": false,
+      "note": "Filter 'Exterior' vs location 'Portugal'"
+    },
+    {
+      "id": 19,
+      "filterInput": "Exterior",
+      "jobLocation": "USA",
+      "expectedMatch": true,
+      "actualMatch": false,
+      "pass": false,
+      "note": "Filter 'Exterior' vs location 'USA'"
+    }
+  ]
+}

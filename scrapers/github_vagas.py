@@ -1,17 +1,24 @@
 import requests
 import urllib.parse
 
-def scrape(keyword, level="Todos", country="Brasil"):
-    if country == "USA":
+def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
+    c_str = (country or "").lower()
+    l_str = (location or "").lower()
+    loc = location or country or kwargs.get("location") or kwargs.get("country") or ""
+    if loc and loc.upper() in ["USA", "US", "UNITED STATES"]:
         return []
         
     jobs = []
     try:
+        kw = keyword or "Python"
+        lvl = level or "Todos"
         repos = "repo:frontendbr/vagas repo:backend-br/vagas repo:react-brasil/vagas repo:qa-brasil/vagas"
-        query = f"{repos} is:issue is:open {keyword}"
+        query = f"{repos} is:issue is:open {kw}"
         
-        if level != "Todos":
-            query += f" {level}"
+        if lvl != "Todos":
+            query += f" {lvl}"
+        if loc and loc.lower() not in ["todos", "brasil", "brasil (remoto)", "remoto", "qualquer", ""]:
+            query += f" {loc}"
             
         encoded_q = urllib.parse.quote(query)
         url = f"https://api.github.com/search/issues?q={encoded_q}&sort=created&order=desc&per_page=15"

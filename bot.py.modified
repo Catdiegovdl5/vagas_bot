@@ -1,0 +1,1477 @@
+import asyncio
+import importlib
+import PyPDF2
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.filters import Command
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+
+import sys
+sys.path.append(".")
+from database import insert_jobs, init_db, is_applied, mark_applied
+init_db()  # Garante que as tabelas existem quando o bot inicia
+import os
+TOKEN = os.environ.get("TELEGRAM_TOKEN", "7724330024:AAFtoSLgXVDlvNmeyPCVMnkWIqbk4wvLSVg")
+
+import traceback
+from loguru import logger
+
+# --- Configurando o Monitoramento Profissional (Loguru) ---
+logger.remove() # Remove o handler padrão
+logger.add(sys.stderr, colorize=True, format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{message}</cyan>", level="DEBUG")
+logger.add("erros_robo.log", rotation="10 MB", retention="5 days", level="DEBUG", 
+           format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
+# ----------------------------------------------------------
+
+import logging
+# Suprime logs verbosos de bibliotecas internas
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
+
+bot = Bot(token=TOKEN)
+dp = Dispatcher()
+
+# --- Monitoramento de Erros via Telegram ---
+@dp.errors()
+async def global_error_handler(event: types.ErrorEvent):
+    erro_completo = "".join(traceback.format_exception(type(event.exception), event.exception, event.exception.__traceback__))
+    logger.error(f"O robô quebrou: {erro_completo}")
+    
+    import html
+    escaped_error = html.escape(erro_completo[:3800])
+    msg = f"🚨 <b>CRITICAL BUG DETECTED:</b>\n<pre><code class=\"language-python\">{escaped_error}</code></pre>"
+    if event.update.callback_query:
+        await event.update.callback_query.message.answer(msg, parse_mode="HTML")
+    elif event.update.message:
+        await event.update.message.answer(msg, parse_mode="HTML")
+# -------------------------------------------
+
+import copy
+
+DEFAULT_RESUME = """
+Diego Santos | Especialista Digital Full-Stack
+
+🎯 Áreas de Atuação:
+- Gestão de Tráfego Pago: Meta Ads (Facebook/Instagram), Google Ads, TikTok Ads, lojistas, infoprodutos e lançamentos digitais.
+- Edição de Vídeo & Motion: Premiere Pro, CapCut Pro, After Effects. Especialista em retenção e viralização (524k+ views orgânicos).
+- Criação de Conteúdo / Social Media: Reels, TikTok, YouTube Shorts, copy para posts e campanhas.
+- Automação com IA e Python: scripts de automação, bots do Telegram, pipelines de vídeo na nuvem, integrações com APIs de IA (Groq, OpenAI).
+- Desenvolvimento Web: HTML, CSS, JavaScript, sites de portfólio, landing pages de alta conversão.
+
+💼 Cases e Resultados:
+- 524.000+ views orgânicos em um único Reels (Instagram).
+- 56.600+ views no TikTok em nicho Geek/Anime.
+- 370 vídeos publicados no YouTube com identidade visual consistente.
+- Pipeline automatizada de corte e montagem de vídeos com Python.
+- Desenvolvimento de bot inteligente de captura de vagas com IA (Groq) e Telegram.
+
+🛠️ Ferramentas: Meta Business Suite, Google Ads Manager, Premiere Pro, CapCut, After Effects, Python, Playwright, GitHub, Render, n8n.
+"""
+
+# Grupos de plataformas por tipo
+FREELANCE_PLATFORMS = ["workana"]
+EMPREGO_PLATFORMS = ["jsearch", "jooble", "remotar", "github_vagas", "indeed", "linkedin", "glassdoor", "infojobs", "gupy", "catho", "vagas_com", "programathor", "coodesh", "geekhunter"]
+
+DEFAULT_SETTINGS = {
+    "level": "Todos",
+    "location": "Brasil (Remoto)",
+    "contract": "Todos", # Todos, PJ, CLT, Freelancer
+    "education": "Todos", # Todos, Sem Formação
+    "platforms": {
+        "jsearch": True,
+        "jooble": True,
+        "workana": True,
+        "remotar": True,
+        "novenove": False,
+        "github_vagas": True,
+        "indeed": True,
+        "linkedin": True,
+        "glassdoor": True,
+        "infojobs": True,
+        "gupy": True,
+        "catho": True,
+        "vagas_com": True,
+        "programathor": True,
+        "coodesh": True,
+        "geekhunter": True,
+        "gmail": False
+    },
+    "ai_filter": True,
+    "escudo_ptbr": True
+}
+
+user_settings_db = {}
+
+def get_user_settings(chat_id):
+    chat_id = str(chat_id)
+    if chat_id not in user_settings_db:
+        user_settings_db[chat_id] = copy.deepcopy(DEFAULT_SETTINGS)
+    return user_settings_db[chat_id]
+
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    await show_main_menu(message)
+
+@dp.message(Command("logs"))
+async def cmd_logs(message: types.Message):
+    if not os.path.exists("erros_robo.log"):
+        await message.answer("Nenhum log de erro encontrado.")
+        return
+    
+    def read_log_tail():
+        with open("erros_robo.log", "r", encoding="utf-8") as f:
+            # Lemos o arquivo todo e pegamos os últimos 3500 caracteres (limite do Telegram)
+            lines = f.readlines()
+            tail = "".join(lines[-50:])
+            if len(tail) > 3500:
+                tail = "..." + tail[-3500:]
+            return tail
+            
+    tail = await asyncio.to_thread(read_log_tail)
+            
+    await message.answer(f"📜 *Últimos Logs (erros_robo.log):*\n\n```log\n{tail}\n```", parse_mode="Markdown")
+
+@dp.callback_query(F.data == "main_menu")
+async def callback_main_menu(callback: CallbackQuery):
+    await callback.answer()
+    markup = get_main_menu_markup()
+    await callback.message.edit_text("🤖 *Sniper Bot Nativo 100% Operante*\n\nO que você deseja fazer?", reply_markup=markup, parse_mode="Markdown")
+
+async def show_main_menu(message: types.Message):
+    markup = get_main_menu_markup()
+    await message.answer("🤖 *Sniper Bot Nativo 100% Operante*\n\nO que você deseja fazer?", reply_markup=markup, parse_mode="Markdown")
+
+def get_main_menu_markup():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🎯 Caçar Vagas", callback_data="hunt_menu")],
+        [InlineKeyboardButton(text="🛠 Configurações", callback_data="settings_menu")]
+    ])
+
+# ----------------- CONFIGURAÇÕES -----------------
+@dp.callback_query(F.data == "settings_menu")
+async def settings_menu(callback: CallbackQuery):
+    await callback.answer()
+    chat_id = callback.message.chat.id
+    await callback.message.edit_text("⚙️ *Configurações do Robô*", reply_markup=get_settings_markup(chat_id), parse_mode="Markdown")
+
+def get_settings_markup(chat_id):
+    settings = get_user_settings(chat_id)
+    p = settings["platforms"]
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"📍 Local: {settings['location']} (Mudar)", callback_data="change_location")],
+        [InlineKeyboardButton(text=f"Nível: {settings['level']} (Mudar)", callback_data="change_level")],
+        [InlineKeyboardButton(text=f"Contrato: {settings['contract']} (Mudar)", callback_data="change_contract")],
+        [InlineKeyboardButton(text=f"Formação: {settings['education']} (Mudar)", callback_data="change_education")],
+        # --- GRUPOS DE PLATAFORMAS ---
+        [InlineKeyboardButton(text="── 🚀 PLATAFORMAS ──", callback_data="noop")],
+        [InlineKeyboardButton(text=f"🚀 Freelance (Workana): {'✅ ON' if p.get('workana') else '❌ OFF'}", callback_data="toggle_group_freelance")],
+        [InlineKeyboardButton(text=f"🌐 Globais (LinkedIn, Indeed): {'✅ ON' if any([p.get('linkedin'), p.get('indeed'), p.get('glassdoor')]) else '❌ OFF'}", callback_data="toggle_group_globais")],
+        [InlineKeyboardButton(text=f"🇧🇷 Nacionais (Gupy, Catho...): {'✅ ON' if any([p.get('gupy'), p.get('catho'), p.get('infojobs'), p.get('vagas_com')]) else '❌ OFF'}", callback_data="toggle_group_nacionais")],
+        [InlineKeyboardButton(text=f"💻 Foco em TI (Coodesh, GitHub): {'✅ ON' if any([p.get('coodesh'), p.get('geekhunter'), p.get('programathor'), p.get('github_vagas')]) else '❌ OFF'}", callback_data="toggle_group_ti")],
+        [InlineKeyboardButton(text=f"🏡 Remotos (Remotar, Jooble): {'✅ ON' if any([p.get('remotar'), p.get('jooble'), p.get('jsearch')]) else '❌ OFF'}", callback_data="toggle_group_remotos")],
+        # --- OUTROS ---
+        [InlineKeyboardButton(text=f"📧 Gmail Alertas: {'✅ ON' if p['gmail'] else '❌ OFF'}", callback_data="toggle_gmail")],
+        [InlineKeyboardButton(text=f"🛡️ Escudo PT-BR: {'✅ ON' if settings.get('escudo_ptbr', True) else '❌ OFF'}", callback_data="toggle_escudo_ptbr")],
+        [InlineKeyboardButton(text="🔙 Voltar ao Início", callback_data="main_menu")]
+    ])
+
+@dp.callback_query(F.data == "change_level")
+async def change_level(callback: CallbackQuery):
+    await callback.answer()
+    chat_id = callback.message.chat.id
+    settings = get_user_settings(chat_id)
+    levels = ["Todos", "Júnior", "Pleno", "Sênior"]
+    idx = levels.index(settings["level"])
+    settings["level"] = levels[(idx + 1) % len(levels)]
+    await callback.message.edit_reply_markup(reply_markup=get_settings_markup(chat_id))
+
+@dp.callback_query(F.data == "change_location")
+async def change_location(callback: CallbackQuery):
+    await callback.answer()
+    chat_id = callback.message.chat.id
+    settings = get_user_settings(chat_id)
+    locations = ["Brasil (Remoto)", "Londrina/PR", "Assaí/PR"]
+    idx = locations.index(settings["location"])
+    settings["location"] = locations[(idx + 1) % len(locations)]
+    await callback.message.edit_reply_markup(reply_markup=get_settings_markup(chat_id))
+
+@dp.callback_query(F.data == "change_contract")
+async def change_contract(callback: CallbackQuery):
+    await callback.answer()
+    chat_id = callback.message.chat.id
+    settings = get_user_settings(chat_id)
+    contracts = ["Todos", "PJ", "CLT", "Freelancer"]
+    idx = contracts.index(settings["contract"])
+    settings["contract"] = contracts[(idx + 1) % len(contracts)]
+    await callback.message.edit_reply_markup(reply_markup=get_settings_markup(chat_id))
+
+@dp.callback_query(F.data == "change_education")
+async def change_education(callback: CallbackQuery):
+    await callback.answer()
+    chat_id = callback.message.chat.id
+    settings = get_user_settings(chat_id)
+    educations = ["Todos", "Sem Formação"]
+    idx = educations.index(settings["education"])
+    settings["education"] = educations[(idx + 1) % len(educations)]
+    await callback.message.edit_reply_markup(reply_markup=get_settings_markup(chat_id))
+
+@dp.callback_query(F.data == "noop")
+async def noop(callback: CallbackQuery):
+    """Botão de cabeçalho de seção - não faz nada."""
+    await callback.answer()
+
+@dp.callback_query(F.data.startswith("toggle_group_"))
+async def toggle_group(callback: CallbackQuery):
+    await callback.answer()
+    chat_id = callback.message.chat.id
+    settings = get_user_settings(chat_id)
+    group_name = callback.data.replace("toggle_group_", "")
+    
+    groups = {
+        "freelance": ["workana"],
+        "globais": ["linkedin", "indeed", "glassdoor"],
+        "nacionais": ["gupy", "catho", "infojobs", "vagas_com"],
+        "ti": ["coodesh", "geekhunter", "programathor", "github_vagas"],
+        "remotos": ["remotar", "jooble", "jsearch"]
+    }
+    
+    plats = groups.get(group_name, [])
+    if not plats: return
+    
+    # Se algum estiver ON, desliga todos. Se todos estiverem OFF, liga todos.
+    is_any_on = any(settings["platforms"].get(p, False) for p in plats)
+    new_state = not is_any_on
+    
+    for p in plats:
+        if p in settings["platforms"]:
+            settings["platforms"][p] = new_state
+            
+    await callback.message.edit_reply_markup(reply_markup=get_settings_markup(chat_id))
+
+@dp.callback_query(F.data == "noop_applied")
+async def handle_noop_applied(callback: CallbackQuery):
+    await callback.answer()
+
+@dp.callback_query(F.data == "toggle_escudo_ptbr")
+async def toggle_escudo_ptbr(callback: CallbackQuery):
+    await callback.answer()
+    chat_id = callback.message.chat.id
+    settings = get_user_settings(chat_id)
+    settings["escudo_ptbr"] = not settings.get("escudo_ptbr", True)
+    await callback.message.edit_reply_markup(reply_markup=get_settings_markup(chat_id))
+
+@dp.callback_query(F.data.startswith("toggle_"))
+async def toggle_platform(callback: CallbackQuery):
+    # Mantém compatibilidade com outros toggles como toggle_gmail
+    if callback.data.startswith("toggle_group_"): return
+
+    await callback.answer()
+    chat_id = callback.message.chat.id
+    settings = get_user_settings(chat_id)
+    plat = callback.data.replace("toggle_", "")
+    if plat in settings["platforms"]:
+        settings["platforms"][plat] = not settings["platforms"][plat]
+    await callback.message.edit_reply_markup(reply_markup=get_settings_markup(chat_id))
+
+# ----------------- CAÇAR VAGAS (MODO) -----------------
+@dp.callback_query(F.data == "hunt_menu")
+async def hunt_menu(callback: CallbackQuery):
+    await callback.answer()
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🚀 Modo Freelance", callback_data="modo_freelance")],
+        [InlineKeyboardButton(text="💼 Modo Emprego", callback_data="modo_emprego")],
+        [InlineKeyboardButton(text="🌐 Modo Ambos", callback_data="modo_ambos")],
+        [InlineKeyboardButton(text="🔙 Voltar", callback_data="main_menu")]
+    ])
+    await callback.message.edit_text(
+        "🎯 *Onde você quer buscar vagas?*\n\n"
+        "🚀 *Freelance* — Workana e 99Freelas (projetos e propostas)\n"
+        "💼 *Emprego* — LinkedIn, Indeed, Glassdoor e mais\n"
+        "🌐 *Ambos* — Todas as plataformas ativas",
+        reply_markup=markup, parse_mode="Markdown"
+    )
+
+@dp.callback_query(F.data.startswith("modo_"))
+async def select_mode(callback: CallbackQuery):
+    await callback.answer()
+    chat_id = callback.message.chat.id
+    settings = get_user_settings(chat_id)
+    modo = callback.data.split("_")[1]  # freelance | emprego | ambos
+
+    # Ativa/desativa plataformas conforme o modo
+    if modo == "freelance":
+        for p in FREELANCE_PLATFORMS: settings["platforms"][p] = True
+        for p in EMPREGO_PLATFORMS: settings["platforms"][p] = False
+    elif modo == "emprego":
+        for p in FREELANCE_PLATFORMS: settings["platforms"][p] = False
+        for p in EMPREGO_PLATFORMS: settings["platforms"][p] = True
+    else:  # ambos
+        for p in FREELANCE_PLATFORMS + EMPREGO_PLATFORMS: settings["platforms"][p] = True
+
+    # Vai para o menu de nichos
+    menus_markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🧠 Especialista em IA", callback_data="nicho_ai")],
+        [InlineKeyboardButton(text="💻 Desenvolvimento", callback_data="nicho_dev")],
+        [InlineKeyboardButton(text="📊 Dados & RPA", callback_data="nicho_dados")],
+        [InlineKeyboardButton(text="📈 Growth & Mkt", callback_data="nicho_mkt")],
+        [InlineKeyboardButton(text="🎬 Audiovisual & Criação", callback_data="nicho_audio")],
+        [InlineKeyboardButton(text="🏢 Base / Apoio Adm", callback_data="nicho_base")],
+        [InlineKeyboardButton(text="🎯 Júnior", callback_data="nicho_junior")],
+        [InlineKeyboardButton(text="🚀 Pleno", callback_data="nicho_pleno")],
+        [InlineKeyboardButton(text="🔙 Voltar ao Modo", callback_data="hunt_menu")]
+    ])
+    modo_labels = {"freelance": "🚀 Freelance", "emprego": "💼 Emprego", "ambos": "🌐 Ambos"}
+    await callback.message.edit_text(
+        f"*Modo: {modo_labels[modo]}*\n\n🎯 Selecione o Nicho Estratégico:",
+        reply_markup=menus_markup, parse_mode="Markdown"
+    )
+
+@dp.callback_query(F.data.startswith("nicho_"))
+async def show_niche_jobs(callback: CallbackQuery):
+    await callback.answer()
+    nicho = callback.data.split("_")[1]
+    
+    menus = {
+        "ai": [
+            "Especialista em IA",
+            "Engenheiro de IA",
+            "Desenvolvedor de Agentes IA",
+            "Prompt Engineer",
+            "Machine Learning Engineer",
+            "Cientista de Dados"
+        ],
+        "dev": [
+            "Desenvolvedor Python",
+            "Desenvolvedor Backend",
+            "Desenvolvedor Node",
+            "Desenvolvedor React",
+            "Desenvolvedor Fullstack",
+            "Desenvolvedor Django",
+            "Desenvolvedor FastAPI"
+        ],
+        "dados": [
+            "Analista de Power BI",
+            "Desenvolvedor RPA",
+            "Analista de Dados",
+            "Engenheiro de Dados",
+            "Analista de Analytics",
+            "Analista SQL"
+        ],
+        "mkt": [
+            "Gestor de Tráfego",
+            "Growth Hacker",
+            "Analista de Marketing Digital",
+            "SDR",
+            "Copywriter",
+            "Especialista em SEO",
+            "Analista de CRM"
+        ],
+        "audio": [
+            "Editor de Vídeo",
+            "Video Maker",
+            "Social Media",
+            "Designer Gráfico",
+            "UX Designer"
+        ],
+        "base": [
+            "Assistente Administrativo",
+            "Recepcionista",
+            "Suporte Técnico N1",
+            "Assistente de Faturamento",
+            "Assistente de Logística",
+            "Assistente Financeiro",
+            "Telemarketing",
+            "Analista de RH"
+        ],
+        "junior": [
+            "Desenvolvedor Junior Python",
+            "Desenvolvedor Junior React",
+            "Desenvolvedor Junior Fullstack",
+            "Analista de Dados Junior",
+            "Analista de Marketing Junior"
+        ],
+        "pleno": [
+            "Desenvolvedor Pleno Python",
+            "Desenvolvedor Pleno React",
+            "Desenvolvedor Pleno Fullstack",
+            "Analista de Dados Pleno",
+            "Gestor de Trafego Pleno"
+        ]
+    }
+    
+    profs = menus.get(nicho, [])
+    buttons = [[InlineKeyboardButton(text=p, callback_data=f"hunt_{p}")] for p in profs]
+    buttons.append([InlineKeyboardButton(text="🔙 Voltar aos Nichos", callback_data="hunt_menu")])
+    
+    markup = InlineKeyboardMarkup(inline_keyboard=buttons)
+    await callback.message.edit_text("🎯 *Selecione a Tecnologia/Profissão:*", reply_markup=markup, parse_mode="Markdown")
+
+# ----------------- PROCESSO DE BUSCA -----------------
+@dp.callback_query(F.data.startswith("auto_apply_"))
+async def handle_auto_apply_callback(callback: CallbackQuery):
+    await callback.answer("Candidatura por e-mail agendada com sucesso!", show_alert=True)
+
+@dp.callback_query(F.data == "mark_applied_btn")
+async def handle_mark_applied(callback: CallbackQuery):
+    """Marca a vaga como candidatada e atualiza o botão."""
+    link = None
+    if callback.message.reply_markup:
+        for row in callback.message.reply_markup.inline_keyboard:
+            for btn in row:
+                if btn.url:
+                    link = btn.url
+                    break
+            if link: break
+    
+    if not link:
+        await callback.answer("❌ Erro: Link da vaga não encontrado.", show_alert=True)
+        return
+    await asyncio.to_thread(mark_applied, link)
+    await callback.answer("✅ Marcado como candidatado!", show_alert=False)
+    # Atualiza os botões da mensagem para mostrar que já candidatou
+    try:
+        old_markup = callback.message.reply_markup
+        new_rows = []
+        for row in old_markup.inline_keyboard:
+            new_row = []
+            for btn in row:
+                if btn.callback_data and btn.callback_data == "mark_applied_btn":
+                    # Substitui botão por indicador visual
+                    new_row.append(InlineKeyboardButton(text="✅ Já me Candidatei", callback_data="noop_applied"))
+                else:
+                    new_row.append(btn)
+            new_rows.append(new_row)
+        await callback.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=new_rows))
+    except Exception:
+        pass  # Se falhar ao editar, não quebra
+
+@dp.callback_query(F.data.startswith("hunt_"), F.data != "hunt_menu")
+async def process_hunt(callback: CallbackQuery):
+    chat_id = callback.message.chat.id
+    settings = get_user_settings(chat_id)
+    active_plats = [k for k, v in settings["platforms"].items() if v]
+    if not active_plats:
+        try:
+            await callback.answer("Ative pelo menos uma plataforma em Configurações!", show_alert=True)
+        except Exception:
+            await callback.message.answer("Ative pelo menos uma plataforma em Configurações!")
+        return
+        
+    await callback.answer()
+    keyword = callback.data.split("_", 1)[1]
+    await _do_hunt(keyword, callback.message, callback=callback)
+
+import unicodedata
+import re
+
+def normalize_str(s):
+    if not s: return ""
+    s = unicodedata.normalize('NFD', str(s))
+    return s.encode('ascii', 'ignore').decode('utf-8').lower()
+
+global_title_blacklist = [
+    # Acadêmico / Ensino
+    "professor", "professora", "docente", "tutor", "tutoria", "instrutor", "instrutora", "palestrante", 
+    "academic", "academico", "lecturer", "lecionar", "ensinar", "aulas",
+    # Jurídico / Legal
+    "advogado", "advogada", "direito", "juridico", "paralegal", "promotor de justica",
+    # Saúde / Médico
+    "medico", "medica", "enfermeiro", "enfermeira", "enfermagem", "dentista", "farmaceutico", 
+    "fisioterapeuta", "nutricionista", "veterinario", "psicologo", "psicologa", "psiquiatra", "biomedico",
+    # Trabalho Braçal / Manutenção Física / Limpeza (geral)
+    "faxineiro", "faxineira", "diarista", "domestica", "passadeira", "cozinheiro", "cozinheira", 
+    "garcom", "garconete", "copa", "servente", "pedreiro", "pintor", "carpinteiro", "frentista", 
+    "mecanico", "lavador", "ajudante de obras", "servicos gerais",
+    # Outros
+    "voluntario", "voluntary"
+]
+
+blacklist = {
+    # --- IA / Inteligência Artificial ---
+    "especialista em ia": ["vendas", "comercial", "atendimento", "conteudo", "social media", "criacao", "redator", "copywriter", "marketing", "video", "imagem"],
+    "engenheiro de ia": ["vendas", "comercial", "atendimento", "conteudo", "marketing"],
+    "desenvolvedor de agentes ia": ["vendas", "comercial", "conteudo", "social media"],
+    "prompt engineer": ["vendas", "comercial", "atendimento", "telemarketing"],
+    "machine learning engineer": ["vendas", "comercial", "atendimento", "suporte", "helpdesk"],
+    "cientista de dados": ["suporte", "infraestrutura", "redes", "helpdesk", "service desk", "dba", "entrada de dados", "digitador"],
+    
+    # --- Desenvolvimento de Software ---
+    "desenvolvedor python": ["professor", "tutor", "instrutor", "curso", "vendas", "comercial"],
+    "desenvolvedor backend": ["frontend", "front-end", "designer", "design", "vendas"],
+    "desenvolvedor node": ["python", "java", "c#", "php", "ruby"],
+    "desenvolvedor react": ["backend", "back-end", "database", "dba"],
+    "desenvolvedor fullstack": ["wordpress", "wix", "shopify", "design", "designer"],
+    "desenvolvedor django": ["frontend", "front-end", "node", "javascript", "react"],
+    "desenvolvedor fastapi": ["frontend", "front-end", "node", "javascript", "react"],
+    
+    # --- Dados & RPA ---
+    "analista de power bi": ["suporte", "helpdesk", "telemarketing", "vendas", "comercial"],
+    "desenvolvedor rpa": ["vendas", "comercial", "atendimento", "suporte", "helpdesk"],
+    "analista de dados": ["suporte", "infraestrutura", "redes", "helpdesk", "service desk", "dba", "entrada de dados", "digitador"],
+    "engenheiro de dados": ["suporte", "infraestrutura", "redes", "helpdesk", "service desk", "dba", "entrada de dados", "digitador"],
+    "analista de analytics": ["suporte", "helpdesk", "vendas", "comercial"],
+    "analista sql": ["suporte", "helpdesk", "telemarketing", "vendas", "comercial"],
+    
+    # --- Growth & Marketing ---
+    "gestor de trafego": ["aereo", "logistica", "transporte", "rodoviario", "carga", "frota", "veiculos", "patio", "controlador"],
+    "growth hacker": ["suporte", "helpdesk", "vendas", "comercial"],
+    "analista de marketing digital": ["designer", "design", "vendas", "sdr"],
+    "sdr": ["loja", "balcao", "caixa", "repositor", "estoque", "limpeza", "farmacia", "supermercado", "promotor", "panfleteiro", "corretor"],
+    "copywriter": ["designer", "design", "video", "editor"],
+    "especialista em seo": ["designer", "design", "video", "editor", "programador"],
+    "analista de crm": ["designer", "design", "video", "editor"],
+    
+    # --- Audiovisual & Criativo ---
+    "editor de video": ["redacao", "texto", "copywriter", "marketing"],
+    "video maker": ["redacao", "texto", "copywriter", "marketing"],
+    "social media": ["programador", "desenvolvedor", "dba"],
+    "designer grafico": ["programador", "desenvolvedor", "video", "editor"],
+    "ux designer": ["programador", "desenvolvedor", "video", "editor"],
+    
+    # --- Base / Apoio Administrativo ---
+    "assistente administrativo": ["producao", "limpeza", "carga", "descarga", "pesado", "operario", "servente", "cozinha", "estoque", "repositor", "caixa", "atendente", "vendas"],
+    "recepcionista": ["limpeza", "zelador", "carga", "descarga", "vigilante armado", "seguranca armada"],
+    "suporte tecnico n1": ["eletricista", "mecanico", "manutencao predial", "refrigeracao", "ar condicionado", "telemarketing", "vendas"],
+    "assistente de faturamento": ["limpeza", "carga", "descarga", "vendas"],
+    "assistente de logistica": ["motorista", "carregador", "limpeza", "carga", "descarga"],
+    "assistente financeiro": ["limpeza", "carga", "descarga", "vendas"],
+    "telemarketing": ["limpeza", "carga", "descarga", "motorista"],
+    "analista de rh": ["direito", "pedagogia", "psicologia", "enfermagem", "limpeza"],
+    
+    # --- Júnior ---
+    "desenvolvedor junior python": ["direito", "pedagogia", "psicologia", "enfermagem", "medicina", "nutricao", "marketing", "vendas", "sdr", "bdr", "designer", "design", "rh", "recepcao", "portaria", "limpeza", "senior", "sr", "pleno"],
+    "desenvolvedor junior react": ["direito", "pedagogia", "psicologia", "enfermagem", "medicina", "nutricao", "marketing", "vendas", "sdr", "bdr", "designer", "design", "rh", "recepcao", "portaria", "limpeza", "senior", "sr", "pleno"],
+    "desenvolvedor junior fullstack": ["direito", "pedagogia", "psicologia", "enfermagem", "medicina", "nutricao", "marketing", "vendas", "sdr", "bdr", "designer", "design", "rh", "recepcao", "portaria", "limpeza", "senior", "sr", "pleno"],
+    "analista de dados junior": ["direito", "pedagogia", "psicologia", "enfermagem", "medicina", "nutricao", "marketing", "vendas", "sdr", "bdr", "designer", "design", "rh", "recepcao", "portaria", "limpeza", "senior", "sr", "pleno"],
+    "analista de marketing junior": ["direito", "pedagogia", "psicologia", "enfermagem", "medicina", "nutricao", "sdr", "bdr", "designer", "design", "rh", "recepcao", "portaria", "limpeza", "senior", "sr", "pleno"],
+    
+    # --- Pleno ---
+    "desenvolvedor pleno python": ["junior", "jr", "estagio", "estagiario", "senior", "sr", "director", "diretor", "coordenador", "gerente"],
+    "desenvolvedor pleno react": ["junior", "jr", "estagio", "estagiario", "senior", "sr", "director", "diretor", "coordenador", "gerente"],
+    "desenvolvedor pleno fullstack": ["junior", "jr", "estagio", "estagiario", "senior", "sr", "director", "diretor", "coordenador", "gerente"],
+    "analista de dados pleno": ["junior", "jr", "estagio", "estagiario", "senior", "sr", "director", "diretor", "coordenador", "gerente"],
+    "gestor de trafego pleno": ["junior", "jr", "estagio", "estagiario", "senior", "sr", "director", "diretor", "coordenador", "gerente", "aereo", "logistica", "transporte"],
+
+    # --- OLD KEYS FOR BACKWARD COMPATIBILITY ---
+    "gestor de trafego / performance": ["aereo", "logistica", "transporte", "rodoviario", "carga", "frota", "veiculos", "patio", "controlador"],
+    "especialista em ia generativa": [
+        "mlops", "machine learning engineer", "redes neurais", "data scientist", "engenheiro de dados",
+        "rpa", "automacao", "uipath", "zapier", "n8n", "make.com",
+        "backend", "desenvolvedor", "dev", "programador", "software engineer",
+        "data engineer", "cloud", "devops", "kubernetes", "docker",
+        "suporte", "infraestrutura", "helpdesk", "sysadmin"
+    ],
+    "ai coder / ai agent developer": ["vendas", "comercial", "conteudo", "social media"],
+    "analista de dados / data scientist": ["suporte", "infraestrutura", "redes", "helpdesk", "service desk", "dba", "entrada de dados", "digitador"],
+    "python scraping & data engineering": ["professor", "tutor", "instrutor", "curso", "vendas", "comercial"],
+    "auxiliar administrativo": ["producao", "limpeza", "carga", "descarga", "pesado", "operario", "servente", "cozinha", "estoque", "repositor", "caixa", "atendente", "vendas"],
+    "recepcao / portaria": ["limpeza", "zelador", "carga", "descarga", "vigilante armado", "seguranca armada"],
+    "suporte tecnico n1 / service desk": ["eletricista", "mecanico", "manutencao predial", "refrigeracao", "ar condicionado", "telemarketing", "vendas"],
+    "desenvolvedor junior / estagiario": ["direito", "pedagogia", "psicologia", "enfermagem", "medicina", "nutricao", "marketing", "vendas", "sdr", "bdr", "designer", "design", "rh", "recepcao", "portaria", "limpeza"],
+    "sdr / vendas junior": ["loja", "balcao", "caixa", "repositor", "estoque", "limpeza", "farmacia", "supermercado", "promotor", "panfleteiro", "corretor"]
+}
+
+def match_exact_word(text, word):
+    pattern = rf'(?<![a-z0-9]){re.escape(word)}(?![a-z0-9])'
+    return bool(re.search(pattern, text))
+
+CO_OCCURRENCE_RULES = {
+    # --- IA / Inteligência Artificial ---
+    "especialista em ia": [
+        ["ia", "ai", "inteligencia artificial", "llm", "generativa", "chatgpt", "gemini", "claude", "copilot"],
+        ["especialista", "consultor", "analista", "gestor"]
+    ],
+    "engenheiro de ia": [
+        ["ia", "ai", "llm", "machine learning", "deep learning", "generativa"],
+        ["engenheiro", "desenvolvedor", "arquiteto"]
+    ],
+    "desenvolvedor de agentes ia": [
+        ["agente", "agent", "ia", "llm", "langchain", "autogen", "crewai", "openai"],
+        ["desenvolvedor", "engenheiro", "programador", "dev"]
+    ],
+    "prompt engineer": [
+        ["prompt", "prompting", "ia", "llm", "chatgpt", "gemini", "claude"],
+        ["engenheiro", "especialista", "analista"]
+    ],
+    "machine learning engineer": [
+        ["machine learning", "ml", "mlops", "deep learning", "tensorflow", "pytorch", "sklearn"],
+        ["engenheiro", "desenvolvedor", "cientista"]
+    ],
+    "cientista de dados": [
+        ["dados", "data", "machine learning", "estatistica", "python", "sklearn", "tensorflow"],
+        ["cientista", "analista", "especialista"]
+    ],
+
+    # --- Desenvolvimento de Software ---
+    "desenvolvedor python": [
+        ["python", "django", "fastapi", "flask", "pandas", "scrapy"],
+        ["desenvolvedor", "programador", "engenheiro", "dev", "backend", "fullstack"]
+    ],
+    "desenvolvedor backend": [
+        ["backend", "back-end", "api", "rest", "graphql", "servidor", "server"],
+        ["desenvolvedor", "programador", "engineer", "dev"]
+    ],
+    "desenvolvedor node": [
+        ["node", "nodejs", "express", "nestjs", "javascript", "typescript"],
+        ["desenvolvedor", "programador", "dev", "backend", "fullstack"]
+    ],
+    "desenvolvedor react": [
+        ["react", "reactjs", "nextjs", "typescript", "javascript", "frontend", "front-end"],
+        ["desenvolvedor", "programador", "dev"]
+    ],
+    "desenvolvedor fullstack": [
+        ["fullstack", "full stack", "full-stack", "frontend", "backend"],
+        ["desenvolvedor", "programador", "dev"]
+    ],
+    "desenvolvedor django": [
+        ["django", "python", "rest", "api"],
+        ["desenvolvedor", "programador", "dev", "backend"]
+    ],
+    "desenvolvedor fastapi": [
+        ["fastapi", "python", "api", "rest"],
+        ["desenvolvedor", "programador", "dev", "backend"]
+    ],
+
+    # --- Dados & RPA ---
+    "analista de power bi": [
+        ["power bi", "powerbi", "bi", "business intelligence", "dax", "tableau", "looker"],
+        ["analista", "especialista", "desenvolvedor", "consultor"]
+    ],
+    "desenvolvedor rpa": [
+        ["rpa", "automacao", "automation", "uipath", "power automate", "blue prism", "n8n", "make", "zapier"],
+        ["desenvolvedor", "analista", "engenheiro", "especialista"]
+    ],
+    "analista de dados": [
+        ["dados", "data", "sql", "python", "excel", "bi", "analytics", "tableau"],
+        ["analista", "cientista", "especialista"]
+    ],
+    "engenheiro de dados": [
+        ["dados", "data", "pipeline", "etl", "spark", "databricks", "airflow", "kafka", "dbt"],
+        ["engenheiro", "arquiteto", "especialista"]
+    ],
+    "analista de analytics": [
+        ["analytics", "google analytics", "ga4", "gtm", "dados", "metrica", "kpi", "looker", "tableau"],
+        ["analista", "especialista", "consultor"]
+    ],
+    "analista sql": [
+        ["sql", "mysql", "postgresql", "oracle", "banco de dados", "database", "tsql", "plsql"],
+        ["analista", "desenvolvedor", "dba", "administrador"]
+    ],
+
+    # --- Growth & Marketing ---
+    "gestor de trafego": [
+        ["trafego", "trafego pago", "ads", "facebook ads", "google ads", "meta ads", "performance"],
+        ["gestor", "manager", "analista", "especialista", "coordenador"]
+    ],
+    "growth hacker": [
+        ["growth", "crescimento", "aquisicao", "conversion", "funil", "funnel", "a/b", "teste"],
+        ["growth", "hacker", "analista", "especialista", "gerente"]
+    ],
+    "analista de marketing digital": [
+        ["marketing", "digital", "redes sociais", "social media", "campanha", "email marketing"],
+        ["analista", "especialista", "coordenador", "gerente"]
+    ],
+    "sdr": [
+        ["sdr", "sales development", "prospectar", "leads", "outbound", "inbound", "vendas"],
+        ["sdr", "representante", "vendedor", "sales", "comercial"]
+    ],
+    "copywriter": [
+        ["copy", "copywriting", "redacao", "texto", "conteudo", "content", "script", "roteiro"],
+        ["copywriter", "redator", "escritor", "writer", "especialista"]
+    ],
+    "especialista em seo": [
+        ["seo", "search engine", "otimizacao", "organico", "keyword", "palavra-chave", "rankeamento"],
+        ["especialista", "analista", "consultor", "gestor"]
+    ],
+    "analista de crm": [
+        ["crm", "hubspot", "salesforce", "rdstation", "automacao", "relacionamento", "cliente"],
+        ["analista", "especialista", "coordenador", "gerente"]
+    ],
+
+    # --- Audiovisual & Criativo ---
+    "editor de video": [
+        ["video", "edicao", "editing", "premiere", "capcut", "after effects", "davinci", "reels", "corte"],
+        ["editor", "motion", "produtor", "criativo"]
+    ],
+    "video maker": [
+        ["video", "producao", "filmagem", "gravacao", "roteiro", "reels", "tiktok", "youtube"],
+        ["video maker", "videomaker", "produtor", "criador"]
+    ],
+    "social media": [
+        ["social media", "redes sociais", "instagram", "tiktok", "facebook", "linkedin", "youtube", "conteudo"],
+        ["social media", "analista", "gestor", "especialista", "criador"]
+    ],
+    "designer grafico": [
+        ["design", "grafico", "graphic", "photoshop", "illustrator", "figma", "identidade visual", "brand"],
+        ["designer", "criativo", "especialista"]
+    ],
+    "ux designer": [
+        ["ux", "ui", "user experience", "user interface", "figma", "wireframe", "design"],
+        ["designer", "analista", "researcher", "especialista"]
+    ],
+
+    # --- Base / Apoio Administrativo ---
+    "assistente administrativo": [
+        ["administrativo", "administracao", "adm", "escritorio", "office", "backoffice"],
+        ["assistente", "auxiliar", "analista", "coordenador"]
+    ],
+    "recepcionista": [
+        ["recepcao", "atendimento", "secretaria", "front desk"],
+        ["recepcionista", "atendente", "secretaria", "assistente"]
+    ],
+    "suporte tecnico n1": [
+        ["suporte", "helpdesk", "service desk", "ti", "chamado", "ticket"],
+        ["suporte", "analista", "tecnico", "assistente"]
+    ],
+    "assistente de faturamento": [
+        ["faturamento", "billing", "nota fiscal", "lancamento", "contas"],
+        ["assistente", "auxiliar", "analista", "tecnico"]
+    ],
+    "assistente de logistica": [
+        ["logistica", "estoque", "expedicao", "armazem", "supply chain", "transporte"],
+        ["assistente", "auxiliar", "analista", "coordenador"]
+    ],
+    "assistente financeiro": [
+        ["financeiro", "contas", "conciliacao", "fluxo de caixa", "contabil"],
+        ["assistente", "auxiliar", "analista", "tecnico"]
+    ],
+    "telemarketing": [
+        ["telemarketing", "teleatendimento", "call center", "callcenter", "sac", "atendimento", "vendas"],
+        ["operador", "operadora", "agente", "assistente", "auxiliar", "atendente"]
+    ],
+    "analista de rh": [
+        ["rh", "recursos humanos", "recrutamento", "selecao", "dp", "folha", "treinamento"],
+        ["analista", "especialista", "assistente", "coordenador"]
+    ],
+
+    # --- Júnior ---
+    "desenvolvedor junior python": [
+        ["python", "django", "fastapi", "flask", "backend"],
+        ["junior", "jr", "estagio", "iniciante"]
+    ],
+    "desenvolvedor junior react": [
+        ["react", "reactjs", "nextjs", "javascript", "typescript"],
+        ["junior", "jr", "estagio", "iniciante"]
+    ],
+    "desenvolvedor junior fullstack": [
+        ["fullstack", "full stack", "frontend", "backend"],
+        ["junior", "jr", "estagio", "iniciante"]
+    ],
+    "analista de dados junior": [
+        ["dados", "data", "sql", "python", "excel", "bi", "analytics"],
+        ["junior", "jr", "estagio", "iniciante"]
+    ],
+    "analista de marketing junior": [
+        ["marketing", "digital", "redes sociais", "conteudo"],
+        ["junior", "jr", "estagio", "iniciante"]
+    ],
+
+    # --- Pleno ---
+    "desenvolvedor pleno python": [
+        ["python", "django", "fastapi", "flask", "backend"],
+        ["pleno", "pl", "mid", "middle"]
+    ],
+    "desenvolvedor pleno react": [
+        ["react", "nextjs", "javascript", "typescript"],
+        ["pleno", "pl", "mid", "middle"]
+    ],
+    "desenvolvedor pleno fullstack": [
+        ["fullstack", "full stack", "frontend", "backend"],
+        ["pleno", "pl", "mid", "middle"]
+    ],
+    "analista de dados pleno": [
+        ["dados", "data", "sql", "python", "bi", "analytics"],
+        ["pleno", "pl", "mid", "middle"]
+    ],
+    "gestor de trafego pleno": [
+        ["trafego pago", "ads", "facebook ads", "google ads", "meta ads", "performance"],
+        ["pleno", "pl", "mid", "gestor", "analista"]
+    ],
+
+    # --- FALLBACKS & OLD KEYS FOR COMPATIBILITY ---
+    "especialista em ia generativa": [
+        ["chatgpt", "midjourney", "ia", "ai", "inteligencia artificial", "llm",
+         "generativa", "copilot", "claude", "gemini", "deepseek", "genai"],
+        ["desenvolvedor", "desenvolvedora", "engenheiro", "engenheira",
+         "analista", "especialista", "designer", "editor", "editora", "gestor", "gestora", "criador", "criadora",
+         "copywriter", "redator", "redatora", "marketing", "video", "conteudo", "writer"]
+    ],
+    "ia generativa": [
+        ["chatgpt", "midjourney", "ia", "ai", "inteligencia artificial", "llm",
+         "generativa", "copilot", "claude", "gemini", "deepseek", "genai"],
+        ["desenvolvedor", "desenvolvedora", "engenheiro", "engenheira",
+         "analista", "especialista", "figma", "designer", "editor", "editora", "gestor", "gestora", "criador", "criadora"]
+    ],
+    "machine learning": [
+        ["machine learning", "ml", "mlops", "deep learning", "tensorflow",
+         "pytorch", "sklearn"],
+        ["desenvolvedor", "desenvolvedora", "engenheiro", "engenheira",
+         "analista", "scientist", "especialista"]
+    ]
+}
+
+def check_co_occurrence(text_norm, kw_norm):
+    if kw_norm in CO_OCCURRENCE_RULES:
+        groups = CO_OCCURRENCE_RULES[kw_norm]
+        for group in groups:
+            matched_group = False
+            for word in group:
+                if match_exact_word(text_norm, word):
+                    matched_group = True
+                    break
+            if not matched_group:
+                return False
+        return True
+    
+    # Generic fallback
+    words = [w for w in re.split(r'\W+', kw_norm) if len(w) > 2]
+    stopwords = {"de", "em", "com", "para", "por", "sem", "sob", "sobre", "the", "and", "with", "for"}
+    significant_words = [w for w in words if w not in stopwords]
+    
+    if not significant_words:
+        return match_exact_word(text_norm, kw_norm)
+        
+    for word in significant_words:
+        if not match_exact_word(text_norm, word):
+            return False
+    return True
+
+def is_job_relevant(job, keyword, settings):
+    title_norm = normalize_str(job.get('title', ''))
+    reqs_norm = normalize_str(job.get('requirements', ''))
+    full_text = title_norm + " " + reqs_norm
+    
+    kw_norm = normalize_str(keyword)
+    user_level = normalize_str(settings.get('level', 'Todos'))
+    user_location = normalize_str(settings.get('location', 'Todos'))
+    user_contract = normalize_str(settings.get('contract', 'Todos'))
+    
+    if 'banco de talentos' in title_norm or 'talent pool' in title_norm:
+        return False
+        
+    job_platform = normalize_str(job.get('platform', ''))
+    is_freelance_platform = any(p in job_platform for p in ['workana', '99freelas', 'freelancer', 'workana.com'])
+    
+    # Usuário solicitou remoção total de filtros para Workana (confiar 100% no scraper)
+    if is_freelance_platform:
+        return True
+        
+    # Filtro de Localização Estrito
+    job_loc = normalize_str(job.get('location', ''))
+    
+    # Plataformas de freelance são 100% remotas por natureza — isentar do filtro de localização
+    is_remote_term = any(r in full_text or r in job_loc for r in ['remoto', 'home office', 'remote', 'teletrabalho', 'anywhere', 'work from home'])
+    is_presential_term = any(p in full_text or p in job_loc for p in ['presencial', 'hibrido', 'hybrid', 'on-site', 'onsite', 'modelo hibrido'])
+
+    if 'remoto' in user_location:
+        # Plataformas freelance são remotas por definição — não aplicar filtro rígido
+        if is_freelance_platform:
+            pass  # deixa passar
+        # Rejeita se diz presencial/híbrido sem dizer remoto também (as vezes é "híbrido ou remoto")
+        elif is_presential_term and not is_remote_term:
+            return False
+            
+        # Se a vaga NÃO diz ser remota, E possui um local específico no campo location que não é "Brasil" (ex: "São Paulo, SP")
+        if not is_freelance_platform and not is_remote_term and len(job_loc) > 3 and 'brasil' not in job_loc and 'brazil' not in job_loc:
+            # Rejeita porque é uma vaga geograficamente alocada que não explicitou ser remota
+            return False
+            
+    elif 'londrina' in user_location or 'assai' in user_location:
+        valid_cities = ['londrina', 'assai', 'cambe', 'ibipora', 'rolandia', 'arapongas', 'maringa', 'apucarana', 'cornelio', 'parana', ' pr ', '- pr', '-pr']
+        
+        is_local = any(city in job_loc for city in valid_cities) or (not job_loc and any(city in full_text for city in valid_cities))
+        
+        if not (is_local or is_remote_term):
+            return False
+
+    if user_contract == 'clt':
+        if (match_exact_word(full_text, 'pj') or 'freelancer' in full_text or 'pessoa juridica' in full_text) and 'clt' not in full_text:
+            return False
+    elif user_contract == 'pj':
+        if ('clt' in full_text or 'carteira assinada' in full_text) and not match_exact_word(full_text, 'pj'):
+            return False
+
+    junior_terms = ['junior', 'jr', 'estagio', 'estagiario', 'trainee', 'aprendiz', 'assistente', 'auxiliar']
+    senior_terms = ['senior', 'sr', 'especialista', 'coordenador', 'gerente', 'diretor', 'tech lead', 'head', 'lead', 'executivo', 'executive', 'architect', 'arquiteto', 'vp', 'manager', 'gestor']
+    pleno_terms = ['pleno', 'pl']
+    
+    if user_level == 'junior':
+        if any(match_exact_word(title_norm, w) for w in senior_terms + pleno_terms):
+            return False
+    elif user_level == 'pleno':
+        if any(match_exact_word(title_norm, w) for w in junior_terms + senior_terms):
+            return False
+    elif user_level == 'senior':
+        if any(match_exact_word(title_norm, w) for w in junior_terms + pleno_terms):
+            return False
+
+    # 1. Global Title Blacklist check (excluding terms in user search keyword)
+    active_global_blacklist = [term for term in global_title_blacklist if term not in kw_norm]
+    if any(match_exact_word(title_norm, term) for term in active_global_blacklist):
+        return False
+        
+    # 2. Local Niche-specific Blacklist check
+    if kw_norm in blacklist:
+        if any(match_exact_word(title_norm, w) for w in blacklist[kw_norm]):
+            return False
+
+    return check_co_occurrence(full_text, kw_norm)
+
+async def _do_hunt(keyword: str, message: types.Message, callback: CallbackQuery = None):
+    chat_id = message.chat.id
+    settings = get_user_settings(chat_id)
+    active_plats = [k for k, v in settings["platforms"].items() if v]
+    if not active_plats:
+        if callback:
+            try:
+                await callback.answer("Ative pelo menos uma plataforma em Configurações!", show_alert=True)
+                return
+            except Exception:
+                pass
+        await message.answer("Ative pelo menos uma plataforma em Configurações!")
+        return
+        
+    plats_str = ', '.join([p.replace('_', ' ').title() for p in active_plats])
+    msg_text = f"⏳ *Iniciando os motores para: {keyword}*\n\nLocalização: {settings['location']}\nNível: {settings['level']}\nContrato: {settings['contract']}\nFormação: {settings['education']}\nPlataformas: {plats_str}..."
+    if callback:
+        try:
+            status_msg = await callback.message.edit_text(msg_text, parse_mode="Markdown")
+            if isinstance(status_msg, bool):
+                status_msg = callback.message
+        except Exception:
+            status_msg = callback.message
+    else:
+        status_msg = await message.answer(msg_text, parse_mode="Markdown")
+        
+    plat_status = {p: "⏳ Buscando..." for p in active_plats}
+    is_hunting = True
+    
+    async def status_updater():
+        while is_hunting:
+            status_text = f"⏳ *Monitor de Caçada: {keyword}*\n\n"
+            for p, stat in plat_status.items():
+                status_text += f"*{p.replace('_', ' ').title()}*: {stat}\n"
+            try:
+                await status_msg.edit_text(status_text, parse_mode="Markdown")
+            except Exception:
+                pass
+            await asyncio.sleep(4)
+        
+        # Final post-hunt update to the Telegram message after the while is_hunting loop terminates
+        status_text = f"⏳ *Monitor de Caçada: {keyword}*\n\n"
+        for p, stat in plat_status.items():
+            status_text += f"*{p.replace('_', ' ').title()}*: {stat}\n"
+        try:
+            await status_msg.edit_text(status_text, parse_mode="Markdown")
+        except Exception:
+            pass
+            
+    updater_task = asyncio.create_task(status_updater())
+    
+    search_mapping = {
+        # --- IA / Inteligência Artificial ---
+        "Especialista em IA": "Especialista IA",
+        "Engenheiro de IA": "Engenheiro IA",
+        "Desenvolvedor de Agentes IA": "AI Developer",
+        "Prompt Engineer": "Prompt Engineer",
+        "Machine Learning Engineer": "Machine Learning Engineer",
+        "Cientista de Dados": "Cientista de Dados",
+        
+        # --- Desenvolvimento de Software ---
+        "Desenvolvedor Python": "Desenvolvedor Python",
+        "Desenvolvedor Backend": "Desenvolvedor Backend",
+        "Desenvolvedor Node": "Desenvolvedor Node",
+        "Desenvolvedor React": "Desenvolvedor React",
+        "Desenvolvedor Fullstack": "Desenvolvedor Fullstack",
+        "Desenvolvedor Django": "Desenvolvedor Django",
+        "Desenvolvedor FastAPI": "Desenvolvedor FastAPI",
+        
+        # --- Dados & RPA ---
+        "Analista de Power BI": "Analista Power BI",
+        "Desenvolvedor RPA": "Desenvolvedor RPA",
+        "Analista de Dados": "Analista de Dados",
+        "Engenheiro de Dados": "Engenheiro de Dados",
+        "Analista de Analytics": "Analista Analytics",
+        "Analista SQL": "Analista SQL",
+        
+        # --- Growth & Marketing ---
+        "Gestor de Tráfego": "Gestor de Trafego",
+        "Growth Hacker": "Growth Hacker",
+        "Analista de Marketing Digital": "Analista Marketing Digital",
+        "SDR": "SDR",
+        "Copywriter": "Copywriter",
+        "Especialista em SEO": "Especialista SEO",
+        "Analista de CRM": "Analista CRM",
+        
+        # --- Audiovisual & Criativo ---
+        "Editor de Vídeo": "Editor de Video",
+        "Video Maker": "Video Maker",
+        "Social Media": "Social Media",
+        "Designer Gráfico": "Designer Grafico",
+        "UX Designer": "UX Designer",
+        
+        # --- Base / Apoio Administrativo ---
+        "Assistente Administrativo": "Assistente Administrativo",
+        "Recepcionista": "Recepcionista",
+        "Suporte Técnico N1": "Suporte Tecnico N1",
+        "Assistente de Faturamento": "Assistente de Faturamento",
+        "Assistente de Logística": "Assistente de Logistica",
+        "Assistente Financeiro": "Assistente Financeiro",
+        "Telemarketing": "Telemarketing",
+        "Analista de RH": "Analista RH",
+        
+        # --- Júnior ---
+        "Desenvolvedor Junior Python": "Desenvolvedor Junior Python",
+        "Desenvolvedor Junior React": "Desenvolvedor Junior React",
+        "Desenvolvedor Junior Fullstack": "Desenvolvedor Junior Fullstack",
+        "Analista de Dados Junior": "Analista de Dados Junior",
+        "Analista de Marketing Junior": "Analista Marketing Junior",
+        
+        # --- Pleno ---
+        "Desenvolvedor Pleno Python": "Desenvolvedor Pleno Python",
+        "Desenvolvedor Pleno React": "Desenvolvedor Pleno React",
+        "Desenvolvedor Pleno Fullstack": "Desenvolvedor Pleno Fullstack",
+        "Analista de Dados Pleno": "Analista de Dados Pleno",
+        "Gestor de Trafego Pleno": "Gestor de Trafego Pleno",
+
+        # --- OLD KEYS FOR BACKWARD COMPATIBILITY ---
+        "Especialista em IA Generativa": "IA Generativa",
+        "AI Coder / AI Agent Developer": "AI Developer",
+        "Engenheiro de Prompt / RAG Specialist": "Prompt Engineer",
+        "Consultor de IA": "Consultor IA",
+        "Engenheiro de Machine Learning / MLOps": "Machine Learning MLOps",
+        "Product Manager de IA / Conversational PO": "Product Manager IA",
+        "Python Scraping & Data Engineering": "Python Scraping",
+        "Integração de APIs & Serverless": "API Backend",
+        "Backend Python": "Python Backend",
+        "Desenvolvedor Frontend React": "Frontend React",
+        "Desenvolvedor Fullstack Node/React": "Fullstack React Node",
+        "Desenvolvedor FastAPI / Django (Backend)": "FastAPI Django",
+        "Engenheiro de Software Python": "Python Developer",
+        "Analista de BI / Analytics": "Analista BI",
+        "Automação RPA & Workflow": "RPA Automação",
+        "Analista de Dados / Data Scientist": "Analista de Dados",
+        "Engenheiro de Dados (Data Engineer)": "Engenheiro de Dados",
+        "Analytics Engineer": "Analytics Engineer",
+        "Growth Engineer / Product Growth": "Growth Engineer",
+        "Especialista Tracking & MarTech": "Web Analytics",
+        "Analista RevOps": "RevOps",
+        "SDR / BDR Técnico": "SDR",
+        "Gestor de Tráfego / Performance": "Tráfego Pago",
+        "Copywriter de Conversão": "Copywriter",
+        "Gestor de Inbound Marketing / CRM": "Inbound Marketing CRM",
+        "Analista de SEO & Tráfego Orgânico": "Analista SEO",
+        "Editor de Vídeo / Motion Designer": "Editor de Vídeo",
+        "Video Maker / Filmmaker": "Video Maker",
+        "Design e Social Media": "Social Media Designer",
+        "Designer UX/UI": "UI UX Designer",
+        "Editor de Vídeo para Redes Sociais": "Editor Reels TikTok",
+        "Designer Gráfico / Visual Designer": "Designer Gráfico",
+        "Recepção / Portaria": "Portaria Recepcionista",
+        "Assistente de Suporte Administrativo": "Assistente Administrativo",
+        "Suporte Técnico N1 / Service Desk": "Suporte TI Helpdesk",
+        "SDR Técnico": "SDR Técnico",
+        "Auxiliar Administrativo / faturamento": "Faturamento",
+        "Auxiliar de Operações / Logística": "Auxiliar Logística",
+        "Operador de Telemarketing / SAC": "Telemarketing SAC",
+        "Auxiliar de Logística / Estoque": "Auxiliar de Estoque",
+        "Assistente de DP / Recursos Humanos": "Assistente DP RH",
+        "Desenvolvedor Júnior / Estagiário": "Desenvolvedor Junior",
+        "Analista de Dados Jr": "Analista de Dados Junior",
+        "Assistente de Marketing": "Marketing Junior",
+        "Assistente de Growth": "Growth Junior",
+        "SDR / Vendas Junior": "SDR Junior",
+        "Editor de Vídeo Júnior": "Editor de Vídeo Junior",
+        "AI Coder Júnior": "AI Developer Junior",
+        "Engenheiro de Prompt Jr": "Prompt Engineer Junior",
+        "Estagiário de TI / Programação": "Estágio TI Programação",
+        "Desenvolvedor Frontend Júnior": "Frontend Junior",
+        "Estagiário de Dados / BI": "Estágio Dados BI",
+        "Designer Júnior": "Designer Junior"
+    }
+    
+    actual_level = settings.get("level", "Todos")
+    base_keyword = search_mapping.get(keyword, keyword)
+    
+    async def fetch_plat(plat):
+        logger.info(f"🚀 Iniciando scraper: {plat.upper()}")
+        try:
+            # Plataformas freelance não recebem o nível na string de busca para não zerar os resultados
+            is_freelance = plat in ['workana', '99freelas', 'freelancer']
+            plat_search_keyword = base_keyword
+            if actual_level != "Todos" and not is_freelance:
+                plat_search_keyword = f"{base_keyword} {actual_level}"
+                
+            module = importlib.import_module(f"scrapers.{plat}")
+            for tentativa in range(3):
+                try:
+                    if plat in ['jsearch', 'jooble', 'github_vagas', 'novenove', 'freelancer', 'indeed', 'linkedin', 'gmail', 'glassdoor', 'infojobs', 'gupy', 'vagas_com', 'programathor', 'coodesh', 'geekhunter']:
+                        res = await asyncio.to_thread(module.scrape, keyword=plat_search_keyword, level="Todos", country=settings["location"])
+                    else:
+                        res = await asyncio.to_thread(module.scrape, keyword=plat_search_keyword, level="Todos")
+                    if res:
+                        for job in res:
+                            job["level"] = actual_level
+                    plat_status[plat] = f"✅ {len(res)} vagas"
+                    logger.info(f"✅ Scraper {plat.upper()} finalizado. Vagas encontradas (brutas): {len(res)}")
+                    return res
+                except Exception as inner_e:
+                    logger.warning(f"⚠️ Instabilidade no scraper {plat.upper()} (Tentativa {tentativa+1}/3): {inner_e}")
+                    plat_status[plat] = f"⚠️ Retry {tentativa+1}/3"
+                    if tentativa < 2:
+                        await asyncio.sleep(2)
+            plat_status[plat] = "❌ Falhou"
+            return []
+        except Exception as e:
+            logger.exception(f"❌ Erro fatal ao carregar scraper {plat.upper()}: {e}")
+        plat_status[plat] = "❌ Falhou"
+        return []
+
+    results = await asyncio.gather(*(fetch_plat(p) for p in active_plats))
+    is_hunting = False
+    await asyncio.sleep(0.5)
+    raw_jobs = []
+    for r in results:
+        if r:
+            raw_jobs.extend(r)
+            
+    # ------ FILTRO SUPREMO LOCAL ------
+    unique_jobs = {}
+    for job in raw_jobs:
+        if "Sem vagas" in job.get('title', '') or "Não houve" in job.get('requirements', ''):
+            continue
+            
+        # Não filtrar por empresa confidencial: LinkedIn, GitHub etc usam nomes anônimos legítimos
+            
+        # Mantém o filtro de nível local estrito (mesmo que tenha sido enviado para o scraper, 
+        # a maioria das plataformas retorna lixo e precisamos barrar no filtro local)
+        filter_settings = settings.copy()
+        
+        if not is_job_relevant(job, keyword, filter_settings):
+            continue
+            
+        comp_norm = normalize_str(job.get('company', ''))
+        link_norm = job.get('link', '')
+        
+        # Usa o link como chave primária de deduplicação (ideal para freelancers com mesmo título)
+        # Se não tiver link, usa o fallback de título + empresa
+        k = link_norm if link_norm else f"{normalize_str(job.get('title', ''))}|{comp_norm}"
+        
+        if k not in unique_jobs:
+            unique_jobs[k] = job
+
+    all_jobs = list(unique_jobs.values())
+    
+    for job in all_jobs:
+        reqs_norm = normalize_str(job.get('requirements', ''))
+        alertas = []
+        if 'teste pratico' in reqs_norm or 'case tecnico' in reqs_norm:
+            alertas.append("⚠️ [TESTE PRÁTICO]")
+        if 'gupy' in reqs_norm or 'gupy.io' in job.get('link', ''):
+            alertas.append("🐢 [GUPY]")
+            
+        if alertas:
+            job['title'] = f"{' '.join(alertas)} {job.get('title', '')}"
+
+        if 'combinar' in str(job.get('budget', '')).lower() or not job.get('budget'):
+            match = re.search(r'r\$\s*\d{1,3}(?:\.\d{3})*(?:,\d{2})?|\b\d{1,3}k\b', reqs_norm)
+            if match:
+                job['budget'] = f"🤑 Oculto: {match.group(0).upper()}"
+
+        kw_norm = normalize_str(keyword)
+        kw_words = [w for w in re.split(r'\W+', kw_norm) if len(w) > 3]
+        count = sum(1 for w in kw_words if w in reqs_norm)
+        if count >= 3:
+            job['match_score'] = "🔥 Match Alto"
+        elif count >= 1:
+            job['match_score'] = "👍 Match Médio"
+        else:
+            job['match_score'] = "🧊 Match Frio"
+    # -------------------------------------
+    
+    if not all_jobs:
+        await message.answer("❌ Nenhuma vaga retornou das APIs.")
+        return
+    
+    escudo_enabled = settings.get("escudo_ptbr", True)
+    if escudo_enabled:
+        await message.answer(f"🛡️ *Escudo PT-BR Ativado!*\nLimpando vagas gringas antes do processamento final...", parse_mode="Markdown")
+        from langdetect import detect
+        
+        def is_brazilian_job(text):
+            try:
+                if len(text) < 20: return True
+                return detect(text) == 'pt'
+            except:
+                return True
+                
+        # Pré-filtro brutal: Se não for PT-BR E não for plataforma freelance, lixo.
+        vagas_br = []
+        for job in all_jobs:
+            plat_lower = job.get('platform', '').lower()
+            is_freela_plat = any(p in plat_lower for p in ['workana', '99freelas', 'freelancer'])
+            
+            # Passa direto se for freelance, ou se for PT-BR
+            if is_freela_plat or is_brazilian_job(job.get('requirements', '')):
+                vagas_br.append(job)
+                
+        if len(vagas_br) < len(all_jobs):
+            await message.answer(f"🗑️ *Limpeza concluída:* {len(all_jobs) - len(vagas_br)} vagas gringas foram deletadas!", parse_mode="Markdown")
+    else:
+        vagas_br = all_jobs
+        
+    # --- NOVO MODELO: Enviar TODAS as vagas que passaram no pré-filtro ---
+    premium_jobs = vagas_br
+    await message.answer(f"🚀 *{len(premium_jobs)} vagas encontradas!* Preparando listagem...", parse_mode="Markdown")
+
+    # Enviar todas as vagas diretamente, sem gerar propostas
+    premium_jobs = vagas_br
+    for job in premium_jobs:
+        job['ai_proposal'] = ''
+        
+    await asyncio.to_thread(insert_jobs, premium_jobs)
+    import auto_apply
+    
+    count = 0
+
+    async def send_with_retry(coro_fn, max_retries=3):
+        """Executa uma função de envio com retry automático em caso de queda de conexão."""
+        from aiohttp import ClientError
+        for attempt in range(max_retries):
+            try:
+                return await coro_fn()
+            except (ClientError, Exception) as e:
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt  # Backoff exponencial: 1s, 2s, 4s
+                    logger.warning(f"Falha de envio (tentativa {attempt+1}/{max_retries}): {e}. Aguardando {wait_time}s...")
+                    await asyncio.sleep(wait_time)
+                else:
+                    logger.error(f"Envio falhou após {max_retries} tentativas: {e}")
+                    raise
+
+    for job in premium_jobs:
+        # Pular vagas sem link válido
+        link = job.get('link', '')
+        if not link or not link.startswith('http'):
+            logger.warning(f"Vaga sem link válido ignorada: {job.get('title', 'N/A')}")
+            continue
+
+        # Verifica se já se candidatou
+        already_applied = await asyncio.to_thread(is_applied, link)
+        if already_applied:
+            apply_result = {}
+        else:
+            # Tenta Auto-Apply silenciosamente
+            apply_result = await asyncio.to_thread(auto_apply.auto_apply, job, str(chat_id))
+        
+        # Mostra salário apenas quando existe valor real detectado
+        badges = ""
+        if job.get('ai_salary_declared') and job.get('budget') and 'combinar' not in str(job.get('budget', '')).lower():
+            badges = f"\n💰 {safe_md(str(job.get('budget', '')))}"
+        if job.get('ai_has_benefits'):
+            badges += " | 🎁 Com Benefícios" if badges else "\n🎁 Com Benefícios"
+        
+        # Botões de ação
+        if already_applied:
+            buttons = [
+                [InlineKeyboardButton(text="✅ Já me Candidatei", callback_data="noop_applied")],
+                [InlineKeyboardButton(text="🔗 Ver Vaga Novamente", url=link)]
+            ]
+        else:
+            buttons = [
+                [InlineKeyboardButton(text="🎯 Aplicar para a Vaga", url=link)],
+                [InlineKeyboardButton(text="✋ Já me Candidatei", callback_data="mark_applied_btn")]
+            ]
+        
+        if apply_result.get("contact_email"):
+            buttons.append([InlineKeyboardButton(
+                text=f"📧 Enviar Currículo ({apply_result['contact_email'][:25]}...)", 
+                callback_data=f"auto_apply_{count}"
+            )])
+        
+        markup = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+        # Sanitizar campos para evitar que caracteres especiais do Markdown do Telegram causem falha silenciosa
+        def safe_md(val, default="Não informado."):
+            s = str(val) if val else default
+            return s.replace("_", "\\_").replace("*", "\\*").replace("[", "\\[").replace("`", "\\`")
+
+
+
+        req_preview = safe_md(job.get('requirements', ''))[:200].replace('\n', ' ') + "..." if job.get('requirements') else "Não informado."
+        text = (
+            f"💎 *{safe_md(job.get('title', 'Vaga'))}*\n"
+            f"🏢 Empresa: `{safe_md(job.get('company', 'N/A'))}`\n"
+            f"🌐 Fonte: `{safe_md(job.get('platform', 'N/A'))}`\n\n"
+            f"📝 *Resumo:* _{req_preview}_"
+        )
+        if badges.strip():
+            text += f"\n{badges}"
+        # O Telegram tem limite de 4096 caracteres. Se passar, cortamos.
+        if len(text) > 4000:
+            text = text[:4000] + "... [Cortado pelo limite do Telegram]"
+            
+        try:
+            sent_msg = await send_with_retry(lambda: message.answer(text, reply_markup=markup, parse_mode="Markdown"))
+            
+
+            count += 1
+            await asyncio.sleep(1.2)  # 1.2s entre mensagens para evitar rate limit do Telegram
+        except Exception as e:
+            logger.error(f"Erro Markdown ao enviar vaga '{job.get('title')}': {e}")
+            # Fallback: enviar sem formatação para não perder a vaga
+            try:
+                plain = f"💎 {job.get('title','Vaga')}\n🏢 {job.get('company','')}\n🌐 {job.get('platform','')}\n🔗 {link}"
+                await send_with_retry(lambda: message.answer(plain, reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🎯 Aplicar", url=link)]])))
+                count += 1
+                if count >= 10:
+                    break
+            except Exception as e2:
+                logger.error(f"Fallback também falhou: {e2}")
+            
+    if count > 0:
+         await message.answer("🎉 Listagem Finalizada! Para mais vagas, inicie outra caçada.")
+
+# ----------------- NLP: TEXTO LIVRE -----------------
+@dp.message(F.text)
+async def handle_free_text(message: types.Message):
+    if message.text.startswith("/"):
+        return
+        
+    await message.answer("🔍 *Processando seu pedido...*", parse_mode="Markdown")
+    
+    text_lower = message.text.lower()
+    
+    # Extrair localidade
+    if any(w in text_lower for w in ['londrina', 'parana', '/pr']):
+        location = 'Londrina/PR'
+    elif any(w in text_lower for w in ['assai', 'assaí']):
+        location = 'Assaí/PR'
+    else:
+        location = 'Brasil (Remoto)'
+    
+    # Extrair nivel
+    if any(w in text_lower for w in ['junior', 'júnior', 'estagio', 'estágio', 'iniciante', 'primeiro emprego']):
+        level = 'Júnior'
+    elif 'pleno' in text_lower:
+        level = 'Pleno'
+    elif any(w in text_lower for w in ['senior', 'sênior']):
+        level = 'Sênior'
+    else:
+        level = 'Todos'
+    
+    # Extrair contrato
+    if 'clt' in text_lower or 'carteira' in text_lower:
+        contract = 'CLT'
+    elif 'pj' in text_lower or 'pessoa juridica' in text_lower:
+        contract = 'PJ'
+    else:
+        contract = 'Todos'
+    
+    # Extrair educação
+    if any(w in text_lower for w in ['sem faculdade', 'sem diploma', 'sem formacao']):
+        education = 'Sem Formação'
+    else:
+        education = 'Todos'
+    
+    keyword = message.text.strip()[:50]
+    
+    chat_id = message.chat.id
+    settings = get_user_settings(chat_id)
+    
+    if location in ["Brasil (Remoto)", "Londrina/PR", "Assaí/PR"]:
+        settings["location"] = location
+    if level in ["Todos", "Júnior", "Pleno", "Sênior"]:
+        settings["level"] = level
+    if contract in ["Todos", "PJ", "CLT"]:
+        settings["contract"] = contract
+    if education in ["Todos", "Sem Formação"]:
+        settings["education"] = education
+        
+    await _do_hunt(keyword, message)
+
+@dp.message(F.document)
+async def handle_document(message: types.Message, bot: Bot):
+    if not message.document.file_name.lower().endswith('.pdf'):
+        await message.answer("❌ Por favor, envie o seu currículo em formato PDF.")
+        return
+        
+    msg_status = await message.answer("📄 *Lendo PDF...*", parse_mode="Markdown")
+    file = await bot.get_file(message.document.file_id)
+    user_id = message.chat.id
+    file_path = f"temp_curriculo_{user_id}.pdf"
+    await bot.download_file(file.file_path, file_path)
+    
+    try:
+        def extract_and_save(pdf_path, txt_path):
+            extracted_text = ""
+            with open(pdf_path, "rb") as f:
+                reader = PyPDF2.PdfReader(f)
+                for page in reader.pages:
+                    extracted_text += page.extract_text() or ""
+                    extracted_text += "\n"
+            with open(txt_path, "w", encoding="utf-8") as f:
+                f.write(extracted_text)
+            return extracted_text
+            
+        curriculo_txt_path = f"curriculo_{user_id}.txt"
+        text = await asyncio.to_thread(extract_and_save, file_path, curriculo_txt_path)
+            
+        await msg_status.edit_text("🧠 *Currículo Salvo!*\nAnalisando suas habilidades...", parse_mode="Markdown")
+        
+        # Extrair palavras-chave diretamente do texto do currículo (sem IA)
+        import re as _re
+        tech_keywords = [
+            "python", "react", "node", "django", "fastapi", "machine learning",
+            "data science", "power bi", "sql", "javascript", "typescript",
+            "ia generativa", "rpa", "automacao", "marketing", "trafego",
+            "seo", "growth", "backend", "fullstack", "frontend", "devops",
+            "cloud", "aws", "docker", "git", "flutter", "kotlin", "java"
+        ]
+        text_lower = text.lower()
+        found = [kw for kw in tech_keywords if kw in text_lower]
+        keywords = found[:3] if len(found) >= 3 else (found + ["Python", "Marketing", "Dados"])[:3]
+        keywords = [kw.title() for kw in keywords]
+        
+        buttons = [[InlineKeyboardButton(text=f"🔍 Buscar: {kw}", callback_data=f"hunt_{kw}")] for kw in keywords]
+        markup = InlineKeyboardMarkup(inline_keyboard=buttons)
+        
+        await msg_status.edit_text(
+            f"🎯 *Análise Concluída!*\n\nBaseado nas habilidades detectadas no seu PDF, clique abaixo para iniciar a busca:\n\n*Clique em um botão para disparar o robô:*",
+            reply_markup=markup,
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        await msg_status.edit_text(f"❌ Erro ao ler PDF: {e}")
+    finally:
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except Exception:
+                pass
+
+@dp.message()
+async def echo_message(message: types.Message):
+    if not message.text.startswith("/"):
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🔍 Procurar Vagas", callback_data="hunt_menu")]
+        ])
+        await message.answer("Para iniciar as buscas, clique no botão abaixo ou digite /start", reply_markup=markup)
+
+async def main():
+    print("Bot Nativo Ligado e Aguardando Comandos!")
+    try:
+        await bot.set_chat_menu_button()
+    except Exception as e:
+        print(f"Warning: Failed to set chat menu button on startup: {e}")
+    
+    while True:
+        try:
+            await dp.start_polling(bot)
+        except Exception as e:
+            print(f"Erro de conexão no Telegram: {e}")
+            print("Tentando reconectar em 5 segundos...")
+            import asyncio
+            await asyncio.sleep(5)
+
+if __name__ == "__main__":
+    asyncio.run(main())

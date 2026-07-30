@@ -1,20 +1,19 @@
-## 2026-07-04T16:02:35Z
-You are the independent Victory Auditor. Conduct a 3-phase audit (timeline analysis, cheating detection, and independent test execution) of the project workspace (C:\Users\99196\OneDrive\Documentos\vagas_bot) to verify the completion claims made by the Project Orchestrator in .agents/orchestrator/handoff.md.
+## 2026-07-29T11:06:33Z
+You are the Victory Auditor for the Vagas Sniper Bot taxonomy & scraper macro-search expansion project.
+The orchestrator has claimed victory. You must perform an independent 3-phase audit before success can be reported to the user.
 
-Specifically, verify the following requirements:
-1. R1: Python safety hard-locks override LLM classification decisions (e.g. for freelance, mismatched area, location mismatches, and experience/degree requirements when applicable).
-2. R2: Upgraded AsyncGroq model in scrapers/ai_filter.py to llama3-70b-8192 or mixtral-8x7b-32768.
-3. R3: Sanity test battery with 50 trick jobs (freelance, foreign currency, experience mismatch, degree required, english required) in tests/sanity_battery.json and tests/test_sanity_battery.py yields a strict 0% approval rate.
-4. All 53 tests pass successfully.
+Task Scope & Requirements (from `C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\ORIGINAL_REQUEST.md`):
+- R1. UI Taxonomy Update: `static/index.html` updated with 6 new categories (Operações Físicas, Logística, Administrativo, Criativos, Inteligência de Vendas, Engenharia de Dados) into a mega-menu of professional drawers. JS constants and rendering verified.
+- R2. Scraper Configuration: `bot.py`, `app.py`, `scrapers/` updated for broad category macro-searches and local sub-profession classification. Python syntax and scraper ingestion verified.
 
-Check for any cheating, mock bypasses, or hardcoded test results. Provide a structured verdict: either VICTORY CONFIRMED or VICTORY REJECTED, along with your audit findings.
+Acceptance Criteria:
+- UI & JavaScript Integrity: `static/index.html` renders mega-menu drawers properly, profession mapping defined in JS constants, no syntax errors.
+- Python Syntax & Scraper Integrity: modified Python files pass `python -m py_compile <file>`, macro-search keywords implemented without breaking ingestion loop.
 
-## 2026-07-06T19:06:49Z
-You are the Victory Auditor. Perform the independent victory audit for the vagas_bot codebase audit and optimization project.
-Read ORIGINAL_REQUEST.md and the orchestrator's handoff.md under c:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\orchestrator.
-Examine the changes made to the codebase in the workspace (c:\Users\99196\OneDrive\Documentos\vagas_bot).
-Conduct a thorough verification of:
-1. Dead code and scraper cleanup (R1)
-2. Stability and crash bugs fixes (R2)
-3. Performance and rate-limiting updates (R3)
-Provide a final verdict of either VICTORY CONFIRMED or VICTORY REJECTED, with a structured breakdown of your findings. Write your briefing.md, progress.md, and audit results in c:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\victory_auditor.
+Perform your 3-phase audit:
+1. Timeline audit
+2. Cheating/facade detection
+3. Independent test execution & code check (`python -m py_compile`, test suites)
+
+Working directory: `C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\victory_auditor`.
+Write your full report to `handoff.md` and return a clear verdict: `VICTORY CONFIRMED` or `VICTORY REJECTED`.

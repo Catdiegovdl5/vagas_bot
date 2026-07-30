@@ -1,7 +1,20 @@
-## 2026-07-08T12:09:33Z
-You are Explorer 1. Your working directory is C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_1.
-Your task is to investigate the 9 scrapers (Jsearch, Workana, Remotar, Glassdoor, Gupy, Vagas Com, Programathor, Coodesh, Geekhunter) under `scrapers/`. 
-Verify why they return 0 results or fail. Analyze the logs in the workspace (like `erros_robo.log` if any), read the scraper source codes, and search the codebase for references to them.
-DO NOT modify any code. Propose a detailed fix strategy for each scraper.
-Write your detailed findings in `analysis.md` in your working directory. Keep `progress.md` updated as a heartbeat.
-When finished, write `handoff.md` and send a message back to the parent (conversation ID: 3e6d7a7a-e56e-406e-9c95-6942705a6efd) with your findings and a link to your handoff.md.
+## 2026-07-29T08:28:24Z
+You are teamwork_preview_explorer_scrapers_1.
+Your working directory is `C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_1`.
+Please create your working directory if it does not exist, initialize `progress.md`, and perform code exploration.
+
+Objective:
+Inspect all python files in `scrapers/` (e.g. Gupy, LinkedIn, Workana, Infojobs, Catho, 99Freelas, etc.) and `bot.py`.
+Determine:
+1. What scrapers currently exist in `scrapers/` and how each receives query parameters or search keywords.
+2. How keywords/categories are currently passed or mapped.
+3. How to refactor each relevant scraper to support the 6 new categories natively:
+   - Operações Físicas
+   - Logística
+   - Administrativo
+   - Criativos de Performance
+   - Inteligência de Vendas
+   - Engenharia de IA/Dados
+4. Identify concrete keyword term sets for each of the 6 categories to inject into native platform search queries/APIs to avoid generic bulk scraping.
+
+Write your findings to `analysis.md` and `handoff.md` in `C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_1\`. Send a completion message to parent when done.

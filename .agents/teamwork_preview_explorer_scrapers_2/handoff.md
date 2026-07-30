@@ -1,124 +1,116 @@
-# Handoff Report — Explorer 2 Scraper Investigation
+# Handoff Report — Backend Job Models & Scraper Payload Compatibility
+
+**Agent**: `teamwork_preview_explorer_scrapers_2`  
+**Working Directory**: `C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_2`  
+**Date**: 2026-07-29  
+
+---
 
 ## 1. Observation
 
-During my read-only investigation, I analyzed:
-*   The log file `erros_robo.log` located at the workspace root, containing run logs.
-*   The 9 python scraper scripts inside `scrapers/`.
-*   The orchestrator bot logic in `bot.py`.
-*   The environment configurations in `.env`.
+Direct observations from inspecting codebase files:
 
-### Exact File Observations and Quotes:
+1. **`database.py` (lines 51–76 & lines 126–154)**:
+   - Table `jobs` schema:
+     ```sql
+     CREATE TABLE IF NOT EXISTS jobs (
+         id TEXT PRIMARY KEY,
+         title TEXT,
+         company TEXT,
+         budget TEXT,
+         link TEXT,
+         platform TEXT,
+         added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+         job_type TEXT,
+         profession TEXT,
+         level TEXT,
+         requirements TEXT,
+         location TEXT,
+         lat REAL,
+         lon REAL,
+         lang TEXT
+     )
+     ```
+   - Validation in `insert_jobs(jobs)` (lines 137–141):
+     ```python
+     link = job.get('link') or ''
+     title = job.get('title') or ''
+     platform = job.get('platform') or ''
+     if not link or not title or not platform or link == '#':
+         continue
+     ```
+   - Normalization call in `insert_jobs(jobs)` (lines 142–144):
+     ```python
+     raw_prof = job.get('profession') or ''
+     from scrapers.ai_filter import classify_profession_fallback
+     clean_profession = classify_profession_fallback(title, raw_prof)
+     ```
 
-*   **JSearch API Key & Silent Exit (`scrapers/jsearch.py` lines 21, 28-31)**:
-    ```python
-    21:         api_key = os.environ.get("JSEARCH_API_KEY", "7af3cebf37mshb1adb579644f3d1p1f605fjsn26d9e7a63fe0")
-    ...
-    28:         data = response.json()
-    29:         
-    30:         if data.get("data"):
-    31:             for item in data["data"][:30]:
-    ```
-    And `.env` has no `JSEARCH_API_KEY` defined.
+2. **`scrapers/ai_filter.py` (lines 36–63)**:
+   - Allowed professions list:
+     ```python
+     ALLOWED_PROFESSIONS = [
+         "Growth & Tráfego",
+         "IA-Ops",
+         "SDR Técnico",
+         "Analytics Engineer",
+         "Server-Side Tracking",
+         "Outros"
+     ]
+     ```
+   - Deterministic classification fallback logic:
+     ```python
+     def classify_profession_fallback(title: str, current_profession: str = "") -> str:
+         if current_profession and current_profession.strip() in ALLOWED_PROFESSIONS:
+             return current_profession.strip()
+         ...
+     ```
 
-*   **Workana Vue.js selector (`scrapers/workana.py` lines 28-30)**:
-    ```python
-    28:             search_tag = soup.find('search')
-    29:             if not search_tag or not search_tag.has_attr(':results-initials'):
-    30:                 continue
-    ```
+3. **`bot.py` (lines 2017–2072 & lines 2195–2336)**:
+   - `SEARCH_MAPPING` maps friendly names to taxonomy keys.
+   - `classify_job_profession(job)` sets `job['category'] = cat` and `job['profession'] = prof` in-memory.
 
-*   **Remotar Search URL and selector (`scrapers/remotar.py` lines 9, 20)**:
-    ```python
-    9:         base_url = f"https://remotar.com.br/search/jobs?q={search_kw}"
-    ...
-    20:             cards = soup.find_all('div', class_='job-list-item')
-    ```
-
-*   **Vagas Com SEO-Friendly URL Routing (`scrapers/vagas_com.py` lines 17-19)**:
-    ```python
-    17:         encoded_kw = urllib.parse.quote(search_kw.replace(' ', '-'))
-    18:         
-    19:         url = f"https://www.vagas.com.br/vagas-de-{encoded_kw}"
-    ```
-
-*   **Programathor SEO-Friendly URL Routing (`scrapers/programathor.py` lines 17-19)**:
-    ```python
-    17:         encoded_kw = urllib.parse.quote(search_kw.replace(' ', '-'))
-    18:         
-    19:         url = f"https://programathor.com.br/jobs-{encoded_kw}"
-    ```
-
-*   **Coodesh SPA Selector (`scrapers/coodesh.py` lines 33-35)**:
-    ```python
-    33:             job_cards = soup.find_all('div', class_=lambda c: c and 'job-card' in str(c).lower())
-    34:             if not job_cards:
-    35:                 job_cards = soup.find_all('a', href=lambda h: h and '/vagas/' in h)
-    ```
-
-*   **Geekhunter URL and Selector (`scrapers/geekhunter.py` lines 19, 40)**:
-    ```python
-    19:         url = f"https://geekhunter.com.br/vagas?q={encoded_kw}"
-    ...
-    40:             job_cards = soup.find_all('div', class_=lambda c: c and 'job' in str(c).lower())
-    ```
-
-*   **`bot.py` Scrapers Country Parameter Signature Mapping (`bot.py` lines 637-640)**:
-    ```python
-    637:                     if plat in ['jsearch', 'jooble', 'github_vagas', 'novenove', 'freelancer', 'indeed', 'linkedin', 'gmail', 'glassdoor', 'infojobs']:
-    638:                         res = await asyncio.to_thread(module.scrape, keyword=search_keyword, level="Todos", country=settings["location"])
-    639:                     else:
-    640:                         res = await asyncio.to_thread(module.scrape, keyword=search_keyword, level="Todos")
-    ```
-
-*   **`erros_robo.log` Output Statuses (verbatim quotes)**:
-    *   `2026-07-08 09:02:10 | INFO | ✅ Scraper VAGAS_COM finalizado. Vagas encontradas (brutas): 0`
-    *   `2026-07-08 09:02:11 | INFO | ✅ Scraper GUPY finalizado. Vagas encontradas (brutas): 0`
-    *   `2026-07-08 09:02:11 | INFO | ✅ Scraper PROGRAMATHOR finalizado. Vagas encontradas (brutas): 0`
-    *   `2026-07-08 09:02:11 | INFO | ✅ Scraper GEEKHUNTER finalizado. Vagas encontradas (brutas): 0`
-    *   `2026-07-08 09:02:11 | INFO | ✅ Scraper COODESH finalizado. Vagas encontradas (brutas): 0`
-    *   `2026-07-08 09:02:11 | INFO | ✅ Scraper JSEARCH finalizado. Vagas encontradas (brutas): 0`
-    *   `2026-07-08 09:02:13 | INFO | ✅ Scraper WORKANA finalizado. Vagas encontradas (brutas): 0`
-    *   `2026-07-08 09:02:15 | INFO | ✅ Scraper REMOTAR finalizado. Vagas encontradas (brutas): 0`
-    *   `2026-07-08 09:02:15 | INFO | ✅ Scraper GLASSDOOR finalizado. Vagas encontradas (brutas): 0`
+4. **`scrapers/linkedin.py`, `scrapers/gupy.py`, `scrapers/workana.py`**:
+   - Return format across scrapers is `List[Dict[str, Any]]` containing keys: `"platform"`, `"title"`, `"company"`, `"budget"`, `"link"`, `"job_type"`, `"profession"`, `"level"`, `"requirements"`.
 
 ---
 
 ## 2. Logic Chain
 
-1. **JSearch**: The absence of `JSEARCH_API_KEY` in `.env` forces the script to fallback to a hardcoded key. Because RapidAPI keys have usage limits or expire, the key fails. Jsearch does not inspect `response.status_code` or API error structures; it searches for `"data"` in the JSON payload, which is missing on errors. The logic dictates that it silently returns `[]`.
-2. **Workana, Glassdoor, Gupy, Programathor, Geekhunter**: These websites are protected by Cloudflare. A standard HTTP requests library (such as python `requests` or headful/headless chrome without evasions) triggers a 403 or challenge screen. For Workana, Glassdoor, and Gupy, this results in empty results because selectors expect specific DOM elements that are absent in the Cloudflare HTML challenge.
-3. **Vagas Com & Programathor**: Both scrapers replace spaces with hyphens to construct tag landing page URLs (`/vagas-de-{kw}` or `/jobs-{kw}`). When a non-standard search keyword is input (e.g. multi-word strategic terms from the nicho menus), the target page returns 404. Since no cards are present on the 404 page, 0 results are parsed.
-4. **Coodesh**: Next.js applications hydrate HTML on the client side. Fetching Coodesh via requests only returns a skeleton HTML shell (`<div id="__next"></div>`), causing BeautifulSoup selectors to find nothing.
-5. **Remotar**: Uses a defunct URL route (`/search/jobs?q=...`) which returns a 404, and references class names that are no longer part of their redesigned layout.
-6. **`bot.py`**: Gupy, Vagas Com, Programathor, Coodesh, and Geekhunter are excluded from the location-aware call list, meaning they cannot filter by location correctly on regional user requests, and default to remote searches nationwide.
+1. **Observation 1** demonstrates that `insert_jobs()` in `database.py` validates `link`, `title`, and `platform`. If any of these are empty, missing, or equal to `'#'`, the job record is skipped.
+2. **Observation 1 & 2** show that when inserting into `jobs.db`, `raw_prof` is passed to `classify_profession_fallback(title, raw_prof)`. If `raw_prof` is not present in `ALLOWED_PROFESSIONS`, regex rules map `title` to one of the 6 allowed professions or default to `"Outros"`.
+3. **Observation 1** shows that the SQLite database table `jobs` includes a `profession` TEXT column, but does NOT include a `category` column. `category` is used as an in-memory attribute by `bot.py` during classification and filtering.
+4. **Observation 3** shows that `bot.py` maintains `SEARCH_MAPPING` and `CO_OCCURRENCE_RULES` for term expansion and relevance checking for all categories (including the 6 new categories).
+5. **Observation 4** confirms that all existing scrapers conform to returning dictionaries with `platform`, `title`, `company`, `budget`, `link`, `job_type`, `profession`, `level`, and `requirements`.
 
 ---
 
 ## 3. Caveats
 
-*   I operated in read-only mode and did not execute the scrapers live to inspect current HTML responses on the real internet because of the CODE_ONLY network restriction constraint.
-*   My assessment of CSS class updates is based on analyzing structural changes in typical site layouts (e.g., Remotar, Coodesh Next.js shell) and verified standard scraper patterns.
+- **PostgreSQL / SaaS Multi-Tenancy**: `database.py` contains `PostgresRLSTenantContext` abstractions for future RLS PostgreSQL migrations, but currently runs SQLite `jobs.db`.
+- **Read-Only Scope**: This report is produced under read-only exploration rules. No modifications were made to project source files.
 
 ---
 
 ## 4. Conclusion
 
-The scrapers are failing due to a mix of Cloudflare blocks (5 scrapers), bad URL schema mapping (2 scrapers), lack of client-side JS rendering (1 scraper), obsolete URL routes & selectors (1 scraper), and credentials expiry (1 scraper).
-To restore the platform to 100% caçada capacity, we must implement:
-*   Impersonation HTTP clients (`curl_cffi`) and headful browser profiles.
-*   Dynamic search parameters (`?q=` / `?text=`) instead of static SEO tag paths.
-*   Direct API endpoint requests (for SPAs like Coodesh/Gupy) or Playwright rendering.
-*   Authentication sessions for closed platforms (Geekhunter).
-*   Correct argument-passing mapping in `bot.py`.
+1. **Required Scraper Fields**: `link` (valid URL, non-empty, `!= '#'`), `title` (non-empty string), and `platform` (non-empty string).
+2. **Database & Category Validation**: SQLite `jobs` table persists `profession` (fallback classified via `ALLOWED_PROFESSIONS`). `category` is an in-memory filter property created by `classify_job_profession()`.
+3. **Category Normalization**: Scraper payload professions are normalized by `classify_profession_fallback()` in `ai_filter.py` and `classify_job_profession()` in `bot.py`.
+4. **100% Payload Compatibility Requirement**: Scrapers must return `List[Dict[str, Any]]` containing `platform`, `title`, `link`, `company`, `budget`, `job_type`, `profession`, `level`, `requirements`, and `location`.
 
 ---
 
 ## 5. Verification Method
 
-1. **Verify `bot.py` signature mismatch**: View `bot.py` line 637-640 and cross-reference with signatures in the scraper files.
-2. **Verify SEO url issues**: Open a browser or run a test command fetching `https://www.vagas.com.br/vagas-de-especialista-em-ia` and note it returns 404, whereas `https://www.vagas.com.br/vagas/?q=especialista+em+ia` returns valid results.
-3. **Verify Coodesh HTML structure**: Inspect the source returned by `requests.get("https://coodesh.com/vagas")` and verify it contains no cards (only NextJS mount nodes).
-4. **Execution Test Suite**:
-   Run the project test suite to verify the mock/E2E pipelines:
-   `python run_tests.py`
+To independently verify these findings:
+
+1. **Inspect Schema & Code**:
+   - Check `database.py` lines 50–76 for table definition.
+   - Check `database.py` lines 126–154 for `insert_jobs` filter logic.
+   - Check `scrapers/ai_filter.py` lines 36–64 for `ALLOWED_PROFESSIONS`.
+   - Check `bot.py` lines 2195–2336 for `classify_job_profession`.
+
+2. **Run Pytest / Empirical Test Command**:
+   - Command: `python run_tests.py` or `pytest`
+   - Test `insert_jobs()` behavior with dictionary payloads omitting `link`, `title`, or `platform` to verify skipping behavior.

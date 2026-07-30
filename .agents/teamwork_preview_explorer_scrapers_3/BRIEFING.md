@@ -1,35 +1,36 @@
-# BRIEFING — 2026-07-08T12:20:10Z
+# BRIEFING — 2026-07-29T11:29:30Z
 
 ## Mission
-Investigate 9 scrapers (Jsearch, Workana, Remotar, Glassdoor, Gupy, Vagas Com, Programathor, Coodesh, Geekhunter) under scrapers/ to identify why they return 0 results or fail, and propose detailed fix strategies.
+Inspect the test suite under `tests/` and test runners to analyze existing tests, scraper test patterns, and define a verification plan for updated scrapers across 6 new categories.
 
 ## 🔒 My Identity
-- Archetype: Explorer
-- Roles: Read-only investigator
-- Working directory: C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_3
-- Original parent: 3e6d7a7a-e56e-406e-9c95-6942705a6efd
-- Milestone: Scraper investigation
+- Archetype: Teamwork explorer
+- Roles: Read-only investigator, scraper test analyst
+- Working directory: C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_3
+- Original parent: f250d8ce-e5a1-428d-b29d-c9ab8eeb5381
+- Milestone: Scraper test suite inspection and verification strategy
 
 ## 🔒 Key Constraints
-- Read-only investigation — do NOT implement
-- CODE_ONLY network mode: no external web access, no curl/wget/etc.
+- Read-only investigation — do NOT implement code changes outside .agents directory
+- Write analysis.md and handoff.md in working directory
+- Report via send_message to parent upon completion
 
 ## Current Parent
-- Conversation ID: 3e6d7a7a-e56e-406e-9c95-6942705a6efd
-- Updated: 2026-07-08T12:20:10Z
+- Conversation ID: f250d8ce-e5a1-428d-b29d-c9ab8eeb5381
+- Updated: 2026-07-29T11:29:30Z
 
 ## Investigation State
-- **Explored paths**: `scrapers/jsearch.py`, `scrapers/workana.py`, `scrapers/remotar.py`, and `erros_robo.log`
-- **Key findings**:
-  - **JSearch**: RapidAPI search endpoint returns 404 Endpoint Not Found, likely due to API key subscription status or route changes.
-  - **Workana**: Scraper actually works when called directly but returned 0 in some runs, possibly due to bot filtering or lack of matching jobs for specific filters.
-  - **Remotar**: Uses static BeautifulSoup selectors on `div.job-list-item`, but site has migrated to a Next.js client-rendered app fetching from backend API (`https://api.remotar.com.br/jobs`).
-- **Unexplored areas**: `glassdoor`, `gupy`, `vagas_com`, `programathor`, `coodesh`, `geekhunter` scrapers.
+- **Explored paths**: `tests/`, `scrapers/`, `run_tests.py`, `PROJECT.md`, `TEST_INFRA.md`, `TEST_READY.md`, `bot.py`
+- **Key findings**: Complete mapping of 49 systematic tier tests, hermetic mocking architecture (Playwright, Groq, requests/curl_cffi), async/sync scraper handling, 6 macro category keyword definitions, and adapted test design for Gupy, InfoJobs, Workana, LinkedIn.
+- **Unexplored areas**: None (all 4 prompt objectives fully addressed).
 
 ## Key Decisions Made
-- Pivot to manual reading and static code structure evaluation of remaining scrapers to avoid further timeout issues with terminal commands.
+- Analyzed 4 core objectives and documented findings in `analysis.md`.
+- Formulated 5-component handoff report in `handoff.md`.
 
 ## Artifact Index
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_3/analysis.md — Detailed scraper investigation findings
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_3/progress.md — Heartbeat and progress file
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_3/handoff.md — Final handoff report
+- `ORIGINAL_REQUEST.md` — Original prompt request
+- `BRIEFING.md` — Working memory
+- `progress.md` — Heartbeat and status
+- `analysis.md` — Detailed exploration & scraper test analysis
+- `handoff.md` — 5-component Handoff report

@@ -1,42 +1,39 @@
-# BRIEFING — 2026-07-08T12:12:00Z
+# BRIEFING — 2026-07-29T11:30:00Z
 
 ## Mission
-Investigate 9 scrapers (Jsearch, Workana, Remotar, Glassdoor, Gupy, Vagas Com, Programathor, Coodesh, Geekhunter) under scrapers/ to identify failure points/reasons for 0 results, and propose detailed fix strategies.
+Inspect backend job models, database schemas, and payload handlers to determine required fields, category/profession validation, normalization, and payload compatibility requirements for scrapers.
 
 ## 🔒 My Identity
-- Archetype: Explorer
-- Roles: Read-only investigator, analyzer
-- Working directory: C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_2
-- Original parent: 3e6d7a7a-e56e-406e-9c95-6942705a6efd
-- Milestone: Scraper investigation and analysis
+- Archetype: Teamwork explorer
+- Roles: Explorer / Code Investigator
+- Working directory: C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_2
+- Original parent: f250d8ce-e5a1-428d-b29d-c9ab8eeb5381
+- Milestone: Scraper payload & backend schema compatibility investigation
 
 ## 🔒 Key Constraints
-- Read-only investigation — do NOT implement
-- CODE_ONLY network mode
-- Write findings in analysis.md
-- Update progress.md as heartbeat
-- Write handoff.md on completion
+- Read-only investigation — do NOT implement code changes in project source files
+- Must output analysis.md and handoff.md in working directory
+- Operating in CODE_ONLY mode
 
 ## Current Parent
-- Conversation ID: 3e6d7a7a-e56e-406e-9c95-6942705a6efd
-- Updated: 2026-07-08T12:12:00Z
+- Conversation ID: f250d8ce-e5a1-428d-b29d-c9ab8eeb5381
+- Updated: 2026-07-29T11:30:00Z
 
 ## Investigation State
-- **Explored paths**: `scrapers/jsearch.py`, `scrapers/workana.py`, `scrapers/remotar.py`, `scrapers/glassdoor.py`, `scrapers/gupy.py`, `scrapers/vagas_com.py`, `scrapers/programathor.py`, `scrapers/coodesh.py`, `scrapers/geekhunter.py`, `bot.py`, `erros_robo.log`
+- **Explored paths**: `database.py`, `scrapers/ai_filter.py`, `bot.py`, `app.py`, `scrapers/linkedin.py`, `scrapers/gupy.py`, `scrapers/workana.py`, `patch_categories.py`, `static/index.html`
 - **Key findings**:
-  - Found that SEO-specific URLs (like in Vagas.com and Programathor) cause failures on custom keywords because pages don't exist.
-  - Client-side rendering (Next.js/React) prevents scrapers like Coodesh from extracting job cards.
-  - Lack of credentials/APIs or expired keys (JSearch, Geekhunter) prevents data fetch.
-  - Cloudflare blocks requests to Workana, Glassdoor, Gupy, Programathor, Geekhunter.
-  - Remotar uses outdated URLs and CSS selectors.
-- **Unexplored areas**: None.
+  1. Mandatory fields: `link` (or `url`), `title`, `platform`.
+  2. DB schema has `profession` column (no `category` column in SQLite table `jobs`).
+  3. `classify_profession_fallback` normalizes `profession` against `ALLOWED_PROFESSIONS`.
+  4. `bot.py` handles `category` and `profession` taxonomy in-memory via `classify_job_profession()` and `SEARCH_MAPPING`.
+- **Unexplored areas**: None (investigation complete)
 
 ## Key Decisions Made
-- Perform static code analysis of the 9 scrapers.
-- Reconstruct flow of scrapers within `bot.py`.
-- Formulate detailed programmatic strategies to fix each of the 9 scrapers.
+- Completed read-only investigation and generated `analysis.md` and `handoff.md`.
 
 ## Artifact Index
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_2/ORIGINAL_REQUEST.md — Original task description
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_2/BRIEFING.md — Working memory briefing index
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_2/progress.md — Progress log heartbeat
+- ORIGINAL_REQUEST.md — Original task prompt
+- BRIEFING.md — Working memory and context
+- progress.md — Heartbeat and status log
+- analysis.md — Detailed exploration findings & compatibility specifications
+- handoff.md — 5-component handoff report

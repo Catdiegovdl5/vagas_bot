@@ -1,7 +1,7 @@
-# BRIEFING — 2026-07-08T13:32:10Z
+# BRIEFING — 2026-07-17T17:30:45Z
 
 ## Mission
-Analyze bot.py keyword filtering logic and recommend how to support creative/marketing jobs utilizing AI.
+Perform a thorough review of the vagas_bot codebase to evaluate CLT scrapers and plan their integration.
 
 ## 🔒 My Identity
 - Archetype: explorer
@@ -16,26 +16,27 @@ Analyze bot.py keyword filtering logic and recommend how to support creative/mar
 - Record the exact lines of code where modifications should be made
 
 ## Current Parent
-- Conversation ID: 119a9989-4c1d-4dc6-8c9b-ea132df9251c
-- Updated: not yet
+- Conversation ID: 154e9d57-fcf3-45a0-9cf5-dfb942e91890
+- Updated: 2026-07-17T17:30:45Z
 
 ## Investigation State
 - **Explored paths**:
   - `bot.py`
-  - `scrapers/ai_filter.py`
-  - `scrapers/jsearch.py`
-  - `tests/test_sanity_battery.py`
-  - `run_tests.py`
+  - `scrapers/gupy.py`, `scrapers/catho.py`, `scrapers/infojobs.py`, `scrapers/vagas_com.py`, `scrapers/workana.py`
+  - `scrapers/coodesh.py`, `scrapers/remotar.py`, `scrapers/run_test.py`, `test_scrapers.py`, `tests/mock_infojobs.py`
 - **Key findings**:
-  - Located the definition of `menus` (lines 302-309), `search_mapping` (lines 587-624), `is_job_relevant` relevance check (lines 347-535), and keyword grouping rules under `rules` (lines 419-525) in `bot.py`.
-  - Identified the AI "Regra de Ouro IA" (Rule 8) in `scrapers/ai_filter.py` (lines 77-77) that summarily rejects marketing/performance jobs if they are classified as AI roles.
-  - Formulated a concrete strategy to modify `menus`, `search_mapping`, `rules` in `bot.py` and modify Rule 8 in `scrapers/ai_filter.py` to allow creative/marketing jobs leveraging AI tools.
+  - Identified dynamic scraper execution in `bot.py` using `importlib` and `asyncio.to_thread` for sync scrapers.
+  - Evaluated that InfoJobs runs sync Playwright inside `asyncio.to_thread`, which is resource-intensive.
+  - Detailed Gupy, Catho, Vagas.com, and InfoJobs current architectures and refactoring blueprints.
 - **Unexplored areas**: None.
 
 ## Key Decisions Made
-- Chose to propose three complementary modifications: modifying user-facing menu options, adding API search mapping, and refining/splitting keyword grouping rules and the AI Rule of Gold prompt.
+- Recommended refactoring all four CLT scrapers to support the standard `async def scrape(keyword, level="Todos", max_pages=...)` signature.
+- Advised using `curl_cffi` AsyncSession for Gupy, Catho, and Vagas.com, and `playwright.async_api` for InfoJobs.
 
 ## Artifact Index
 - C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/explorer_m1/ORIGINAL_REQUEST.md — Original request log
 - C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/explorer_m1/BRIEFING.md — My working memory
 - C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/explorer_m1/progress.md — Progress log
+- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/explorer_m1/analysis.md — Review findings report
+- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/explorer_m1/handoff.md — Handoff report containing plan/next steps

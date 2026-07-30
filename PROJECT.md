@@ -1,39 +1,32 @@
-# Project: vagas_bot Autonomous Recruitment
+# Project: vagas_bot Expansion — New Profession Taxonomy & Scraper Macro-Searches
 
 ## Architecture
 - **Data Flow**:
-  - Scrapers (`scrapers/linkedin.py`, `scrapers/glassdoor.py`, `scrapers/infojobs.py`, `scrapers/indeed.py`, `scrapers/jooble.py`) search and retrieve raw vacancies.
-  - Deep scraping retrieves the full description from Indeed/Jooble.
-  - Groq AI Filter (`scrapers/ai_filter.py`) evaluates and scores vacancies, generating `JobEvaluation` objects (score, salary, benefits, etc.).
-  - Database (`database.py`) inserts the filtered jobs along with their AI scores and application status.
-  - FastAPI Web App (`app.py`) displays the database content on a dashboard, allowing users to trigger runs, which must execute the AI filtering pipeline.
-  - Auto-Apply module (`auto_apply.py`) polls pending jobs with high matching scores, fills Easy Apply forms, uploads `temp_curriculo.pdf`, and submits applications.
-- **Code Layout**:
-  - `database.py`: DB schema and helpers (SQLAlchemy/SQLite).
-  - `bot.py`: Telegram Bot flow.
-  - `app.py`: FastAPI Web App backend and endpoints.
-  - `scrapers/`: Directory for all scrapers.
-  - `auto_apply.py`: Core logic for form detection, input filling, resume uploading, and form submission.
-  - `test_apply.py`: Mock ATS server and automated submission test case.
+  - Frontend (`static/index.html`): Mega-menu drawers for broad categories (Operações Físicas, Logística, Administrativo, Criativos, Inteligência de Vendas, Engenharia de Dados, etc.). Sends macro-search or category search requests to backend.
+  - Backend (`app.py` & `bot.py`):
+    - Macro-searches execute queries for broad domain keywords (e.g., "Indústria", "Logística", "Administrativo", "Vendas", "Dados", "Design").
+    - Local classification & filtering via `CO_OCCURRENCE_RULES` and `is_job_relevant` in `bot.py` matches specific sub-professions (e.g. "Pintor Industrial", "Almoxarife", "Assistente de Logística").
+  - Scrapers (`scrapers/*.py`): Receive macro-search terms, fetch job postings, and return normalized lists.
+  - Database (`database.py`): Persists jobs with assigned professions, levels, locations, and AI/rule scores.
+
+## Code Layout
+- `static/index.html`: Web dashboard UI, mega-menu drawers, JS constants for profession mappings.
+- `bot.py`: Telegram Bot logic, `CO_OCCURRENCE_RULES`, `blacklist`, `is_job_relevant()` filtering logic, and sub-profession classification.
+- `app.py`: FastAPI server, `/api/trigger`, `/api/search`, seed search loops, periodic background hunt loops.
+- `scrapers/`: Individual platform scrapers (`linkedin.py`, `gupy.py`, `catho.py`, `infojobs.py`, `workana.py`, etc.).
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| 1 | E2E Testing Track | Design E2E test infrastructure, feature inventory, Tier 1-4 tests, publish `TEST_READY.md` | none | DONE |
-| 2 | S-Tier Scrapers & Snippet Bypass | Implement S-Tier scrapers (LinkedIn, Glassdoor, InfoJobs) and Deep Scraping (Indeed, Jooble) | none | IN_PROGRESS (Conv: e02a576f-5864-4b55-bf93-7ec0017e77ec) |
-| 3 | DB Schema & AI Ranking Update | Perform DB migrations, update Groq prompts/scores, update FastAPI trigger to filter jobs | M2 | PLANNED |
-| 4 | Auto-Apply Engine & Mock ATS | Implement form autofill, resume upload, and mock server tests (`test_apply.py`) | M3 | PLANNED |
-| 5 | final_milestone | Pass all E2E test tiers and perform Adversarial Coverage Hardening | M1, M4 | PLANNED |
+| 1 | UI Taxonomy Update | Update `static/index.html` mega-menu drawers and JS profession mapping constants | None | DONE |
+| 2 | Scraper Config & Macro-Searches | Update `bot.py`, `app.py`, and scraper keyword mapping (`CO_OCCURRENCE_RULES`, macro-search terms, local filtering) | M1 | DONE |
+| 3 | Final Verification & Integration Gate | Pass `py_compile`, unit/filter test suite, Reviewers, Challengers, and Forensic Audit | M1, M2 | DONE |
 
 ## Interface Contracts
-### `scrapers/*` ↔ `database.py`
-- Scrapers return lists of dicts conforming to standard schema:
-  - `title`, `company`, `budget` (salary string/float), `link`, `platform`, `requirements` (full vacancy text, >=500 chars).
-- `database.py` provides:
-  - `insert_jobs(jobs: List[dict])`: Stores jobs, checking for duplicates using `link`.
-  - `update_apply_status(job_id: str, status: str)`: Updates application state.
+### `static/index.html` ↔ `app.py`
+- Category/Drawer selection triggers `/api/search` or `/api/trigger` with macro keyword or category name.
+- Profession filter dropdowns map category IDs to human-readable names and sub-profession lists.
 
-### `scrapers/ai_filter.py` ↔ `database.py` / `bot.py` / `app.py`
-- `ai_filter.py` provides `score_job_match(requirements: str, title: str, company: str, curriculo: str) -> JobEvaluation`.
-- `JobEvaluation` attributes:
-  - `aprovado: bool`, `score: int` (0-100), `salario_extraido: float`, `justificativa_curta: str`, `reqs: str`, `bonus: str`, `benefits: str`, `model: str`.
+### `bot.py` (`is_job_relevant`) ↔ `scrapers/*`
+- Scrapers accept broad macro-search keywords (e.g., "Indústria", "Logística", "Dados").
+- `is_job_relevant(job, keyword, settings)` filters and classifies jobs for specific sub-professions using `CO_OCCURRENCE_RULES` and `blacklist`.

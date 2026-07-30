@@ -1,0 +1,1320 @@
+{
+  "ufs_tested": [
+    "SP",
+    "RJ",
+    "MG",
+    "PR",
+    "RS",
+    "SC",
+    "BA"
+  ],
+  "trigger_endpoint": {
+    "SP": {
+      "status_code": 200,
+      "response": {
+        "status": "success",
+        "message": "Caçada disparada em segundo plano para Python (Pleno)!"
+      },
+      "scrapers_called_count": 16,
+      "is_job_relevant_call_count": 16,
+      "settings_locations_received": [
+        "SP"
+      ],
+      "exact_uf_verified": true,
+      "scraper_kwargs": {
+        "workana": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "gupy": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "catho": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "infojobs": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "linkedin": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "vagas_com": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "novenove": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "freelancer": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "remotar": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "programathor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "geekhunter": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "coodesh": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "github_vagas": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "indeed": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "glassdoor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        },
+        "jooble": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SP",
+          "country": "SP",
+          "max_pages": 10
+        }
+      },
+      "scraper_exceptions": {}
+    },
+    "RJ": {
+      "status_code": 200,
+      "response": {
+        "status": "success",
+        "message": "Caçada disparada em segundo plano para Python (Pleno)!"
+      },
+      "scrapers_called_count": 16,
+      "is_job_relevant_call_count": 16,
+      "settings_locations_received": [
+        "RJ"
+      ],
+      "exact_uf_verified": true,
+      "scraper_kwargs": {
+        "workana": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "gupy": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "catho": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "infojobs": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "linkedin": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "vagas_com": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "novenove": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "freelancer": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "remotar": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "programathor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "geekhunter": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "coodesh": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "github_vagas": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "indeed": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "glassdoor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        },
+        "jooble": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RJ",
+          "country": "RJ",
+          "max_pages": 10
+        }
+      },
+      "scraper_exceptions": {}
+    },
+    "MG": {
+      "status_code": 200,
+      "response": {
+        "status": "success",
+        "message": "Caçada disparada em segundo plano para Python (Pleno)!"
+      },
+      "scrapers_called_count": 16,
+      "is_job_relevant_call_count": 16,
+      "settings_locations_received": [
+        "MG"
+      ],
+      "exact_uf_verified": true,
+      "scraper_kwargs": {
+        "workana": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "gupy": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "catho": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "infojobs": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "linkedin": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "vagas_com": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "novenove": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "freelancer": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "remotar": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "programathor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "geekhunter": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "coodesh": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "github_vagas": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "indeed": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "glassdoor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        },
+        "jooble": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "MG",
+          "country": "MG",
+          "max_pages": 10
+        }
+      },
+      "scraper_exceptions": {}
+    },
+    "PR": {
+      "status_code": 200,
+      "response": {
+        "status": "success",
+        "message": "Caçada disparada em segundo plano para Python (Pleno)!"
+      },
+      "scrapers_called_count": 16,
+      "is_job_relevant_call_count": 16,
+      "settings_locations_received": [
+        "PR"
+      ],
+      "exact_uf_verified": true,
+      "scraper_kwargs": {
+        "workana": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "gupy": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "catho": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "infojobs": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "linkedin": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "vagas_com": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "novenove": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "freelancer": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "remotar": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "programathor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "geekhunter": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "coodesh": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "github_vagas": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "indeed": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "glassdoor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        },
+        "jooble": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "PR",
+          "country": "PR",
+          "max_pages": 10
+        }
+      },
+      "scraper_exceptions": {}
+    },
+    "RS": {
+      "status_code": 200,
+      "response": {
+        "status": "success",
+        "message": "Caçada disparada em segundo plano para Python (Pleno)!"
+      },
+      "scrapers_called_count": 16,
+      "is_job_relevant_call_count": 16,
+      "settings_locations_received": [
+        "RS"
+      ],
+      "exact_uf_verified": true,
+      "scraper_kwargs": {
+        "workana": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "gupy": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "catho": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "infojobs": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "linkedin": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "vagas_com": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "novenove": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "freelancer": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "remotar": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "programathor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "geekhunter": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "coodesh": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "github_vagas": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "indeed": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "glassdoor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        },
+        "jooble": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "RS",
+          "country": "RS",
+          "max_pages": 10
+        }
+      },
+      "scraper_exceptions": {}
+    },
+    "SC": {
+      "status_code": 200,
+      "response": {
+        "status": "success",
+        "message": "Caçada disparada em segundo plano para Python (Pleno)!"
+      },
+      "scrapers_called_count": 16,
+      "is_job_relevant_call_count": 16,
+      "settings_locations_received": [
+        "SC"
+      ],
+      "exact_uf_verified": true,
+      "scraper_kwargs": {
+        "workana": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "gupy": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "catho": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "infojobs": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "linkedin": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "vagas_com": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "novenove": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "freelancer": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "remotar": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "programathor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "geekhunter": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "coodesh": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "github_vagas": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "indeed": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "glassdoor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        },
+        "jooble": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "SC",
+          "country": "SC",
+          "max_pages": 10
+        }
+      },
+      "scraper_exceptions": {}
+    },
+    "BA": {
+      "status_code": 200,
+      "response": {
+        "status": "success",
+        "message": "Caçada disparada em segundo plano para Python (Pleno)!"
+      },
+      "scrapers_called_count": 16,
+      "is_job_relevant_call_count": 16,
+      "settings_locations_received": [
+        "BA"
+      ],
+      "exact_uf_verified": true,
+      "scraper_kwargs": {
+        "workana": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "gupy": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "catho": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "infojobs": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "linkedin": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "vagas_com": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "novenove": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "freelancer": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "remotar": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "programathor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "geekhunter": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "coodesh": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "github_vagas": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "indeed": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "glassdoor": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        },
+        "jooble": {
+          "keyword": "Python",
+          "level": "Pleno",
+          "location": "BA",
+          "country": "BA",
+          "max_pages": 10
+        }
+      },
+      "scraper_exceptions": {}
+    }
+  },
+  "scraper_signatures": {
+    "workana": {
+      "parameters": [
+        "keyword",
+        "level",
+        "max_pages",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "gupy": {
+      "parameters": [
+        "keyword",
+        "level",
+        "max_pages",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "catho": {
+      "parameters": [
+        "keyword",
+        "level",
+        "max_pages",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "infojobs": {
+      "parameters": [
+        "keyword",
+        "level",
+        "max_pages",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "linkedin": {
+      "parameters": [
+        "keyword",
+        "level",
+        "location",
+        "country",
+        "contract",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "vagas_com": {
+      "parameters": [
+        "keyword",
+        "level",
+        "max_pages",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "novenove": {
+      "parameters": [
+        "keyword",
+        "level",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "freelancer": {
+      "parameters": [
+        "keyword",
+        "level",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "remotar": {
+      "parameters": [
+        "keyword",
+        "level",
+        "contract",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "programathor": {
+      "parameters": [
+        "keyword",
+        "level",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "geekhunter": {
+      "parameters": [
+        "keyword",
+        "level",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "coodesh": {
+      "parameters": [
+        "keyword",
+        "level",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "github_vagas": {
+      "parameters": [
+        "keyword",
+        "level",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "indeed": {
+      "parameters": [
+        "keyword",
+        "level",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "glassdoor": {
+      "parameters": [
+        "keyword",
+        "level",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    },
+    "jooble": {
+      "parameters": [
+        "keyword",
+        "level",
+        "location",
+        "country",
+        "kwargs"
+      ],
+      "has_var_keyword": true,
+      "kwargs_passed_by_app": {
+        "keyword": "Python",
+        "level": "Pleno",
+        "location": "SP",
+        "country": "SP",
+        "max_pages": 10
+      },
+      "location_passed": true
+    }
+  },
+  "is_job_relevant_matching": {
+    "SP": [
+      {
+        "title": "Dev Python SP",
+        "location": "São Paulo - SP",
+        "expected": true,
+        "actual": true,
+        "pass": true
+      },
+      {
+        "title": "Dev Python RJ",
+        "location": "Rio de Janeiro - RJ",
+        "expected": false,
+        "actual": false,
+        "pass": true
+      }
+    ],
+    "RJ": [
+      {
+        "title": "Dev Python RJ",
+        "location": "Rio de Janeiro - RJ",
+        "expected": true,
+        "actual": true,
+        "pass": true
+      },
+      {
+        "title": "Dev Python SP",
+        "location": "São Paulo - SP",
+        "expected": false,
+        "actual": false,
+        "pass": true
+      }
+    ],
+    "MG": [
+      {
+        "title": "Dev Python BH",
+        "location": "Belo Horizonte - MG",
+        "expected": true,
+        "actual": true,
+        "pass": true
+      },
+      {
+        "title": "Dev Python PR",
+        "location": "Curitiba - PR",
+        "expected": false,
+        "actual": false,
+        "pass": true
+      }
+    ],
+    "PR": [
+      {
+        "title": "Dev Python CWB",
+        "location": "Curitiba - PR",
+        "expected": true,
+        "actual": true,
+        "pass": true
+      },
+      {
+        "title": "Dev Python RS",
+        "location": "Porto Alegre - RS",
+        "expected": false,
+        "actual": false,
+        "pass": true
+      }
+    ],
+    "RS": [
+      {
+        "title": "Dev Python POA",
+        "location": "Porto Alegre - RS",
+        "expected": true,
+        "actual": true,
+        "pass": true
+      },
+      {
+        "title": "Dev Python SC",
+        "location": "Florianópolis - SC",
+        "expected": false,
+        "actual": false,
+        "pass": true
+      }
+    ],
+    "SC": [
+      {
+        "title": "Dev Python Floripa",
+        "location": "Florianópolis - SC",
+        "expected": true,
+        "actual": true,
+        "pass": true
+      },
+      {
+        "title": "Dev Python BA",
+        "location": "Salvador - BA",
+        "expected": false,
+        "actual": false,
+        "pass": true
+      }
+    ],
+    "BA": [
+      {
+        "title": "Dev Python SSA",
+        "location": "Salvador - BA",
+        "expected": true,
+        "actual": true,
+        "pass": true
+      },
+      {
+        "title": "Dev Python SP",
+        "location": "São Paulo - SP",
+        "expected": false,
+        "actual": false,
+        "pass": true
+      }
+    ]
+  }
+}

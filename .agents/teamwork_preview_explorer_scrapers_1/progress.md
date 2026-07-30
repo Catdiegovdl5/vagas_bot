@@ -1,13 +1,17 @@
-# Progress Log
+# Progress Log - teamwork_preview_explorer_scrapers_1
 
-Last visited: 2026-07-08T09:21:00-03:00
+Last visited: 2026-07-29T08:29:40Z
 
-- [x] Initialized ORIGINAL_REQUEST.md, BRIEFING.md, and progress.md.
-- [x] Scan directory structure to locate logs, `scrapers/` folder, and key files.
-- [x] Examine workspace logs (e.g. `erros_robo.log` or others).
-- [x] Analyze Geekhunter, Jsearch, Workana, Remotar, Glassdoor, Gupy, Vagas Com, Programathor, Coodesh scrapers source codes and logic.
-- [x] Create and run custom `test_all_nine.py` script to test all 9 scrapers and observe failures.
-- [x] Analyze results of the test run to diagnose specific causes of failure for each scraper.
-- [x] Draft analysis findings in `analysis.md`.
-- [x] Write handoff report in `handoff.md`.
-- [x] Send handoff message to parent.
+- [x] Create working directory and initial metadata files (`ORIGINAL_REQUEST.md`, `progress.md`, `BRIEFING.md`).
+- [x] Inspect files in `scrapers/` and `bot.py` to identify all scrapers and their keyword/parameter mechanisms.
+- [x] Analyze how categories and keywords are currently passed or mapped.
+- [x] Design refactoring strategy for scrapers to natively support the 6 new categories:
+  - Operações Físicas
+  - Logística
+  - Administrativo
+  - Criativos de Performance
+  - Inteligência de Vendas
+  - Engenharia de IA/Dados
+- [x] Define concrete keyword term sets for each of the 6 categories for native platform searches.
+- [x] Generate `analysis.md` and `handoff.md`.
+- [x] Send completion message to parent (`f250d8ce-e5a1-428d-b29d-c9ab8eeb5381`).

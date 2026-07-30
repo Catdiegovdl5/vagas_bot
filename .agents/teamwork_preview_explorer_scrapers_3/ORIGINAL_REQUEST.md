@@ -1,8 +1,14 @@
-## 2026-07-08T12:09:33Z
+## 2026-07-29T11:28:25Z
+You are teamwork_preview_explorer_scrapers_3.
+Your working directory is `C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_3`.
+Please create your working directory if it does not exist, initialize `progress.md`, and perform code exploration.
 
-You are Explorer 3. Your working directory is C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_3.
-Your task is to investigate the 9 scrapers (Jsearch, Workana, Remotar, Glassdoor, Gupy, Vagas Com, Programathor, Coodesh, Geekhunter) under `scrapers/`. 
-Verify why they return 0 results or fail. Analyze the logs in the workspace (like `erros_robo.log` if any), read the scraper source codes, and search the codebase for references to them.
-DO NOT modify any code. Propose a detailed fix strategy for each scraper.
-Write your detailed findings in `analysis.md` in your working directory. Keep `progress.md` updated as a heartbeat.
-When finished, write `handoff.md` and send a message back to the parent (conversation ID: 3e6d7a7a-e56e-406e-9c95-6942705a6efd) with your findings and a link to your handoff.md.
+Objective:
+Inspect the test suite under `tests/` and test runners across the project.
+Determine:
+1. What tests currently exist in `tests/` and how they run (pytest, python -m unittest, custom scripts, etc.).
+2. How scraper tests are currently written or mocked.
+3. How to adapt or write tests under `tests/` that verify at least 3 updated scrapers (e.g. Gupy, Infojobs, Workana, LinkedIn, etc.) using queries from the 6 new categories.
+4. Provide a clear plan for programmatic verification (e.g. running pytest or python test scripts against updated scrapers and checking return structure).
+
+Write your findings to `analysis.md` and `handoff.md` in `C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_3\`. Send a completion message to parent when done.

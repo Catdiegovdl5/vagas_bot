@@ -4,15 +4,22 @@ import urllib.parse
 import os
 APIFY_TOKEN = os.environ.get("APIFY_API_TOKEN", "")
 
-def scrape(keyword, level="Todos", country="Brasil"):
-    if "Brasil" not in country:
+def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
+    c_str = (country or "").lower()
+    l_str = (location or "").lower()
+    loc = location or country or kwargs.get("location") or kwargs.get("country") or ""
+    if loc and loc.upper() in ["USA", "US", "UNITED STATES"]:
         return []
 
     client = ApifyClient(APIFY_TOKEN)
     
-    search_term = keyword
-    if not any(word in keyword.lower() for word in ['contratando', 'vaga', 'oportunidade', 'estágio', 'freela', 'pj']):
-        search_term = f"vaga {keyword}"
+    kw = keyword or "Python"
+    lvl = level or "Todos"
+    search_term = kw
+    if not any(word in kw.lower() for word in ['contratando', 'vaga', 'oportunidade', 'estágio', 'freela', 'pj']):
+        search_term = f"vaga {kw}"
+    if loc and loc.lower() not in ["todos", "brasil", "brasil (remoto)", "remoto", "qualquer", ""]:
+        search_term += f" {loc}"
 
     search_url = f"https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=BR&q={urllib.parse.quote(search_term)}"
     

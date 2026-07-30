@@ -48,13 +48,15 @@ def test_app_workflow_get_jobs_endpoint():
     """
     # Insert a job manually
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute(
-        "INSERT INTO jobs (id, title, company, budget, link, platform, requirements) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        ("https://example.com/job/dash-test-1", "Dashboard Engineer", "Dash Corp", "R$ 7.000", "https://example.com/job/dash-test-1", "LinkedIn", "Requirements for dashboard test")
-    )
-    conn.commit()
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO jobs (id, title, company, budget, link, platform, requirements) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            ("https://example.com/job/dash-test-1", "Dashboard Engineer", "Dash Corp", "R$ 7.000", "https://example.com/job/dash-test-1", "LinkedIn", "Requirements for dashboard test")
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
     response = client.get("/api/jobs")
     assert response.status_code == 200
@@ -103,10 +105,12 @@ def test_app_workflow_n8n_webhook_ingestion():
 
     # Verify insertions in SQLite DB
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM jobs WHERE link LIKE '%n8n-test%'")
-    count = c.fetchone()[0]
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*) FROM jobs WHERE link LIKE '%n8n-test%'")
+        count = c.fetchone()[0]
+    finally:
+        conn.close()
     assert count == 2
 
 def test_app_workflow_system_logs_dashboard():
@@ -157,23 +161,25 @@ def test_app_workflow_full_pipeline_cycle():
     from scrapers.ai_filter import score_job_match
     # Retrieve job from DB
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT title, company, requirements, link FROM jobs WHERE link = ?", (job_link,))
-    r = c.fetchone()
-    db_job = {"title": r[0], "company": r[1], "requirements": r[2], "link": r[3]}
-    
-    loop = asyncio.get_event_loop()
-    eval_result = loop.run_until_complete(
-        score_job_match("Python FastAPI Developer", db_job, "FastAPI", "Brasil (Remoto)", "Todos")
-    )
-    
-    # Write evaluation back to DB
-    c.execute(
-        "UPDATE jobs SET score = ?, status = ? WHERE link = ?",
-        (eval_result["score"], "pending" if eval_result["aprovado"] else "rejected", job_link)
-    )
-    conn.commit()
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute("SELECT title, company, requirements, link FROM jobs WHERE link = ?", (job_link,))
+        r = c.fetchone()
+        db_job = {"title": r[0], "company": r[1], "requirements": r[2], "link": r[3]}
+        
+        loop = asyncio.get_event_loop()
+        eval_result = loop.run_until_complete(
+            score_job_match("Python FastAPI Developer", db_job, "FastAPI", "Brasil (Remoto)", "Todos")
+        )
+        
+        # Write evaluation back to DB
+        c.execute(
+            "UPDATE jobs SET score = ?, status = ? WHERE link = ?",
+            (eval_result["score"], "pending" if eval_result["aprovado"] else "rejected", job_link)
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
     # 3. Auto-apply engine runs and applies to it
     aa = get_auto_apply()
@@ -192,10 +198,12 @@ def test_app_workflow_full_pipeline_cycle():
             # Status is not a column directly returned in get_jobs(), let's check DB directly
             # Wait, let's verify DB status is applied
             conn = sqlite3.connect(database.DB_PATH)
-            c = conn.cursor()
-            c.execute("SELECT status FROM jobs WHERE link = ?", (job_link,))
-            status = c.fetchone()[0]
-            conn.close()
+            try:
+                c = conn.cursor()
+                c.execute("SELECT status FROM jobs WHERE link = ?", (job_link,))
+                status = c.fetchone()[0]
+            finally:
+                conn.close()
             assert status == "applied"
             break
             

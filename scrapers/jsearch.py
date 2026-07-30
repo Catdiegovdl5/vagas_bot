@@ -2,28 +2,31 @@ import requests
 import urllib.parse
 import os
 
-def scrape(keyword, level, country="Brasil"):
+def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
     jobs = []
+    c_str = (country or "").lower()
+    l_str = (location or "").lower()
+    target_loc = location or country or kwargs.get("location") or kwargs.get("country") or ""
     try:
-        # JSearch requer uma API Key válida do RapidAPI
-        # Configure JSEARCH_API_KEY no seu .env ou nas variáveis de ambiente
         api_key = os.environ.get("JSEARCH_API_KEY", "")
         if not api_key:
             print("JSearch: JSEARCH_API_KEY não configurada. Pulando scraper.")
             return jobs
         
-        search_kw = f"{keyword}"
-        if level != "Todos":
-            search_kw += f" {level}"
+        kw = keyword or "Python"
+        lvl = level or "Todos"
+        search_kw = f"{kw}"
+        if lvl != "Todos":
+            search_kw += f" {lvl}"
+        if target_loc and target_loc.lower() not in ["todos", "brasil", "brasil (remoto)", "remoto", "qualquer", ""] and target_loc.upper() not in ["USA", "US"]:
+            search_kw += f" {target_loc}"
             
         encoded_kw = urllib.parse.quote(search_kw)
         
-        if "Brasil" in country:
-            url = f"https://jsearch.p.rapidapi.com/search?query={encoded_kw}&page=1&num_pages=3&date_posted=month&country=br&language=pt"
-        elif country == "USA":
+        if target_loc and target_loc.upper() in ["USA", "US"]:
             url = f"https://jsearch.p.rapidapi.com/search?query={encoded_kw}&page=1&num_pages=3&date_posted=month&country=us&language=en"
         else:
-            url = f"https://jsearch.p.rapidapi.com/search?query={encoded_kw}&page=1&num_pages=3&date_posted=month"
+            url = f"https://jsearch.p.rapidapi.com/search?query={encoded_kw}&page=1&num_pages=3&date_posted=month&country=br&language=pt"
         
         headers = {
             "x-rapidapi-key": api_key,
@@ -64,7 +67,11 @@ def scrape(keyword, level, country="Brasil"):
                 if not req_text.strip():
                     req_text = "Sem descrição disponível."
                 
-                link = item.get("job_apply_link") or item.get("job_google_link") or "https://google.com"
+                link = item.get("job_apply_link") or item.get("job_google_link") or ""
+                
+                # Guard: descartar vagas sem link válido ou sem título real
+                if not title or not link or link == "#":
+                    continue
                 
                 jobs.append({
                     "platform": f"JSearch",

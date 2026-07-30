@@ -189,11 +189,14 @@ def apply_to_job(job_link: str, resume_path: str, candidate: dict, mock_ats_url:
             # Post to the mock ATS server
             response = requests.post(mock_ats_url, data=data, files=files, timeout=5)
             if response.status_code == 200:
-                res_data = response.json()
-                return res_data.get("status") == "success"
+                try:
+                    res_data = response.json()
+                    return res_data.get("status") == "success"
+                except Exception:
+                    return False
             return False
     except Exception as e:
-        print(f"Error during auto-apply HTTP request to {mock_ats_url}: {e}")
+        logger.warning(f"Auto-apply HTTP request to {mock_ats_url} error: {e}")
         return False
 
 

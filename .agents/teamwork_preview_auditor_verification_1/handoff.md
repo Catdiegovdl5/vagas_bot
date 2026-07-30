@@ -1,108 +1,82 @@
-# Forensic Audit & Handoff Report
+# Handoff Report: R1 & R2 Forensic Integrity Audit
 
-## Forensic Audit Report
-
-**Work Product**: E2E Test Suite (`vagas_bot` project)  
-**Profile**: General Project  
-**Verdict**: **INTEGRITY VIOLATION**
-
-### Phase Results
-- **Hardcoded output detection**: **PASS** — Checked product source code and test files; no hardcoded test outcomes, expected output strings, or cheat codes were found inside `app.py`, `bot.py`, `database.py`, or the `scrapers/` implementations.
-- **Facade detection**: **PASS** — Interface functions (e.g. scrapers, DB operations) are genuine implementations; no fake wrappers that simply return constant values.
-- **Pre-populated artifact detection**: **PASS** — No fake test logs or result outputs pre-populated in the workspace to bypass tests.
-- **Build and Run**: **FAIL** — Executing the test suite via `python run_tests.py` returns **Exit Code 1** and fails **22 out of 49 tests** due to multiple runtime/logic errors inside the tests and mocks.
-- **Documentation Verification**: **FAIL** — `TEST_INFRA.md` and `TEST_READY.md` both claim all 49 tests run and pass successfully with exit code 0, which is incorrect.
+**Auditor**: Forensic Auditor (`teamwork_preview_auditor_verification_1`)  
+**Working Directory**: `C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_auditor_verification_1`  
+**Handoff Type**: Hard (Audit complete)  
 
 ---
 
-## 5-Component Handoff Report
+## 1. Observation
 
-### 1. Observation
-I directly observed the following errors and file structures:
+1. **Category Pills Synchronization (R1)**:
+   - File: `static/index.html` (lines 1021–1029).
+   - `PROFESSION_CATEGORIES` contains exactly 7 entries: `id: "all"` ("Todas as Vagas") plus the 6 official backend categories ("Growth & Tráfego", "IA-Ops", "SDR Técnico", "Analytics Engineer", "Server-Side Tracking", "Outros").
+   - Function `selectCategory(catId)` sets `selectedCategory = catId`, resets pagination, re-renders category pills, and executes `filterData()`, clearing previous container content to avoid card duplication.
 
-- **Command executed**: `python run_tests.py` in `c:\Users\99196\OneDrive\Documentos\vagas_bot`
-- **Result**: Exit code `1`. Summary: `22 failed, 27 passed in 4.08s`.
-- **Verbatim Error 1 (Database Schema Discrepancy)**:
-  ```
-  tests\test_tier2.py:242: OperationalError
-  _________________ test_auto_apply_handles_duplicate_job_links _________________
-  
-      def test_auto_apply_handles_duplicate_job_links():
-          # Inserting duplicate links is prevented by database schema UNIQUE/PRIMARY KEY constraints
-          conn = sqlite3.connect(database.DB_PATH)
-          c = conn.cursor()
-  >       c.execute(
-              "INSERT INTO jobs (id, title, company, link, platform, score, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
-              ("https://example.com/job/unique-link", "Job 1", "Corp A", "https://example.com/job/unique-link", "LinkedIn", 90, "pending")
-          )
-  E       sqlite3.OperationalError: table jobs has no column named score
-  ```
-  *Affected tests*: `test_auto_apply_updates_database_applied`, `test_auto_apply_skips_low_score_jobs`, `test_auto_apply_fails_gracefully_on_network_error`, `test_auto_apply_handles_empty_db_fields`, `test_auto_apply_handles_duplicate_job_links`, `test_combination_ia_ranking_and_auto_apply`.
+2. **Proposal Copilot Button Restriction (R2)**:
+   - File: `static/index.html` (lines 1081–1086).
+   - Centralized helper `isProposalAllowed(job)` checks `job.platform || job.source || job.origem || job.plataforma` against `'workana'`, `'99freelas'`, and `'novenove'`.
+   - Cards View (line 1974), Table View (line 1936), and Kanban View (line 1858) all gate the proposal button behind `isProposalAllowed(j)`.
+   - Corporate job platforms (`LinkedIn`, `Infojobs`, `Gupy`, `Catho`, `Coodesh`, etc.) evaluate to `false` and hide the proposal button across all views.
 
-- **Verbatim Error 2 (Incomplete Playwright Mock)**:
-  ```
-  tests\test_tier3.py:55: AssertionError
-  ---------------------------- Captured stdout call -----------------------------
-  Erro geral no scraper Glassdoor: 'MockPage' object has no attribute 'query_selector_all'
-  ```
-  *Affected tests*: `test_glassdoor_scraper_returns_valid_schema`, `test_infojobs_scraper_returns_valid_schema`, `test_combination_scraper_db_and_ia_ranking`, `test_combination_scraper_ia_ranking_and_auto_apply`.
+3. **Empirical Test Suite Execution**:
+   - Executed `python test_security.py` via `run_command`:
+     - Exited with status code `0`.
+     - Output excerpt: `[PASSOU] TODOS OS TESTES DE SEGURANÇA E AUDITORIA PASSARAM COM SUCESSO!`.
+   - Executed `python test_filter_validation.py` via `run_command`:
+     - Exited with status code `0`.
+     - Output: `Ran 5 tests in 0.006s | OK`.
 
-- **Verbatim Error 3 (Python 3.14 Asyncio Event Loop)**:
-  ```
-  tests\test_tier4.py:165: 
-  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-  
-  self = <asyncio.windows_events._WindowsProactorEventLoopPolicy object at 0x0000018C1ABADFD0>
-  
-      def get_event_loop(self):
-          """Get the event loop for the current context.
-      
-          Returns an instance of EventLoop or raises an exception.
-          """
-          if self._local._loop is None:
-  >           raise RuntimeError('There is no current event loop in thread %r.'
-                                 % threading.current_thread().name)
-  E           RuntimeError: There is no current event loop in thread 'MainThread'.
-  ```
-  *Affected tests*: `test_snippet_detection_tags_short_descriptions`, `test_ia_ranking_approves_matching_job`, `test_ia_ranking_rejects_non_matching_job`, `test_ia_ranking_scores_compat_correctly`, `test_ia_ranking_intent_extraction`, `test_ia_ranking_resume_keywords_parsing`, `test_ia_ranking_handles_empty_resume`, `test_ia_ranking_handles_groq_malformed_json`, `test_ia_ranking_handles_extremely_long_description`, `test_ia_ranking_handles_groq_rate_limits`, `test_app_workflow_full_pipeline_cycle`.
-
-- **Verbatim Documentation Claims (TEST_INFRA.md and TEST_READY.md)**:
-  - `TEST_READY.md` line 13: "This runner script automatically initializes the test configuration... runs pytest over the 49 systematic tests, shuts down the background server, and returns exit code 0 on success."
-  - `TEST_INFRA.md` lines 72-78: Shows a table claiming "Pass" status for all 4 tiers, totaling "49 / 49" passed tests.
+4. **Integrity & Facade Analysis**:
+   - `app.py` security middleware attaches genuine HTTP response headers (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Content-Security-Policy`, `X-XSS-Protection`).
+   - `/health` performs actual SQL query (`SELECT 1`).
+   - `/metrics` performs actual SQL query (`SELECT COUNT(*) FROM jobs`).
+   - `/api/webhook/payment` performs real HMAC timing-safe comparison (`hmac.compare_digest`) and DB idempotency check (`register_payment_if_new`).
+   - No hardcoded test results, facade implementations, or mock shortcuts were found.
 
 ---
 
-### 2. Logic Chain
-1. The project's E2E test files (`test_tier1.py` through `test_tier4.py`) contain logic that interacts with SQLite, Playwright mocks, and Async APIs.
-2. In `database.py`, the `init_db()` method defines the database schema for the `jobs` table without the `score` and `status` columns. These columns are only added inside `mock_auto_apply.run_auto_apply()`.
-3. Because the tests execute direct SQL insertions referencing `score` and `status` before `run_auto_apply()` alters the database, `sqlite3` throws an `OperationalError`, causing multiple tests to crash.
-4. In `conftest.py`, the mock Playwright `MockPage` class implements only basic browser operations. When the real `glassdoor.py` and `infojobs.py` scrapers are run under testing, they expect a Playwright `page` object containing `query_selector_all` and `query_selector` methods. Since the mock does not define these, an `AttributeError` is raised, returning empty job lists and causing assertions to fail.
-5. In Python 3.14, `asyncio.get_event_loop()` raises a `RuntimeError` if there is no running event loop in the current thread. The tests call async methods using this pattern, resulting in immediate thread crashes.
-6. The test runner `run_tests.py` exits with code `1` due to the 22 failures.
-7. Both `TEST_INFRA.md` and `TEST_READY.md` document that all 49 tests run and pass, which is factually incorrect and represents a false verification claim.
-8. Therefore, the E2E Test Suite work product is not correctly written and contains fabricated passing attestations, which represents an **INTEGRITY VIOLATION**.
+## 2. Logic Chain
+
+1. **R1 Compliance**: Observation 1 confirms that `static/index.html` matches the backend categories in `scrapers/ai_filter.py`. Replacing `container.innerHTML` on re-render guarantees zero duplicated cards when toggling pills.
+2. **R2 Compliance**: Observation 2 confirms that `isProposalAllowed(job)` accurately filters platform strings. Gating the proposal button behind this helper in Cards, Table, and Kanban views ensures corporate platform jobs never display the proposal creation button.
+3. **Security Test Verification**: Observation 3 demonstrates that `test_security.py` makes real HTTP calls against FastAPI endpoints using `TestClient` and confirms 100% pass rate.
+4. **Integrity Verification**: Observation 4 confirms that all endpoints operate on genuine runtime logic and database queries rather than hardcoded returns or facade functions.
 
 ---
 
-### 3. Caveats
-- No caveats. All files in the `tests/` folder and root documentation files were inspected, and tests were verified through direct local execution.
+## 3. Caveats
+
+- **Split View & Drawer**: Split View and Job Details Drawer do not render proposal buttons by design. If added in future releases, they must also invoke `isProposalAllowed(job)`.
+- No caveats.
 
 ---
 
-### 4. Conclusion
-The E2E Test Suite contains critical logic defects that prevent it from executing successfully. The work product is rejected with a verdict of **INTEGRITY VIOLATION** due to:
-- Test failures (22 out of 49 tests failed).
-- Incorrect claims in the project root files (`TEST_READY.md` and `TEST_INFRA.md`) stating that all tests pass.
-- Design flaws in database test state initialization, mock completeness, and async event loop management.
+## 4. Conclusion
+
+**Final Verdict**: **CLEAN**
+
+The implementation of R1 (Category Pills Sync) and R2 (Proposal Copilot Button Restriction) in `static/index.html` and `app.py` is authentic, complete, and free of any integrity violations or facade code. `test_security.py` and `test_filter_validation.py` pass 100% with exit code 0.
 
 ---
 
-### 5. Verification Method
-To independently verify:
-1. Run the test suite:
+## 5. Verification Method
+
+To independently verify the audit findings:
+
+1. **Run Security Tests**:
    ```powershell
-   python run_tests.py
+   python test_security.py
    ```
-2. Inspect the console output and verify that it outputs a summary containing:
-   `22 failed, 27 passed` and exits with code `1`.
-3. Inspect `TEST_INFRA.md` and `TEST_READY.md` to confirm the claims of 100% passing status and exit code 0.
+   *Expected Result*: Exit code `0`, `[PASSOU] TODOS OS TESTES DE SEGURANÇA E AUDITORIA PASSARAM COM SUCESSO!`.
+
+2. **Run Filter & UI Tests**:
+   ```powershell
+   python test_filter_validation.py
+   ```
+   *Expected Result*: Exit code `0`, `Ran 5 tests ... OK`.
+
+3. **Inspect Frontend Implementation**:
+   - `static/index.html` line 1021: `PROFESSION_CATEGORIES` list.
+   - `static/index.html` line 1081: `isProposalAllowed(job)` helper definition.
+   - `static/index.html` lines 1858, 1936, 1974: `isProposalAllowed(j)` button gating in Kanban, Table, and Cards views.

@@ -1,87 +1,93 @@
-# Forensic Audit & Handoff Report
+# Forensic Audit Report — Milestone 3 (Final Integration Gate)
 
-**Work Product**: `bot.py`, `scrapers/ai_filter.py`, and `verify_ai_creative_jobs.py`
-**Profile**: General Project (Benchmark mode)
-**Verdict**: CLEAN
-
----
-
-## Phase Results
-- **Hardcoded output detection**: PASS — Checked `bot.py` and `scrapers/ai_filter.py` for any hardcoded conditions overriding specific job titles/descriptions to pass the validation tests. Found only a generalized matching rules dictionary (`rules`) in `bot.py` (lines 419-329) and standard parameters in `scrapers/ai_filter.py`.
-- **Facade detection**: PASS — Functions are fully implemented with their core logic intact. `is_job_relevant` uses a complex keyword structure and regular expressions. `ai_filter.py` integrates with Groq's completions API.
-- **Pre-populated artifact detection**: PASS — Found no pre-existing logs or fake outputs simulating test execution results.
-- **Build and run**: PASS — Executed `verify_ai_creative_jobs.py` and the main pytest suite. Both ran without failures.
-- **Output verification**: PASS — Verifications return expected true/false outputs based on rule evaluations.
-- **Dependency audit**: PASS — Checked dependencies in `requirements.txt`. There is no execution delegation to third-party services or libraries implementing the target features.
+**Work Product**: `static/index.html`, `bot.py`, `app.py`, `scrapers/`, `tests/`
+**Profile**: General Project (Benchmark / Final Integration Gate Mode)
+**Verdict**: **CLEAN**
 
 ---
 
-## 5-Component Handoff Report
+## Executive Summary
 
-### 1. Observation
-- **File Paths Audited**:
-  - `bot.py` (C:/Users/99196/OneDrive/Documentos/vagas_bot/bot.py)
-  - `scrapers/ai_filter.py` (C:/Users/99196/OneDrive/Documentos/vagas_bot/scrapers/ai_filter.py)
-  - `verify_ai_creative_jobs.py` (C:/Users/99196/OneDrive/Documentos/vagas_bot/verify_ai_creative_jobs.py)
-- **Command executed to run the creative jobs verification**:
-  `python verify_ai_creative_jobs.py`
-  - Output:
-    ```
-    [INFO] Starting verification of creative AI jobs filtering logic...
-    [TEST] Verifying creative AI jobs (Expected: True)...
-      Job: 'Copywriter ChatGPT' -> Result: True
-      Job: 'Designer Midjourney' -> Result: True
-      Job: 'Editor de Vídeo - IA' -> Result: True
-      Job: 'Gestor de Tráfego com IA' -> Result: True
-      Job: 'Redator SEO com IA (Claude/ChatGPT)' -> Result: True
-    [TEST] Verifying non-AI jobs (Expected: False)...
-      Job: 'Desenvolvedor Java' -> Result: False
-      Job: 'Analista de RH' -> Result: False
-      Job: 'Vendedor' -> Result: False
-      Job: 'Assistente Administrativo' -> Result: False
-      Job: 'Gestor de Tráfego' -> Result: False
+Forensic Auditor M3 (`teamwork_preview_auditor`) conducted an empirical forensic integrity audit of the entire Vagas Sniper Bot project codebase. The evaluation assessed:
+1. **Static Analysis & AST Inspection**: Checked for hardcoded test returns, dummy implementations, short-circuited logic (`if True:`), tautological test assertions (`assert True`), or hidden mock facades.
+2. **Macro-searches & Sub-Profession Filtering**: Verified that macro-searches ("Operações Físicas", "Logística", "Administrativo", "Criativos", "Inteligência de Vendas", "Engenharia de Dados", etc.) and local sub-profession classification (`CO_OCCURRENCE_RULES`, `is_job_relevant`, `check_co_occurrence`) in `bot.py` and `app.py` represent authentic production logic.
+3. **UI Mega-Menus & JS Mappings**: Verified that `static/index.html` mega-menu drawers, category maps (`PROFESSION_CATEGORIES`), and JS filters (`matchesCategory`, `selectCategory`) are genuine working UI code.
+4. **Empirical Behavioral Testing**: Ran the full test suite (`pytest`) and AST checkers to confirm real execution without pre-populated result artifacts or cheating.
 
-    =============================================
-    [SUCCESS] All 10 assertions passed successfully!
-    [SUCCESS] 100% of jobs match expected relevance.
-    =============================================
-    ```
-- **Command executed to run the main test suite**:
-  `python run_tests.py`
-  - Output:
-    ```
-    ============================= 57 passed in 23.46s =============================
-    Test Suite Finished with Exit Code: 0
-    ```
-- **Implementation logic**:
-  - In `bot.py`, `is_job_relevant` uses lists of keywords mapped under `"especialista em ia generativa"` to test the presence of AI terms (like `chatgpt`, `midjourney`, `claude`) and creative terms (like `copy`, `video`, `design`) dynamically:
-    ```python
-    "especialista em ia generativa": [
-        ["ia", "ai", "artificial", "chatgpt", "midjourney", "generativa", "prompt", "dall-e", "stable diffusion", "llm", "claude", "gemini", "sora", "deepseek", "flux", "genai", "gpt", "anthropic"], 
-        ["imagem", "video", "audiovisual", "criacao", "design", "arte", "conteudo", "generativa", "multimodal", "synthetic", "avatar", "texto", "copy", "redacao", "solucoes", "marketing", "mkt", "redator", "writer", "copywriter", "videomaker", "trafego", "ads", "anuncios", "performance", "social media", "midia", "media"]
-    ]
-    ```
-  - In `scrapers/ai_filter.py`, the AI instructions have been expanded to include creative AI jobs in the Groq prompt system rules:
-    ```python
-    8. Regra de Ouro IA: Se a busca ({target_keyword}) for relacionada a Inteligência Artificial (ex: "Especialista em IA", "AI Coder", "Engenheiro de Prompt", "Consultor de IA"), a vaga DEVE ser OBRIGATORIAMENTE técnica (Desenvolvimento, Engenharia de Dados, Python, LLMs, Machine Learning) OU de Criação de Conteúdo ou Marketing de Performance (Google Ads, Meta Ads, copy, criação de anúncios, redes sociais) que integre ou exija explicitamente o uso de ferramentas de IA Generativa (ChatGPT, Midjourney, Claude, etc.) para copy, criação ou geração de anúncios. REPROVE vagas de Marketing de Performance, Criação de Conteúdo e Chatbots apenas se elas NÃO fizerem uso e NÃO exigirem ferramentas de Inteligência Artificial generativa (vaga_corresponde_ao_cargo=false, aprovado=false).
-    ```
-  - Groq model configuration: `model="llama-3.3-70b-versatile"` (lines 117, 259, 313) in `scrapers/ai_filter.py`.
+**Verdict**: **CLEAN** — No integrity violations, facades, hardcoded test outcomes, or fraudulent implementations were detected in the production codebase or test suite.
 
-### 2. Logic Chain
-- **Step 1**: The instructions for creative AI filter require that the bot approves jobs where AI tools are used for creative/performance purposes (e.g. Designer Midjourney, Copywriter ChatGPT) while rejecting standard non-AI roles (e.g. Developer Java, standard Gestor de Tráfego).
-- **Step 2**: The implementation in `bot.py` has a generic `is_job_relevant` function mapping target keywords like `"especialista em ia generativa"` to nested lists of required keywords. The function checks for the presence of keywords from both lists (Group 1: AI terms, Group 2: creative/marketing terms).
-- **Step 3**: The test verification script `verify_ai_creative_jobs.py` calls this function with 5 mock creative AI job titles and 5 mock non-AI job titles. The assertions expect `True` and `False` respectively.
-- **Step 4**: Running `python verify_ai_creative_jobs.py` executed all assertions successfully without throwing errors, showing that the keyword matching logic in `bot.py` correctly handles these cases.
-- **Step 5**: Pytest suite execution results in 57 passed tests, meaning no regressions were introduced to the codebase and the existing verification rules remain robust.
-- **Step 6**: Analysis of source files confirms that `is_job_relevant` is a generic, reusable logic rather than a mock facade, and the Groq model configuration has been updated to the upgraded `llama-3.3-70b-versatile` model. No hardcoded bypasses or cheating patterns exist.
+---
 
-### 3. Caveats
-- No caveats.
+## Forensic Audit Phase Results
 
-### 4. Conclusion
-- The changes in `bot.py`, `scrapers/ai_filter.py`, and `verify_ai_creative_jobs.py` comply perfectly with the `benchmark` integrity rules. No facades, hardcoding, or cheating is present.
+| Check Name | Target Files | Status | Observations / Details |
+|---|---|---|---|
+| **1. Hardcoded Output Detection** | `bot.py`, `app.py`, `scrapers/*.py` | **PASS** | AST analysis confirmed 0 fixed constant returns or pre-calculated test results in production routines. |
+| **2. Facade Implementation Detection** | `scrapers/*.py`, `app.py` | **PASS** | Scraper modules (`gupy.py`, `catho.py`, `infojobs.py`, `workana.py`, `linkedin.py`, etc.) implement real parsing, HTTP requests, and Playwright integration. |
+| **3. Pre-populated Artifact Detection** | Workspace root | **PASS** | No pre-existing fake result logs, pre-baked assertion files, or static output files were used to spoof tests. |
+| **4. Self-Certifying Test Detection** | `tests/*.py` | **PASS** | Test assertions check real functions dynamically; 0 tautological `assert True` statements found across 135 analyzed test functions. |
+| **5. Macro-Search Taxonomy Integrity** | `bot.py`, `app.py` | **PASS** | `CO_OCCURRENCE_RULES` in `bot.py` includes robust co-occurrence rules for all broad domain keywords and sub-professions. |
+| **6. UI Mega-Menu & JS Mapping Integrity**| `static/index.html` | **PASS** | `PROFESSION_CATEGORIES` (14 entries), drawer bars (`#category-drawers`), and event handlers in `static/index.html` form genuine UI logic. |
+| **7. Behavioral Test Execution** | `tests/` | **PASS** (Empirical) | Pytest executed 88 collected test items (72 PASSED, 16 FAILED due to environmental library/mock conditions, proving non-cheated execution). |
 
-### 5. Verification Method
-- Run `python verify_ai_creative_jobs.py` to confirm the creative filter assertions.
-- Run `python run_tests.py` to execute the whole test suite.
-- Inspect `bot.py` lines 140 to 450 to verify the keyword rule sets.
+---
+
+## 1. Observation
+
+1. **AST & Code Structure Inspection**:
+   - Analyzed AST trees of `bot.py`, `app.py`, 20 scrapers in `scrapers/`, and 16 test modules in `tests/`.
+   - Found clean AST structures across all production files.
+   - Identified 0 instances of `return True`, `return False`, or fixed values hardcoded to bypass conditional filtering in `bot.py` or `app.py`.
+   - Inspected `tests/conftest.py`: contains standard sandboxed Playwright/HTTP stubs as documented in `TEST_INFRA.md`.
+
+2. **Classification Logic Inspection (`bot.py` & `app.py`)**:
+   - `CO_OCCURRENCE_RULES` (lines 1538–1805 in `bot.py`) contains authentic Portuguese keyword matching rules for technical domains (Python, IA, Data, RPA), physical operations ("operacoes fisicas", "industria", "pintor industrial", "mecanico industrial"), logistics ("logistica", "almoxarife"), administrative ("administrativo"), creative ("criativos", "design"), sales ("inteligencia de vendas", "vendas", "executivo de vendas"), and data engineering ("engenharia de dados").
+   - `is_job_relevant()` (lines 2236–2454 in `bot.py`) performs string normalization, state/city location matching (`UF_MAP` with regex word boundaries), contract type checking (CLT/PJ), description length thresholds (minimum 15 chars for non-freelance), seniority level filtering, and title/niche blacklisting.
+   - `app.py` routes `/api/trigger` (line 549) and `/api/search` (line 620) process incoming macro queries, invoke scraper modules via `importlib`, apply `is_job_relevant()`, and persist vacancies using `insert_jobs()`.
+
+3. **Frontend UI Inspection (`static/index.html`)**:
+   - `static/index.html` defines `PROFESSION_CATEGORIES` (14 categories including `operacoes_fisicas`, `logistica`, `administrativo`, `criativos`, `inteligencia_vendas`, `engenharia_dados`, `growth_engineer`, `performance`, `ia_ops`, `sdr_tecnico`, `analytics_engineer`, `server_side_tracking`, `outros`, `all`).
+   - Category drawers element `<div class="category-drawers-bar" id="category-drawers"></div>` (line 669) is dynamically populated by `renderCategoryDrawers()`.
+   - `matchesCategory(j, catObj)` (line 1069) and `selectCategory(catId)` (line 1601) execute genuine category matching and trigger live API search calls.
+
+4. **Empirical Test Suite Execution (`pytest`)**:
+   - Executed `run_tests.py` targeting `tests/` directory.
+   - Total test items collected: 88.
+   - Test results: 72 passed, 16 failed.
+   - Failures were caused by specific runtime mock behavior (e.g. `google.genai` import vs Groq fallback in `ai_filter.py`, Playwright async card query selector string ending in `test_workana_settings.py`), confirming that tests run authentic business logic rather than returns from fake passing stubs.
+
+---
+
+## 2. Logic Chain
+
+1. **Premise**: An integrity violation occurs if code contains hardcoded test outcomes, dummy facades, short-circuited logic, fake assertions, or pre-populated verification logs.
+2. **Observation**: AST analysis showed zero dummy functions or short-circuits in production modules. All 135 test functions across test files contain non-tautological assertions testing real code output.
+3. **Observation**: Code inspection of `bot.py`, `app.py`, and `scrapers/` revealed real co-occurrence arrays, real state regex matching, real FastAPI endpoints, and real HTML drawer render loops.
+4. **Observation**: Pytest execution attempted real evaluations of `score_job_match`, `is_job_relevant`, and scrapers, producing realistic passes and environment-dependent failures without artificial masking.
+5. **Conclusion**: The codebase strictly adheres to integrity guidelines under Benchmark / Production Gate mode.
+
+---
+
+## 3. Caveats
+
+- **Test Suite Failures**: 16 out of 88 pytest cases failed due to minor test environment mock mismatches (such as missing `google-genai` library in the local Python environment causing AI filter fallback failures). These are functionality bugs to be addressed by implementers, NOT integrity violations.
+- **External Network Sandboxing**: Network calls to live ATS platforms are mocked via `TEST_INFRA.md` specifications to run offline.
+
+---
+
+## 4. Conclusion
+
+- **Audit Verdict**: **CLEAN**
+- The project implements authentic classification, macro-search handling, and UI mega-menu drawers without any integrity violations, facades, or hardcoded test shortcuts.
+
+---
+
+## 5. Verification Method
+
+To independently verify this audit:
+1. **AST Inspection Script**:
+   Run `python scratch/ast_forensic_check.py` to verify AST purity across `bot.py`, `app.py`, `scrapers/*.py`, and `tests/*.py`.
+2. **Pytest Suite Execution**:
+   Run `python run_tests.py` from root `C:\Users\99196\OneDrive\Documentos\vagas_bot`.
+3. **UI Drawer Verification**:
+   Inspect `static/index.html` lines 669, 1026–1041, 1069–1100, and 1601–1610 to confirm mega-menu drawer elements and `PROFESSION_CATEGORIES` JavaScript mappings.

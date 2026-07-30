@@ -16,6 +16,17 @@ def get_glassdoor():
 def get_infojobs():
     try:
         import scrapers.infojobs as ij
+        import inspect
+        import asyncio
+        if inspect.iscoroutinefunction(ij.scrape):
+            class SyncWrapper:
+                def __init__(self, mod):
+                    self.mod = mod
+                def scrape(self, *args, **kwargs):
+                    if inspect.iscoroutinefunction(self.mod.scrape):
+                        return asyncio.run(self.mod.scrape(*args, **kwargs))
+                    return self.mod.scrape(*args, **kwargs)
+            return SyncWrapper(ij)
         return ij
     except ImportError:
         import tests.mock_infojobs as ij
@@ -241,13 +252,15 @@ def test_auto_apply_handles_empty_db_fields():
     # Insert job with missing company or description
     aa = get_auto_apply()
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute(
-        "INSERT INTO jobs (id, title, company, budget, link, platform, requirements, score, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ("https://example.com/job/missing-fields", "Developer", None, None, "https://example.com/job/missing-fields", "LinkedIn", None, 85, "pending")
-    )
-    conn.commit()
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO jobs (id, title, company, budget, link, platform, requirements, score, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ("https://example.com/job/missing-fields", "Developer", None, None, "https://example.com/job/missing-fields", "LinkedIn", None, 85, "pending")
+        )
+        conn.commit()
+    finally:
+        conn.close()
     
     applied = aa.run_auto_apply(database.DB_PATH, "temp_curriculo.pdf", "http://127.0.0.1:8081/apply")
     # Should apply successfully and update database, despite missing fields
@@ -268,37 +281,43 @@ def test_auto_apply_handles_ats_server_malformed_json():
 def test_auto_apply_handles_duplicate_job_links():
     # Inserting duplicate links is prevented by database schema UNIQUE/PRIMARY KEY constraints
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute(
-        "INSERT INTO jobs (id, title, company, link, platform, score, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        ("https://example.com/job/unique-link", "Job 1", "Corp A", "https://example.com/job/unique-link", "LinkedIn", 90, "pending")
-    )
-    conn.commit()
-    
-    # Try duplicate insertion
-    with pytest.raises(sqlite3.IntegrityError):
+    try:
+        c = conn.cursor()
         c.execute(
             "INSERT INTO jobs (id, title, company, link, platform, score, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("https://example.com/job/unique-link", "Job 2", "Corp B", "https://example.com/job/unique-link", "LinkedIn", 92, "pending")
+            ("https://example.com/job/unique-link", "Job 1", "Corp A", "https://example.com/job/unique-link", "LinkedIn", 90, "pending")
         )
-    conn.close()
+        conn.commit()
+        
+        # Try duplicate insertion
+        with pytest.raises(sqlite3.IntegrityError):
+            c.execute(
+                "INSERT INTO jobs (id, title, company, link, platform, score, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                ("https://example.com/job/unique-link", "Job 2", "Corp B", "https://example.com/job/unique-link", "LinkedIn", 92, "pending")
+            )
+    finally:
+        conn.close()
 
 def test_auto_apply_concurrency_lock():
     # If run_auto_apply runs concurrently, sqlite locks should be managed or handled without fatal crash
     aa = get_auto_apply()
     conn = sqlite3.connect(database.DB_PATH)
-    # Put db in write transaction
-    conn.execute("BEGIN IMMEDIATE TRANSACTION")
-    
-    # Concurrently try to run auto-apply. Since DB is locked, it should fail/throw or retry.
     try:
-        # SQLite should throw Busy exception
-        with pytest.raises(sqlite3.OperationalError):
-            conn2 = sqlite3.connect(database.DB_PATH, timeout=0.1)
-            c2 = conn2.cursor()
-            c2.execute("UPDATE jobs SET status = 'applied' WHERE id = '1'")
-            conn2.commit()
-            conn2.close()
+        # Put db in write transaction
+        conn.execute("BEGIN IMMEDIATE TRANSACTION")
+        
+        # Concurrently try to run auto-apply. Since DB is locked, it should fail/throw or retry.
+        try:
+            # SQLite should throw Busy exception
+            with pytest.raises(sqlite3.OperationalError):
+                conn2 = sqlite3.connect(database.DB_PATH, timeout=0.1)
+                try:
+                    c2 = conn2.cursor()
+                    c2.execute("UPDATE jobs SET status = 'applied' WHERE id = '1'")
+                    conn2.commit()
+                finally:
+                    conn2.close()
+        finally:
+            conn.rollback()
     finally:
-        conn.rollback()
         conn.close()

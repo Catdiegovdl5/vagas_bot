@@ -1,44 +1,35 @@
-# BRIEFING — 2026-07-08T09:21:00-03:00
+# BRIEFING — 2026-07-29T08:29:40Z
 
 ## Mission
-Investigate 9 job scrapers (Jsearch, Workana, Remotar, Glassdoor, Gupy, Vagas Com, Programathor, Coodesh, Geekhunter) to verify why they return 0 results or fail, and propose fix strategies.
+Investigate all scrapers in `scrapers/` and `bot.py` to determine how keyword search queries work and design the refactoring for supporting 6 new categories natively with optimized keyword term sets.
 
 ## 🔒 My Identity
-- Archetype: Explorer
-- Roles: Teamwork explorer
-- Working directory: C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_1
-- Original parent: 3e6d7a7a-e56e-406e-9c95-6942705a6efd
-- Milestone: Scraper Investigation
+- Archetype: explorer
+- Roles: teamwork_preview_explorer_scrapers_1
+- Working directory: C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_1
+- Original parent: f250d8ce-e5a1-428d-b29d-c9ab8eeb5381
+- Milestone: Scrapers category and keyword refactoring analysis
 
 ## 🔒 Key Constraints
-- Read-only investigation — do NOT implement
-- Analyze failures and propose fixes in analysis.md and handoff.md
-- Keep progress.md updated as heartbeat
+- Read-only investigation — do NOT implement changes in source code files outside working directory
+- Produce `analysis.md` and `handoff.md` in working directory
+- Communicate completion to parent via `send_message`
 
 ## Current Parent
-- Conversation ID: 3e6d7a7a-e56e-406e-9c95-6942705a6efd
-- Updated: 2026-07-08T09:21:00-03:00
+- Conversation ID: f250d8ce-e5a1-428d-b29d-c9ab8eeb5381
+- Updated: 2026-07-29T08:29:40Z
 
 ## Investigation State
-- **Explored paths**: `scrapers/` files, `bot.py`, `erros_robo.log`, live page structures of Coodesh, Geekhunter, Remotar, Glassdoor, and Gupy.
-- **Key findings**: 
-  - Jsearch: RapidAPI key expired.
-  - Workana & Vagas.com: Functional.
-  - Remotar: Uses client-side rendering (CSR).
-  - Glassdoor: Validation check is fooled by Cloudflare brand name presence on block pages.
-  - Gupy: Old API deprecated; new employability API `v1/jobs` is active.
-  - Programathor: Capitalization bug in URL slugs.
-  - Coodesh: CSR page; uses API query with `x-csh-key: coodesh-experts` header.
-  - Geekhunter: Domain changed and CSR skeletons; parse `/jobs/` links in raw HTML directly.
+- **Explored paths**: `scrapers/` (19 files), `bot.py`
+- **Key findings**: Identified scraper invocation mechanisms, parameter passing, `vagas_com_mapping`, `workana.py` single-keyword extraction, and formulated native search term sets for the 6 new categories.
 - **Unexplored areas**: None.
 
 ## Key Decisions Made
-- Wrote and executed diagnostics scripts for all failing scrapers, verifying exact selectors and APIs.
+- Completed exploration and synthesized findings into `analysis.md` and `handoff.md`.
 
 ## Artifact Index
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_1/ORIGINAL_REQUEST.md — Original request content
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_1/BRIEFING.md — My working memory briefing
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_1/progress.md — Progress log heartbeat
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_1/test_all_nine.py — Script to test all 9 scrapers
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_1/analysis.md — Report detailing findings for all scrapers
-- C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/teamwork_preview_explorer_scrapers_1/handoff.md — 5-component handoff report
+- C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_1\ORIGINAL_REQUEST.md
+- C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_1\progress.md
+- C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_1\BRIEFING.md
+- C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_1\analysis.md
+- C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\teamwork_preview_explorer_scrapers_1\handoff.md

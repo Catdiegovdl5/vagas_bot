@@ -2,30 +2,44 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 
-def scrape(keyword, level="Todos", country="Brasil"):
+def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
     jobs = []
     try:
-        encoded_kw = urllib.parse.quote(keyword)
+        search_kw = keyword or "Python"
+        lvl = level or "Todos"
+        loc = location or country or kwargs.get("location") or kwargs.get("country") or ""
+        
+        if lvl != "Todos":
+            search_kw += f" {lvl}"
+        if loc and loc.lower() not in ["todos", "brasil", "brasil (remoto)", "remoto", "qualquer", ""]:
+            search_kw += f" {loc}"
+            
+        encoded_kw = urllib.parse.quote(search_kw)
         url = f"https://www.99freelas.com.br/projects?q={encoded_kw}"
         
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
         response = requests.get(url, headers=headers, timeout=10)
         
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
-            items = soup.find_all('li', class_='result-item')
+            # Seleciona os links diretamente dos títulos da classe .title a ou .project-title a
+            links = soup.select('.title a, .project-title a, .result-item a.title')
             
-            for item in items[:15]:
-                title_el = item.find('h1', class_='title')
-                if not title_el:
+            for a_tag in links[:15]:
+                title = a_tag.text.strip()
+                href = a_tag.get('href', '')
+                if not title or not href or '#' in href:
                     continue
                     
-                title = title_el.text.strip()
-                link_el = title_el.find('a')
-                link = "https://www.99freelas.com.br" + link_el.get('href', '') if link_el and link_el.get('href') else url
+                link = "https://www.99freelas.com.br" + href if href.startswith('/') else href
                 
-                desc_el = item.find('div', class_='description')
-                desc = desc_el.text.strip() if desc_el else "Sem descrição"
+                # Busca elemento pai ou container do item para extrair a descrição
+                parent = a_tag.find_parent('li') or a_tag.find_parent('div')
+                desc = "Sem descrição"
+                if parent:
+                    desc_el = parent.select_one('.description, .project-description, .summary')
+                    if desc_el:
+                        desc = desc_el.text.strip()
                 
                 jobs.append({
                     "platform": "99Freelas",

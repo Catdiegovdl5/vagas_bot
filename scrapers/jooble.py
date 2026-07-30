@@ -8,26 +8,29 @@ try:
 except ImportError:
     requests_cffi = None
 
-def scrape(keyword, level="Todos", country="Brasil"):
+def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
     jobs = []
+    c_str = (country or "").lower()
+    l_str = (location or "").lower()
+    target_loc = location or country or kwargs.get("location") or kwargs.get("country") or ""
     try:
-        search_kw = f"{keyword}"
-        if level != "Todos":
-            search_kw += f" {level}"
+        kw = keyword or "Python"
+        lvl = level or "Todos"
+        search_kw = f"{kw}"
+        if lvl != "Todos":
+            search_kw += f" {lvl}"
             
-        base_url = "jooble.org"
-        loc = ""
-        if "Brasil" in country: 
-            base_url = "br.jooble.org"
-            loc = "Brazil"
-        elif country == "USA": 
-            loc = "United States"
-        elif "Londrina" in country:
-            base_url = "br.jooble.org"
+        base_url = "br.jooble.org"
+        loc = "Brazil"
+        if "Londrina" in target_loc:
             loc = "Londrina"
-        elif "Assaí" in country:
-            base_url = "br.jooble.org"
+        elif "Assaí" in target_loc:
             loc = "Assaí"
+        elif target_loc and target_loc.upper() in ["USA", "US", "UNITED STATES"]:
+            base_url = "jooble.org"
+            loc = "United States"
+        elif target_loc and target_loc.lower() not in ["todos", "brasil", "brasil (remoto)", "remoto", "qualquer", ""]:
+            loc = target_loc
             
         url = f"https://{base_url}/api/0031603e-bd0a-4505-ad10-383c420d804f"
         
@@ -98,6 +101,10 @@ def scrape(keyword, level="Todos", country="Brasil"):
                     api_snippet = item.get("snippet", "")
                     description = api_snippet.replace('<b>', '').replace('</b>', '').replace('\n', ' ').strip()
                     
+                # Guard: descartar vagas com link inválido ou sem título
+                if not title or not final_url or final_url == '#':
+                    continue
+
                 jobs.append({
                     "platform": "Jooble",
                     "title": title,
@@ -112,16 +119,4 @@ def scrape(keyword, level="Todos", country="Brasil"):
     except Exception:
         pass
         
-    if not jobs:
-        jobs.append({
-            "platform": "Jooble",
-            "title": f"Sem vagas API Jooble para {keyword} ({level})",
-            "company": "N/A",
-            "budget": "N/A",
-            "link": "#",
-            "job_type": "N/A",
-            "profession": keyword,
-            "level": level,
-            "requirements": "Não houve resultados."
-        })
     return jobs

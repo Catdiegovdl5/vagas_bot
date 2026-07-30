@@ -10,7 +10,10 @@ import base64
 # Definimos que o robô só pode ler e-mails, para segurança
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
-def scrape(keyword, level="Todos", country="Brasil"):
+def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
+    c_str = (country or "").lower()
+    l_str = (location or "").lower()
+    loc = location or country or kwargs.get("location") or kwargs.get("country") or ""
     creds = None
     
     # O token armazena o acesso persistente do usuário.

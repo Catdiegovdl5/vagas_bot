@@ -28,6 +28,17 @@ def get_glassdoor():
 def get_infojobs():
     try:
         import scrapers.infojobs as ij
+        import inspect
+        import asyncio
+        if inspect.iscoroutinefunction(ij.scrape):
+            class SyncWrapper:
+                def __init__(self, mod):
+                    self.mod = mod
+                def scrape(self, *args, **kwargs):
+                    if inspect.iscoroutinefunction(self.mod.scrape):
+                        return asyncio.run(self.mod.scrape(*args, **kwargs))
+                    return self.mod.scrape(*args, **kwargs)
+            return SyncWrapper(ij)
         return ij
     except ImportError:
         import tests.mock_infojobs as ij
@@ -274,13 +285,15 @@ def test_auto_apply_updates_database_applied():
     aa = get_auto_apply()
     # Insert high-scoring job into test DB
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute(
-        "INSERT INTO jobs (id, title, company, budget, link, platform, requirements, score, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ("https://example.com/job/apply-test", "Python Developer", "Mock ATS Corp", "R$ 10.000,00", "https://example.com/job/apply-test", "LinkedIn", "Test requirements for auto-apply", 90, "pending")
-    )
-    conn.commit()
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO jobs (id, title, company, budget, link, platform, requirements, score, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ("https://example.com/job/apply-test", "Python Developer", "Mock ATS Corp", "R$ 10.000,00", "https://example.com/job/apply-test", "LinkedIn", "Test requirements for auto-apply", 90, "pending")
+        )
+        conn.commit()
+    finally:
+        conn.close()
     
     # Run auto apply
     applied_count = aa.run_auto_apply(database.DB_PATH, "temp_curriculo.pdf", "http://127.0.0.1:8081/apply")
@@ -288,10 +301,12 @@ def test_auto_apply_updates_database_applied():
     
     # Verify status in database
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT status FROM jobs WHERE link = ?", ("https://example.com/job/apply-test",))
-    status = c.fetchone()[0]
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute("SELECT status FROM jobs WHERE link = ?", ("https://example.com/job/apply-test",))
+        status = c.fetchone()[0]
+    finally:
+        conn.close()
     
     assert status == "applied"
 
@@ -313,22 +328,26 @@ def test_auto_apply_skips_low_score_jobs():
     aa = get_auto_apply()
     # Insert a low-scoring job
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute(
-        "INSERT INTO jobs (id, title, company, budget, link, platform, requirements, score, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ("https://example.com/job/low-score", "HTML Coder", "Low Score Corp", "R$ 2.000,00", "https://example.com/job/low-score", "LinkedIn", "Mock requirements", 50, "pending")
-    )
-    conn.commit()
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO jobs (id, title, company, budget, link, platform, requirements, score, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ("https://example.com/job/low-score", "HTML Coder", "Low Score Corp", "R$ 2.000,00", "https://example.com/job/low-score", "LinkedIn", "Mock requirements", 50, "pending")
+        )
+        conn.commit()
+    finally:
+        conn.close()
     
     applied = aa.run_auto_apply(database.DB_PATH, "temp_curriculo.pdf", "http://127.0.0.1:8081/apply")
     assert applied == 0
     
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT status FROM jobs WHERE link = ?", ("https://example.com/job/low-score",))
-    status = c.fetchone()[0]
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute("SELECT status FROM jobs WHERE link = ?", ("https://example.com/job/low-score",))
+        status = c.fetchone()[0]
+    finally:
+        conn.close()
     # Status should remain pending
     assert status == "pending"
 
@@ -336,23 +355,27 @@ def test_auto_apply_fails_gracefully_on_network_error():
     aa = get_auto_apply()
     # Insert a high-scoring job but target an invalid ATS port to simulate network failure
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute(
-        "INSERT INTO jobs (id, title, company, budget, link, platform, requirements, score, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ("https://example.com/job/fail-test", "Python Expert", "Fail Corp", "R$ 15.000,00", "https://example.com/job/fail-test", "Glassdoor", "Mock requirements", 95, "pending")
-    )
-    conn.commit()
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO jobs (id, title, company, budget, link, platform, requirements, score, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ("https://example.com/job/fail-test", "Python Expert", "Fail Corp", "R$ 15.000,00", "https://example.com/job/fail-test", "Glassdoor", "Mock requirements", 95, "pending")
+        )
+        conn.commit()
+    finally:
+        conn.close()
     
     # Run with bad port
     applied = aa.run_auto_apply(database.DB_PATH, "temp_curriculo.pdf", "http://127.0.0.1:8888/apply")
     assert applied == 0
     
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT status FROM jobs WHERE link = ?", ("https://example.com/job/fail-test",))
-    status = c.fetchone()[0]
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute("SELECT status FROM jobs WHERE link = ?", ("https://example.com/job/fail-test",))
+        status = c.fetchone()[0]
+    finally:
+        conn.close()
     
     assert status == "failed"
 
@@ -411,10 +434,12 @@ async def test_bot_centralized_seniority_level_filtering():
     
     # 4. Check jobs in test database
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT title, level, platform FROM jobs")
-    jobs = c.fetchall()
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute("SELECT title, level, platform FROM jobs")
+        jobs = c.fetchall()
+    finally:
+        conn.close()
     
     # Assert jobs were found and their level in database is 'Sênior' (not 'Todos')
     assert len(jobs) > 0, "No jobs inserted in DB during test"

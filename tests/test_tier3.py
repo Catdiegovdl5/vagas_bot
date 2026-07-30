@@ -15,6 +15,17 @@ def get_glassdoor():
 def get_infojobs():
     try:
         import scrapers.infojobs as ij
+        import inspect
+        import asyncio
+        if inspect.iscoroutinefunction(ij.scrape):
+            class SyncWrapper:
+                def __init__(self, mod):
+                    self.mod = mod
+                def scrape(self, *args, **kwargs):
+                    if inspect.iscoroutinefunction(self.mod.scrape):
+                        return asyncio.run(self.mod.scrape(*args, **kwargs))
+                    return self.mod.scrape(*args, **kwargs)
+            return SyncWrapper(ij)
         return ij
     except ImportError:
         import tests.mock_infojobs as ij
@@ -84,14 +95,16 @@ def test_combination_ia_ranking_and_auto_apply():
     
     # Pre-populate a job in DB
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute(
-        "INSERT INTO jobs (id, title, company, budget, link, platform, requirements, score, status) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ("https://example.com/job/ia-apply-comb", "Python Lead", "Combo S/A", "R$ 15.000", "https://example.com/job/ia-apply-comb", "Glassdoor", "Python developer expert", 95, "pending")
-    )
-    conn.commit()
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO jobs (id, title, company, budget, link, platform, requirements, score, status) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ("https://example.com/job/ia-apply-comb", "Python Lead", "Combo S/A", "R$ 15.000", "https://example.com/job/ia-apply-comb", "Glassdoor", "Python developer expert", 95, "pending")
+        )
+        conn.commit()
+    finally:
+        conn.close()
     
     # Trigger auto-apply
     applied = aa.run_auto_apply(database.DB_PATH, "temp_curriculo.pdf", "http://127.0.0.1:8081/apply")
@@ -99,10 +112,12 @@ def test_combination_ia_ranking_and_auto_apply():
     
     # Check status
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT status FROM jobs WHERE link = ?", ("https://example.com/job/ia-apply-comb",))
-    status = c.fetchone()[0]
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute("SELECT status FROM jobs WHERE link = ?", ("https://example.com/job/ia-apply-comb",))
+        status = c.fetchone()[0]
+    finally:
+        conn.close()
     
     assert status == "applied"
 
@@ -126,21 +141,23 @@ def test_combination_scraper_ia_ranking_and_auto_apply():
     # 3. Read jobs and evaluate them with IA ranking
     db_jobs = database.get_jobs()
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    
-    loop = asyncio.get_event_loop()
-    for job in db_jobs:
-        eval_result = loop.run_until_complete(
-            score_job_match("Django developer. Python background. 3 years experience.", job, "Django", "Brasil (Remoto)", "Pleno")
-        )
-        # Update score and status based on evaluation
-        status = "pending" if eval_result["aprovado"] else "rejected"
-        c.execute(
-            "UPDATE jobs SET score = ?, status = ?, requirements = ? WHERE link = ?",
-            (eval_result["score"], status, eval_result["reqs"], job["link"])
-        )
-    conn.commit()
-    conn.close()
+    try:
+        c = conn.cursor()
+        
+        loop = asyncio.get_event_loop()
+        for job in db_jobs:
+            eval_result = loop.run_until_complete(
+                score_job_match("Django developer. Python background. 3 years experience.", job, "Django", "Brasil (Remoto)", "Pleno")
+            )
+            # Update score and status based on evaluation
+            status = "pending" if eval_result["aprovado"] else "rejected"
+            c.execute(
+                "UPDATE jobs SET score = ?, status = ?, requirements = ? WHERE link = ?",
+                (eval_result["score"], status, eval_result["reqs"], job["link"])
+            )
+        conn.commit()
+    finally:
+        conn.close()
     
     # 4. Run auto-apply
     applied = aa.run_auto_apply(database.DB_PATH, "temp_curriculo.pdf", "http://127.0.0.1:8081/apply")
@@ -148,10 +165,12 @@ def test_combination_scraper_ia_ranking_and_auto_apply():
     
     # 5. Confirm applied job status
     conn = sqlite3.connect(database.DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT status, score FROM jobs WHERE status = 'applied'")
-    results = c.fetchall()
-    conn.close()
+    try:
+        c = conn.cursor()
+        c.execute("SELECT status, score FROM jobs WHERE status = 'applied'")
+        results = c.fetchall()
+    finally:
+        conn.close()
     
     assert len(results) > 0
     for status, score in results:

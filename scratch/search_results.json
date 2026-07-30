@@ -1,0 +1,29 @@
+{
+  "escudo_ptbr": [
+    "99: \"escudo_ptbr\": True",
+    "173: [InlineKeyboardButton(text=f\"🛡️ Escudo PT-BR: {'✅ ON' if settings.get('escudo_ptbr', True) else '❌ OFF'}\", callback_data=\"toggle_escudo_ptbr\")],",
+    "254: @dp.callback_query(F.data == \"toggle_escudo_ptbr\")",
+    "255: async def toggle_escudo_ptbr(callback: CallbackQuery):",
+    "259: settings[\"escudo_ptbr\"] = not settings.get(\"escudo_ptbr\", True)",
+    "1147: escudo_enabled = settings.get(\"escudo_ptbr\", True)",
+    "1148: if escudo_enabled:",
+    "1149: await message.answer(f\"🛡️ *Escudo PT-BR Ativado!*\\nLimpando vagas gringas antes do processamento final...\", parse_mode=\"Markdown\")",
+    "1150: from langdetect import detect"
+  ],
+  "applied": [
+    "10: from database import insert_jobs, init_db, is_applied, mark_applied",
+    "250: @dp.callback_query(F.data == \"noop_applied\")",
+    "251: async def handle_noop_applied(callback: CallbackQuery):",
+    "411: @dp.callback_query(F.data.startswith(\"mark_applied_\"))",
+    "412: async def handle_mark_applied(callback: CallbackQuery):",
+    "414: link = callback.data.replace(\"mark_applied_\", \"\", 1)",
+    "415: await asyncio.to_thread(mark_applied, link)",
+    "424: if btn.callback_data and btn.callback_data.startswith(\"mark_applied_\"):",
+    "426: new_row.append(InlineKeyboardButton(text=\"✅ Já me Candidatei\", callback_data=\"noop_applied\"))",
+    "1211: already_applied = await asyncio.to_thread(is_applied, link)",
+    "1212: if already_applied:",
+    "1226: if already_applied:",
+    "1228: [InlineKeyboardButton(text=\"✅ Já me Candidatei\", callback_data=\"noop_applied\")],",
+    "1234: [InlineKeyboardButton(text=\"✋ Já me Candidatei\", callback_data=f\"mark_applied_{link}\")]"
+  ]
+}

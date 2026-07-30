@@ -1,31 +1,18 @@
 # Original User Request
 
-## 2026-07-04T13:31:37Z
+## 2026-07-29T10:40:41Z
 
-You are the Project Orchestrator (archetype: teamwork_preview_orchestrator).
-Your working directory is: C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\orchestrator
+Expand the Vagas Sniper Bot to support a new, extensive taxonomy of professions (ranging from Industrial/Blue Collar to Data/AI Engineering) and update the scrapers to correctly query and fetch jobs for these new categories.
 
-Your task is to orchestrate and complete the project defined in:
-C:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\ORIGINAL_REQUEST.md
+Requirements:
+R1. UI Taxonomy Update: Update `static/index.html` to merge the 6 new categories provided by the user (Operações Físicas, Logística, Administrativo, Criativos, Inteligência de Vendas, e Engenharia de Dados) with the current drawers. Transform the category system into a comprehensive mega-menu of professional drawers.
+R2. Scraper Configuration (Macro-Searches): Update the scraping logic (and any keyword mapping configurations, like `CO_OCCURRENCE_RULES` if applicable) to support the new taxonomy. Configure scrapers to execute macro-searches for broad categories (e.g., "Indústria", "Logística") and rely on local filtering to classify specific sub-professions (like "Pintor Industrial" or "Almoxarife").
 
-Please follow these steps:
-1. Initialize your plan.md, progress.md, and context.md files in your working directory.
-2. Delegate implementation and exploration tasks to specialized subagents.
-3. Manage the subagents and coordinate the development.
-4. Keep progress.md updated regularly with detailed milestone completion statuses.
-5. Once all requirements and acceptance criteria in ORIGINAL_REQUEST.md are fully satisfied and verified, report back to me (the Sentinel) with your completion handoff.
-
-Note:
-- You must write only to your own folder and instruct your subagents to write to their respective folders under .agents/.
-- Do not write code directly. Use specialized subagents.
-- Ensure the project runs successfully in the user's workspace C:\Users\99196\OneDrive\Documentos\vagas_bot.
-
-## 2026-07-04T15:34:44Z
-
-Lead the project to refine the IA filtering intelligence of Sniper_bot. See .agents/ORIGINAL_REQUEST.md for the new follow-up request. Maintain plan.md and progress.md in your working directory (.agents/orchestrator/). Follow all requirements: R1 (Python hard-locks in scrapers/ai_filter.py), R2 (AsyncGroq model upgrade to a 70B+ model), and R3 (50-job sanity test battery with 0% approval rate for trick/pegadinha jobs). When complete, write a completion handoff.md and notify me.
-
-## 2026-07-06T18:40:00Z
-
-Start the project orchestration for the vagas_bot codebase audit and optimization as described in the latest follow-up in c:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\ORIGINAL_REQUEST.md. Write your plan.md, progress.md, and context.md in c:\Users\99196\OneDrive\Documentos\vagas_bot\.agents\orchestrator. Coordinate the specialists to achieve R1, R2, and R3 requirements.
-
-
+Acceptance Criteria:
+- UI & JS Integrity:
+  - `static/index.html` renders new mega-menu drawers properly.
+  - Profession mapping (IDs, keywords, names) is correctly defined in JS constants.
+  - No syntax errors or broken JS logic are introduced.
+- Python Syntax & Scraper Integrity:
+  - All modified Python scrapers and config files pass `python -m py_compile <file>`.
+  - Macro-search keywords are logically implemented without breaking existing job ingestion loop.

@@ -15,16 +15,153 @@ try:
 except ImportError:
     stealth_sync = None
 
-def scrape(keyword, level="Todos", country="Brasil"):
-    if "Londrina" in country:
+def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
+    c_str = (country or "").lower()
+    l_str = (location or "").lower()
+    loc = location or country or kwargs.get("location") or kwargs.get("country") or ""
+    if "Londrina" in loc:
         loc_param = "&l=Londrina%2C+PR&radius=15"
-    elif "Assaí" in country:
+    elif "Assaí" in loc:
         loc_param = "&l=Assa%C3%AD%2C+PR&radius=15"
+    elif loc and loc.lower() not in ["todos", "brasil", "brasil (remoto)", "remoto", "qualquer", ""]:
+        loc_param = f"&l={urllib.parse.quote(loc)}"
     else:
         loc_param = ""
         
     jobs = []
-    encoded_kw = urllib.parse.quote(keyword)
+
+    # Mapeamento: keyword padronizada → termo de busca no Indeed
+    indeed_mapping = {
+        # --- 6 NOVAS CATEGORIAS MACRO E SUB-PROFISSÕES ---
+        "operações físicas":            "operador producao manutencao industrial",
+        "operacoes fisicas":            "operador producao manutencao industrial",
+        "indústria":                    "industrial fabrica operador",
+        "industria":                    "industrial fabrica operador",
+        "operador cnc":                 "operador cnc",
+        "pintor industrial":            "pintor industrial",
+        "mecânico industrial":          "mecanico industrial",
+        "mecanico industrial":          "mecanico industrial",
+        "soldador":                     "soldador caldeireiro",
+        "soldador / caldeireiro":       "soldador caldeireiro",
+        "eletricista":                  "eletricista industrial",
+        "operador de produção":         "operador de producao",
+        "operador de producao":         "operador de producao",
+        "auxiliar de produção":         "auxiliar de producao",
+        "auxiliar de producao":         "auxiliar de producao",
+        "auxiliar de operações":        "auxiliar de operacoes",
+        "auxiliar de operacoes":        "auxiliar de operacoes",
+        "conferente":                   "conferente",
+
+        "logística":                    "logistica estoque almoxarifado",
+        "logistica":                    "logistica estoque almoxarifado",
+        "assistente de logística":     "assistente logistica",
+        "assistente de logistica":     "assistente logistica",
+        "auxiliar de logística":        "auxiliar logistica",
+        "auxiliar de logistica":        "auxiliar logistica",
+        "auxiliar de almoxarifado":     "auxiliar almoxarifado",
+        "operador de empilhadeira":     "operador empilhadeira",
+        "auxiliar de expedição":        "auxiliar expedicao",
+        "auxiliar de expedicao":        "auxiliar expedicao",
+        "motorista":                    "motorista",
+        "almoxarife":                   "almoxarife",
+
+        "administrativo":               "assistente administrativo escritorio",
+        "assistente administrativo":    "assistente administrativo",
+        "auxiliar administrativo":      "auxiliar administrativo",
+        "recepcionista":                "recepcionista",
+        "auxiliar de escritório":       "auxiliar escritorio",
+        "auxiliar de escritorio":       "auxiliar escritorio",
+        "data entry":                   "data entry digitador",
+        "digitador":                    "digitador",
+        "assistente financeiro":        "assistente financeiro",
+
+        "criativos de performance":     "designer performance copywriter editor video",
+        "criativos":                    "designer copywriter editor video",
+        "design":                       "designer grafico",
+        "designer conversional":        "designer conversional",
+        "copywriter":                   "copywriter",
+        "criador de anúncios":          "criador de anuncios",
+        "criador de anuncios":          "criador de anuncios",
+        "motion designer":              "motion designer",
+        "editor de vídeo":              "editor de video",
+        "editor de video":              "editor de video",
+        "gestor de tráfego":            "gestor trafego pago",
+        "gestor de trafego":            "gestor trafego pago",
+        "designer gráfico":             "designer grafico",
+        "designer grafico":             "designer grafico",
+
+        "inteligência de vendas":       "sdr bdr inside sales executivo vendas",
+        "inteligencia de vendas":       "sdr bdr inside sales executivo vendas",
+        "vendas":                       "executivo vendas comercial",
+        "sdr":                          "sdr vendas",
+        "bdr":                          "bdr prospeccao",
+        "inside sales":                 "inside sales",
+        "analista de sales ops":        "analista sales ops",
+        "executivo de vendas":          "executivo vendas",
+        "crm":                          "analista crm",
+        "analista de crm":              "analista crm",
+        "analista de vendas":           "analista vendas",
+
+        "engenharia de ia/dados":       "engenheiro de dados ia machine learning",
+        "engenharia de ia dados":       "engenheiro de dados ia machine learning",
+        "engenharia de dados":          "engenheiro de dados etl",
+        "engenheiro de dados":          "engenheiro de dados",
+        "data engineer":                "data engineer",
+        "engenheiro de ia":              "engenheiro ia",
+        "machine learning":             "machine learning engineer",
+        "cientista de dados":            "cientista de dados",
+        "analista de dados":            "analista de dados",
+
+        # IA / AI
+        "especialista em ia":            "especialista inteligencia artificial",
+        "especialista em ia generativa": "ia generativa",
+        "desenvolvedor de agentes ia":   "desenvolvedor agentes ia",
+        "prompt engineer":               "prompt engineer ia",
+        "machine learning engineer":     "machine learning engineer",
+        # Desenvolvimento
+        "desenvolvedor python":          "desenvolvedor python",
+        "desenvolvedor backend":         "desenvolvedor backend",
+        "desenvolvedor node":            "desenvolvedor node.js",
+        "desenvolvedor react":           "desenvolvedor react",
+        "desenvolvedor fullstack":       "desenvolvedor fullstack",
+        "desenvolvedor django":          "desenvolvedor django",
+        "desenvolvedor fastapi":         "desenvolvedor fastapi",
+        "desenvolvedor rpa":             "desenvolvedor rpa automacao",
+        "desenvolvedor junior python":   "desenvolvedor python junior",
+        "desenvolvedor junior react":    "desenvolvedor react junior",
+        "desenvolvedor junior fullstack": "desenvolvedor fullstack junior",
+        "desenvolvedor pleno python":    "desenvolvedor python pleno",
+        "desenvolvedor pleno react":     "desenvolvedor react pleno",
+        "desenvolvedor pleno fullstack": "desenvolvedor fullstack pleno",
+        # Dados & Analytics
+        "analista de analytics":        "analista analytics",
+        "analista sql":                 "analista sql",
+        "analista de power bi":         "analista power bi",
+        "analista de dados junior":     "analista dados junior",
+        "analista de dados pleno":      "analista dados pleno",
+        # Marketing & Growth
+        "gestor de trafego pleno":      "gestor trafego pago pleno",
+        "growth hacker":                "growth hacker marketing",
+        "analista de marketing digital": "analista marketing digital",
+        "especialista em seo":          "especialista seo",
+        "analista de marketing junior": "analista marketing junior",
+        # Design & Video
+        "video maker":                  "videomaker",
+        "social media":                 "social media",
+        "ux designer":                  "ux designer",
+        # Admin
+        "analista de rh":               "analista rh",
+        "suporte tecnico n1":           "suporte tecnico",
+        "assistente de faturamento":    "assistente faturamento",
+    }
+
+    kw_str = keyword or "Python"
+    lvl_str = level or "Todos"
+    kw_clean = kw_str.lower().strip()
+    search_term = indeed_mapping.get(kw_clean, kw_str)
+    if lvl_str != "Todos":
+        search_term += f" {lvl_str}"
+    encoded_kw = urllib.parse.quote(search_term)
     
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -46,7 +183,10 @@ def scrape(keyword, level="Todos", country="Brasil"):
                     page.wait_for_timeout(5000)
                     content = page.content()
                 
-                match = re.search(r'window\.mosaic\.providerData\[[\'"]mosaic-provider-jobcards[\'"]\]\s*=\s*(\{.*?\});', content, re.DOTALL)
+                match = re.search(r'window\.mosaic\.providerData\[[\'"]mosaic-provider-jobcards[\'"]\]\s*=\s*(\{.*?\});', content, re.DOTALL | re.IGNORECASE)
+                if not match:
+                    match = re.search(r'window\._initialData\s*=\s*(\{.*?\});', content, re.DOTALL)
+                
                 if match:
                     data = json.loads(match.group(1))
                     results = data.get("metaData", {}).get("mosaicProviderJobCardsModel", {}).get("results", [])
@@ -132,7 +272,7 @@ def scrape(keyword, level="Todos", country="Brasil"):
                             if not description:
                                 description = f"Local: {location}. Resumo: {clean_snippet}"
                                 
-                            jobs.append({
+                            job_obj = {
                                 "platform": "Indeed",
                                 "title": title,
                                 "company": company,
@@ -142,7 +282,13 @@ def scrape(keyword, level="Todos", country="Brasil"):
                                 "profession": keyword,
                                 "level": level,
                                 "requirements": description
-                            })
+                            }
+                            try:
+                                from bot import classify_job_profession
+                                job_obj = classify_job_profession(job_obj)
+                            except Exception:
+                                pass
+                            jobs.append(job_obj)
 
             except Exception as e:
                 print(f"Erro no scraper Indeed Playwright na página {start}: {e}")

@@ -1,0 +1,115 @@
+{
+  "total_tests": 500,
+  "passed_tests": 500,
+  "failed_tests": [],
+  "existing_levels_tested": [
+    "Todos",
+    "Júnior",
+    "Pleno",
+    "Sênior",
+    "Jovem Aprendiz"
+  ],
+  "regression_free": true,
+  "ganhar_experiencia_sample": [
+    [
+      "JOB_001",
+      "Desenvolvedor Python Júnior",
+      false
+    ],
+    [
+      "JOB_002",
+      "Desenvolvedor Python Jr",
+      false
+    ],
+    [
+      "JOB_003",
+      "Desenvolvedor Python Pleno",
+      false
+    ],
+    [
+      "JOB_004",
+      "Analista de Dados Pleno",
+      false
+    ],
+    [
+      "JOB_005",
+      "Desenvolvedor Python Sênior",
+      false
+    ],
+    [
+      "JOB_006",
+      "Tech Lead Python",
+      false
+    ],
+    [
+      "JOB_007",
+      "Jovem Aprendiz Administrativo",
+      false
+    ],
+    [
+      "JOB_008",
+      "Menor Aprendiz TI",
+      false
+    ],
+    [
+      "JOB_009",
+      "Desenvolvedor Python Voluntário ONG",
+      true
+    ],
+    [
+      "JOB_010",
+      "Assistente de Dados sem experiência",
+      false
+    ],
+    [
+      "JOB_011",
+      "Professor de Python",
+      false
+    ],
+    [
+      "JOB_012",
+      "Advogado Trabalhista",
+      false
+    ],
+    [
+      "JOB_013",
+      "Controlador de Tráfego Aéreo",
+      false
+    ],
+    [
+      "JOB_014",
+      "Especialista em IA",
+      false
+    ],
+    [
+      "JOB_015",
+      "Desenvolvedor Python para Web Scraping",
+      false
+    ],
+    [
+      "JOB_016",
+      "Banco de Talentos - Desenvolvedor Python",
+      false
+    ],
+    [
+      "JOB_017",
+      "Desenvolvedor Python",
+      false
+    ],
+    [
+      "JOB_018",
+      "Desenvolvedor Python",
+      false
+    ],
+    [
+      "JOB_019",
+      "Desenvolvedor Python",
+      false
+    ],
+    [
+      "JOB_020",
+      "Desenvolvedor Python",
+      false
+    ]
+  ]
+}

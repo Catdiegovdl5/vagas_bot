@@ -1,0 +1,18 @@
+{
+  "summary": {
+    "dataset_size": 600,
+    "union_matches": 600,
+    "union_pass_rate": 100.0,
+    "discrepancies": [],
+    "isolation_failures": [],
+    "level_counts": {
+      "Todos": 60,
+      "Júnior": 36,
+      "Pleno": 36,
+      "Sênior": 48,
+      "Jovem Aprendiz": 60,
+      "Ganhar Experiência": 12,
+      "Iniciantes Tudo": 60
+    }
+  }
+}

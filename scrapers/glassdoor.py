@@ -6,14 +6,151 @@ try:
 except ImportError:
     stealth_sync = None
 
-def scrape(keyword, level="Todos", country="Brasil"):
+def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
     jobs = []
-    encoded_kw = urllib.parse.quote(keyword)
+    c_str = (country or "").lower()
+    l_str = (location or "").lower()
+    loc = location or country or kwargs.get("location") or kwargs.get("country") or ""
+
+    # Mapeamento: keyword padronizada → termo de busca no Glassdoor
+    glassdoor_mapping = {
+        # --- 6 NOVAS CATEGORIAS MACRO E SUB-PROFISSÕES ---
+        "operações físicas":            "operador producao manutencao industrial",
+        "operacoes fisicas":            "operador producao manutencao industrial",
+        "indústria":                    "industrial fabrica operador",
+        "industria":                    "industrial fabrica operador",
+        "operador cnc":                 "operador cnc",
+        "pintor industrial":            "pintor industrial",
+        "mecânico industrial":          "mecanico industrial",
+        "mecanico industrial":          "mecanico industrial",
+        "soldador":                     "soldador caldeireiro",
+        "soldador / caldeireiro":       "soldador caldeireiro",
+        "eletricista":                  "eletricista industrial",
+        "operador de produção":         "operador de producao",
+        "operador de producao":         "operador de producao",
+        "auxiliar de produção":         "auxiliar de producao",
+        "auxiliar de producao":         "auxiliar de producao",
+        "auxiliar de operações":        "auxiliar de operacoes",
+        "auxiliar de operacoes":        "auxiliar de operacoes",
+        "conferente":                   "conferente",
+
+        "logística":                    "logistica estoque almoxarifado",
+        "logistica":                    "logistica estoque almoxarifado",
+        "assistente de logística":     "assistente logistica",
+        "assistente de logistica":     "assistente logistica",
+        "auxiliar de logística":        "auxiliar logistica",
+        "auxiliar de logistica":        "auxiliar logistica",
+        "auxiliar de almoxarifado":     "auxiliar almoxarifado",
+        "operador de empilhadeira":     "operador empilhadeira",
+        "auxiliar de expedição":        "auxiliar expedicao",
+        "auxiliar de expedicao":        "auxiliar expedicao",
+        "motorista":                    "motorista",
+        "almoxarife":                   "almoxarife",
+
+        "administrativo":               "assistente administrativo escritorio",
+        "assistente administrativo":    "assistente administrativo",
+        "auxiliar administrativo":      "auxiliar administrativo",
+        "recepcionista":                "recepcionista",
+        "auxiliar de escritório":       "auxiliar escritorio",
+        "auxiliar de escritorio":       "auxiliar escritorio",
+        "data entry":                   "data entry digitador",
+        "digitador":                    "digitador",
+        "assistente financeiro":        "assistente financeiro",
+
+        "criativos de performance":     "designer performance copywriter editor video",
+        "criativos":                    "designer copywriter editor video",
+        "design":                       "designer grafico",
+        "designer conversional":        "designer conversional",
+        "copywriter":                   "copywriter",
+        "criador de anúncios":          "criador de anuncios",
+        "criador de anuncios":          "criador de anuncios",
+        "motion designer":              "motion designer",
+        "editor de vídeo":              "editor de video",
+        "editor de video":              "editor de video",
+        "gestor de tráfego":            "gestor trafego pago",
+        "gestor de trafego":            "gestor trafego pago",
+        "designer gráfico":             "designer grafico",
+        "designer grafico":             "designer grafico",
+
+        "inteligência de vendas":       "sdr bdr inside sales executivo vendas",
+        "inteligencia de vendas":       "sdr bdr inside sales executivo vendas",
+        "vendas":                       "executivo vendas comercial",
+        "sdr":                          "sdr vendas",
+        "bdr":                          "bdr prospeccao",
+        "inside sales":                 "inside sales",
+        "analista de sales ops":        "analista sales ops",
+        "executivo de vendas":          "executivo vendas",
+        "crm":                          "analista crm",
+        "analista de crm":              "analista crm",
+        "analista de vendas":           "analista vendas",
+
+        "engenharia de ia/dados":       "engenheiro de dados ia machine learning",
+        "engenharia de ia dados":       "engenheiro de dados ia machine learning",
+        "engenharia de dados":          "engenheiro de dados etl",
+        "engenheiro de dados":          "engenheiro de dados",
+        "data engineer":                "data engineer",
+        "engenheiro de ia":              "engenheiro ia",
+        "machine learning":             "machine learning engineer",
+        "cientista de dados":            "cientista de dados",
+        "analista de dados":            "analista de dados",
+
+        # IA / AI
+        "especialista em ia":            "especialista inteligencia artificial",
+        "especialista em ia generativa": "ia generativa",
+        "desenvolvedor de agentes ia":   "desenvolvedor agentes ia",
+        "prompt engineer":               "prompt engineer",
+        "machine learning engineer":     "machine learning engineer",
+        # Desenvolvimento
+        "desenvolvedor python":          "desenvolvedor python",
+        "desenvolvedor backend":         "desenvolvedor backend",
+        "desenvolvedor node":            "desenvolvedor node",
+        "desenvolvedor react":           "desenvolvedor react",
+        "desenvolvedor fullstack":       "desenvolvedor fullstack",
+        "desenvolvedor django":          "desenvolvedor django",
+        "desenvolvedor fastapi":         "desenvolvedor fastapi",
+        "desenvolvedor rpa":             "desenvolvedor rpa",
+        "desenvolvedor junior python":   "desenvolvedor python junior",
+        "desenvolvedor junior react":    "desenvolvedor react junior",
+        "desenvolvedor junior fullstack": "desenvolvedor fullstack junior",
+        "desenvolvedor pleno python":    "desenvolvedor python pleno",
+        "desenvolvedor pleno react":     "desenvolvedor react pleno",
+        "desenvolvedor pleno fullstack": "desenvolvedor fullstack pleno",
+        # Dados & Analytics
+        "analista de analytics":        "analista analytics",
+        "analista sql":                 "analista sql",
+        "analista de power bi":         "analista power bi",
+        "analista de dados junior":     "analista dados junior",
+        "analista de dados pleno":      "analista dados pleno",
+        # Marketing & Growth
+        "gestor de trafego pleno":      "gestor trafego pago pleno",
+        "growth hacker":                "growth hacker",
+        "analista de marketing digital": "analista marketing digital",
+        "especialista em seo":          "especialista seo",
+        "analista de marketing junior": "analista marketing junior",
+        # Design & Video
+        "video maker":                  "videomaker",
+        "social media":                 "social media",
+        "ux designer":                  "ux designer",
+        # Admin
+        "analista de rh":               "analista recursos humanos",
+        "suporte tecnico n1":           "suporte tecnico",
+        "assistente de faturamento":    "assistente faturamento",
+    }
+
+    kw_str = keyword or "Python"
+    lvl_str = level or "Todos"
+    kw_clean = kw_str.lower().strip()
+    search_term = glassdoor_mapping.get(kw_clean, kw_str)
+    if lvl_str != "Todos":
+        search_term += f" {lvl_str}"
+    if loc and loc.lower() not in ["todos", "brasil", "brasil (remoto)", "remoto", "qualquer", ""]:
+        search_term += f" {loc}"
+    encoded_kw = urllib.parse.quote(search_term)
     
     # Glassdoor BR redireciona para /vagas/ com parâmetro sc.keyword
     urls_to_try = [
         f"https://www.glassdoor.com.br/Job/jobs.htm?sc.keyword={encoded_kw}&locT=N&locId=0",
-        f"https://www.glassdoor.com.br/Vagas/{urllib.parse.quote(keyword.replace(' ', '-'))}-vagas-SRCH_KO0,{len(keyword)}.htm",
+        f"https://www.glassdoor.com.br/Vagas/{urllib.parse.quote(search_term.replace(' ', '-'))}-vagas-SRCH_KO0,{len(search_term)}.htm",
     ]
     
     with sync_playwright() as p:
@@ -156,7 +293,7 @@ def scrape(keyword, level="Todos", country="Brasil"):
                     if not description:
                         description = f"Vaga de {title} na empresa {company}. Acesse o link para mais detalhes e candidatura."
 
-                    jobs.append({
+                    job_obj = {
                         "platform": "Glassdoor",
                         "title": title,
                         "company": company,
@@ -166,7 +303,13 @@ def scrape(keyword, level="Todos", country="Brasil"):
                         "profession": keyword,
                         "level": level,
                         "requirements": description
-                    })
+                    }
+                    try:
+                        from bot import classify_job_profession
+                        job_obj = classify_job_profession(job_obj)
+                    except Exception:
+                        pass
+                    jobs.append(job_obj)
                 except Exception:
                     continue
                     

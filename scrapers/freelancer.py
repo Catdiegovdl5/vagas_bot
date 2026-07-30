@@ -1,10 +1,19 @@
 import requests
 import urllib.parse
 
-def scrape(keyword, level="Todos", country="Brasil"):
+def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
     jobs = []
+    c_str = (country or "").lower()
+    l_str = (location or "").lower()
+    loc = location or country or kwargs.get("location") or kwargs.get("country") or ""
     try:
-        encoded_kw = urllib.parse.quote(keyword)
+        search_kw = keyword or "Python"
+        lvl = level or "Todos"
+        if lvl != "Todos":
+            search_kw += f" {lvl}"
+        if loc and loc.lower() not in ["todos", "brasil", "brasil (remoto)", "remoto", "qualquer", ""]:
+            search_kw += f" {loc}"
+        encoded_kw = urllib.parse.quote(search_kw)
         url = f"https://www.freelancer.com/api/projects/0.1/projects/active/?query={encoded_kw}&limit=15"
         
         headers = {"User-Agent": "Mozilla/5.0"}

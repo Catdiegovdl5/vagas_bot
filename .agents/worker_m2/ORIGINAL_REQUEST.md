@@ -28,3 +28,22 @@ MANDATORY INTEGRITY WARNING:
 
 Please execute the file edits using replace_file_content or multi_replace_file_content.
 Write a summary of changes to C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/worker_m2/handoff.md and send a message back to parent (conversation ID: 119a9989-4c1d-4dc6-8c9b-ea132df9251c) when completed.
+
+## 2026-07-17T17:32:57Z
+Refactor the CLT scrapers in the scrapers/ folder to run asynchronously.
+Working directory: C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/worker_m2
+
+Instructions:
+1. Read the plan at `C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/worker_m2/plan.md`.
+2. Refactor the following files in `scrapers/`:
+   - `gupy.py` (convert to async, use curl_cffi.requests.AsyncSession, support max_pages pagination).
+   - `catho.py` (convert to async, use curl_cffi.requests.AsyncSession, support max_pages pagination).
+   - `vagas_com.py` (convert to async, use curl_cffi.requests.AsyncSession, support max_pages pagination).
+   - `infojobs.py` (convert to async, use playwright.async_api, support max_pages pagination).
+3. Ensure all return the standard dictionary list format with detailed `requirements` (descriptions).
+4. Run syntax verification checks on the modified files to ensure they are valid python.
+
+MANDATORY INTEGRITY WARNING:
+DO NOT CHEAT. All implementations must be genuine. DO NOT hardcode test results, create dummy/facade implementations, or circumvent the intended task. A Forensic Auditor will independently verify your work. Integrity violations WILL be detected and your work WILL be rejected.
+
+When finished, write a report to `C:/Users/99196/OneDrive/Documentos/vagas_bot/.agents/worker_m2/handoff.md` and notify me via `send_message` with recipient ID `9bd37d9f-c4fa-4209-9345-4cb66709f84f` (or your parent) referencing the location of these files.

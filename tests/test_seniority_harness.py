@@ -10,11 +10,12 @@ class MockScraperModule:
         self.__name__ = name
         self.called_args = []
 
-    def scrape(self, keyword, level="Todos", country=None):
+    def scrape(self, keyword, level="Todos", location="Todos", country=None, **kwargs):
         # Record the exact arguments used to call scrape
         self.called_args.append({
             "keyword": keyword,
             "level": level,
+            "location": location,
             "country": country
         })
         # Conforms to the standard scraper schema
