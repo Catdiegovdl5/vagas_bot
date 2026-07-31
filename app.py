@@ -113,55 +113,73 @@ def serve_tma_proposal():
 
 @app.get("/api/jobs")
 @app.get("/api/vagas")
-async def api_get_jobs(
-    lat: float = None, 
-    lon: float = None, 
-    radius: float = 50.0, 
-    profession: str = None, 
-    level: str = None,
-    senioridade: str = None
-):
-    try:
-        jobs = await asyncio.to_thread(get_jobs, include_all=True, lat=lat, lon=lon, radius=radius)
+def listar_vagas(estado: str = "", cidade: str = "", senioridade: str = "todos", lat: float = None, lon: float = None, radius: float = 50.0):
+    query = "SELECT * FROM vagas WHERE 1=1"
+    params = []
+
+    if estado:
+        query += " AND estado = ?"
+        params.append(estado)
+
+    if cidade:
+        query += " AND cidade LIKE ?"
+        params.append(f"%{cidade}%")
+
+    # FILTRO RIGOROSO DE SENIORIDADE
+    if senioridade and senioridade.lower() != "todos" and senioridade.lower() != "all":
+        sen = senioridade.lower()
         
-        target_level = senioridade or level
-        if target_level and target_level.lower() not in ["all", "todos", ""]:
-            tgt = target_level.lower().strip()
-            import re
-            def match_seniority(job):
-                job_lvl = (job.get("level") or job.get("senioridade") or "").lower()
-                job_title = (job.get("title") or "").lower()
-                job_req = (job.get("requirements") or "").lower()
-                full = f"{job_lvl} {job_title} {job_req}"
+        if sen in ["jr", "junior", "júnior"]:
+            # Inclui Jr/Júnior e EXCLUI explicitamente Sênior, Sr, Pleno e Lead
+            query += """ AND (
+                (LOWER(titulo) LIKE '%jr%' OR LOWER(titulo) LIKE '%jún%' OR LOWER(titulo) LIKE '%jun%' OR LOWER(senioridade) LIKE '%jr%' OR LOWER(senioridade) LIKE '%jún%')
+                AND LOWER(titulo) NOT LIKE '%sênior%' AND LOWER(titulo) NOT LIKE '%senior%' AND LOWER(titulo) NOT LIKE '%sr%'
+                AND LOWER(titulo) NOT LIKE '%pleno%' AND LOWER(titulo) NOT LIKE '%lead%'
+            )"""
+            
+        elif sen in ["pl", "pleno"]:
+            query += """ AND (
+                (LOWER(titulo) LIKE '%pleno%' OR LOWER(titulo) LIKE '%pl%' OR LOWER(senioridade) LIKE '%pleno%')
+                AND LOWER(titulo) NOT LIKE '%sênior%' AND LOWER(titulo) NOT LIKE '%senior%' AND LOWER(titulo) NOT LIKE '%sr%'
+            )"""
+            
+        elif sen in ["sr", "senior", "sênior"]:
+            query += " AND (LOWER(titulo) LIKE '%sênior%' OR LOWER(titulo) LIKE '%senior%' OR LOWER(titulo) LIKE '%sr%' OR LOWER(senioridade) LIKE '%sên%')"
+            
+        elif sen in ["lead", "especialista", "head"]:
+            query += " AND (LOWER(titulo) LIKE '%lead%' OR LOWER(titulo) LIKE '%especialista%' OR LOWER(titulo) LIKE '%head%' OR LOWER(senioridade) LIKE '%lead%')"
 
-                is_estagio = bool(re.search(r'\b(estag|estág|trainee|intern)\b', full, re.I))
-                is_jr = bool(re.search(r'\b(jun|jún|jr|junior|júnior)\b', full, re.I))
-                is_pl = bool(re.search(r'\b(plen|pl|pleno)\b', full, re.I))
-                is_sr = bool(re.search(r'\b(sen|sên|sr|senior|sênior)\b', full, re.I))
-                is_lead = bool(re.search(r'\b(lead|especialista|head|principal|coordenador|gerente)\b', full, re.I))
+        elif sen in ["estagio", "trainee"]:
+            query += " AND (LOWER(titulo) LIKE '%estág%' OR LOWER(titulo) LIKE '%estag%' OR LOWER(titulo) LIKE '%trainee%')"
 
-                if tgt == 'estagio':
-                    return is_estagio
-                elif tgt == 'sr':
-                    return is_sr
-                elif tgt == 'lead':
-                    return is_lead
-                elif tgt == 'jr':
-                    return is_jr or (not is_sr and not is_lead and not is_estagio)
-                elif tgt == 'pl':
-                    return is_pl or (not is_sr and not is_lead and not is_estagio)
-                else:
-                    return tgt in full
+    query += " ORDER BY id DESC LIMIT 200"
 
-            jobs = [j for j in jobs if match_seniority(j)]
-
-        if profession and profession.lower() not in ["all", "todos", ""]:
-            prof_clean = profession.lower().strip()
-            jobs = [j for j in jobs if prof_clean in (j.get("profession") or "").lower() or prof_clean in (j.get("title") or "").lower()]
-
-        return {"jobs": jobs}
+    try:
+        with sqlite3.connect("vagas.db") as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            rows = cursor.execute(query, params).fetchall()
+            # Mapeamento do sqlite para o formato esperado pelo frontend (keys em ingles)
+            jobs = []
+            for r in rows:
+                row_dict = dict(r)
+                jobs.append({
+                    "id": row_dict.get("id"),
+                    "title": row_dict.get("titulo"),
+                    "company": row_dict.get("empresa"),
+                    "location": row_dict.get("cidade"),
+                    "level": row_dict.get("senioridade"),
+                    "link": row_dict.get("link"),
+                    "platform": row_dict.get("plataforma"),
+                    "requirements": row_dict.get("descricao"),
+                    "budget": row_dict.get("salario"),
+                    "status": row_dict.get("status"),
+                    "job_type": "CLT",
+                    "profession": row_dict.get("titulo")
+                })
+            return {"jobs": jobs}
     except Exception as e:
-        logger.error(f"Erro ao buscar vagas no DB: {e}")
+        logger.error(f"Erro ao buscar vagas no DB SQL: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
 from pydantic import BaseModel

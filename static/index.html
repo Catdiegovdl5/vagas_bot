@@ -2758,17 +2758,48 @@
             return '';
         }
 
-        function selecionarFiltroSenioridade(nivel, elemento) {
-            filtrarSenioridade(nivel, elemento);
-        }
+        let senioridadeSelecionada = 'todos';
 
-        function filtrarSenioridade(nivel, elemento) {
-            selectedSeniority = (nivel === 'todos' || nivel === 'all') ? 'all' : nivel;
-            document.querySelectorAll('.s-tab, .seniority-chip').forEach(btn => btn.classList.remove('active'));
+        function selecionarFiltroSenioridade(nivel, elemento) {
+            senioridadeSelecionada = nivel;
+
+            // Atualiza a classe ativa visual do botão
+            document.querySelectorAll('.s-tab, .seniority-chip').forEach(btn => {
+                btn.classList.remove('active');
+            });
             if (elemento) {
                 elemento.classList.add('active');
             }
-            filterData();
+
+            // Faz a requisição à API com a nova senioridade
+            carregarVagasServidor();
+        }
+
+        async function carregarVagasServidor() {
+            const estadoSelect = document.getElementById('state-select');
+            const estado = estadoSelect ? (estadoSelect.value === 'Todos' ? '' : estadoSelect.value) : '';
+            const cidadeEl = document.getElementById('loc-input');
+            const cidade = cidadeEl ? cidadeEl.value : '';
+
+            const url = `/api/vagas?estado=${encodeURIComponent(estado)}&cidade=${encodeURIComponent(cidade)}&senioridade=${encodeURIComponent(senioridadeSelecionada)}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                const vagas = data.jobs || [];
+                
+                allData = vagas;
+                filterData();
+                
+                // Atualiza o texto do contador na tela (além do updateMetrics padrao)
+                const contador = document.getElementById('results-counter');
+                if (contador) {
+                    const lang = currentLang;
+                    contador.innerText = i18nData[lang].showing_jobs.replace('{n}', viewData.length);
+                }
+            } catch (err) {
+                console.error("Erro ao filtrar vagas pelo servidor:", err);
+            }
         }
 
         function openProfileModal() { document.getElementById('modal-profile').classList.add('active'); }
