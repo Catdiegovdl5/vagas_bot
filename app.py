@@ -3,11 +3,12 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from database import get_jobs, insert_jobs, init_db, mark_applied, mark_ignored
+from database import get_jobs, insert_jobs, init_db, mark_applied, mark_ignored, get_connection
 import uvicorn
 import os
 import asyncio
 import logging
+import sqlite3
 from logging.handlers import RotatingFileHandler
 from typing import Optional, List, Dict, Union
 from dotenv import load_dotenv
@@ -113,74 +114,169 @@ def serve_tma_proposal():
 
 @app.get("/api/jobs")
 @app.get("/api/vagas")
-def listar_vagas(estado: str = "", cidade: str = "", senioridade: str = "todos", lat: float = None, lon: float = None, radius: float = 50.0):
-    query = "SELECT * FROM vagas WHERE 1=1"
+def listar_vagas(
+    estado: str = "",
+    cidade: str = "",
+    senioridade: str = "todos",
+    profession: str = "",
+    lat: float = None,
+    lon: float = None,
+    radius: float = 50.0
+):
+    """
+    Endpoint unificado de busca de vagas.
+    - Usa jobs.db (via get_connection) com tabela 'jobs'
+    - Filtro de senioridade rigoroso/Modo Flexível: 
+        * Sr/Lead/Estagio: somente vagas EXPLÍCITAS
+        * Jr/Pl: inclui vagas genéricas (nao_informado) + exclui outros níveis explícitos
+    - Suporta filtro por profession (categoria), estado, cidade
+    """
+    base_query = """
+        SELECT j.id, j.title, j.company, j.budget, j.link, j.platform,
+               j.job_type, j.profession, j.level, j.requirements,
+               j.location, j.lat, j.lon, j.lang, j.added_at,
+               CASE
+                   WHEN a.link IS NOT NULL THEN 'Aplicado'
+                   WHEN i.link IS NOT NULL THEN 'Ignorado'
+                   ELSE 'Disponível'
+               END AS status
+        FROM jobs j
+        LEFT JOIN applied_jobs a ON j.link = a.link
+        LEFT JOIN ignored_jobs i ON j.link = i.link
+        WHERE 1=1
+    """
     params = []
 
-    if estado:
-        query += " AND estado = ?"
-        params.append(estado)
+    # ── Filtro por estado / cidade ────────────────────────────────────
+    if estado and estado.lower() not in ("todos", "all", ""):
+        base_query += " AND LOWER(j.location) LIKE ?"
+        params.append(f"%{estado.lower()}%")
 
-    if cidade:
-        query += " AND cidade LIKE ?"
-        params.append(f"%{cidade}%")
+    if cidade and cidade.strip():
+        base_query += " AND LOWER(j.location) LIKE ?"
+        params.append(f"%{cidade.lower().strip()}%")
 
-    # FILTRO RIGOROSO DE SENIORIDADE
-    if senioridade and senioridade.lower() != "todos" and senioridade.lower() != "all":
-        sen = senioridade.lower()
-        
-        if sen in ["jr", "junior", "júnior"]:
-            # Inclui Jr/Júnior e EXCLUI explicitamente Sênior, Sr, Pleno e Lead
-            query += """ AND (
-                (LOWER(titulo) LIKE '%jr%' OR LOWER(titulo) LIKE '%jún%' OR LOWER(titulo) LIKE '%jun%' OR LOWER(senioridade) LIKE '%jr%' OR LOWER(senioridade) LIKE '%jún%')
-                AND LOWER(titulo) NOT LIKE '%sênior%' AND LOWER(titulo) NOT LIKE '%senior%' AND LOWER(titulo) NOT LIKE '%sr%'
-                AND LOWER(titulo) NOT LIKE '%pleno%' AND LOWER(titulo) NOT LIKE '%lead%'
-            )"""
-            
-        elif sen in ["pl", "pleno"]:
-            query += """ AND (
-                (LOWER(titulo) LIKE '%pleno%' OR LOWER(titulo) LIKE '%pl%' OR LOWER(senioridade) LIKE '%pleno%')
-                AND LOWER(titulo) NOT LIKE '%sênior%' AND LOWER(titulo) NOT LIKE '%senior%' AND LOWER(titulo) NOT LIKE '%sr%'
-            )"""
-            
-        elif sen in ["sr", "senior", "sênior"]:
-            query += " AND (LOWER(titulo) LIKE '%sênior%' OR LOWER(titulo) LIKE '%senior%' OR LOWER(titulo) LIKE '%sr%' OR LOWER(senioridade) LIKE '%sên%')"
-            
-        elif sen in ["lead", "especialista", "head"]:
-            query += " AND (LOWER(titulo) LIKE '%lead%' OR LOWER(titulo) LIKE '%especialista%' OR LOWER(titulo) LIKE '%head%' OR LOWER(senioridade) LIKE '%lead%')"
+    # ── Filtro por profissão / categoria ────────────────────────────
+    if profession and profession.lower() not in ("all", "todos", ""):
+        prof = profession.lower().strip()
+        base_query += " AND (LOWER(j.profession) LIKE ? OR LOWER(j.title) LIKE ?)"
+        params.extend([f"%{prof}%", f"%{prof}%"])
 
-        elif sen in ["estagio", "trainee"]:
-            query += " AND (LOWER(titulo) LIKE '%estág%' OR LOWER(titulo) LIKE '%estag%' OR LOWER(titulo) LIKE '%trainee%')"
+    # ── Filtro de Senioridade — Modo Flexível ───────────────────────
+    # Marcadores de nível ALTO explícito no título (excluem vagas de outros filtros)
+    SENIOR_MARKS  = ["s_nior", "senior", " sr ", "sênio", "s%nio"]
+    LEAD_MARKS    = ["lead", "especialista", "head ", "tech lead", "principal", "coordenador", "gerente"]
+    JUNIOR_MARKS  = ["jr", "j_nior", "junior", "j%nior"]
+    PLENO_MARKS   = ["pleno", " pl "]
+    ESTAGIO_MARKS = ["est_gio", "estagio", "trainee", "intern"]
 
-    query += " ORDER BY id DESC LIMIT 200"
+    sen = (senioridade or "todos").lower().strip()
+
+    if sen not in ("todos", "all", ""):
+
+        # Helper: build LIKE clause
+        def like_any(col, marks, negate=False):
+            op = "NOT LIKE" if negate else "LIKE"
+            clauses = [f"LOWER({col}) {op} ?" for _ in marks]
+            join = " AND " if negate else " OR "
+            return join.join(clauses), marks
+
+        if sen in ("jr", "junior"):
+            # MODO FLEXÍVEL: inclui nao_informado e jr; exclui sr/lead/pleno/estagio
+            excl_clauses = []
+            excl_params  = []
+            for mark in SENIOR_MARKS + LEAD_MARKS + PLENO_MARKS + ESTAGIO_MARKS:
+                excl_clauses.append(f"LOWER(j.title) NOT LIKE ?")
+                excl_params.append(f"%{mark}%")
+
+            incl_clauses = []
+            incl_params  = []
+            for mark in JUNIOR_MARKS:
+                incl_clauses.append(f"LOWER(j.title) LIKE ?")
+                incl_params.append(f"%{mark}%")
+            # also: level is jr or nao_informado
+            incl_clauses.append("j.level IN ('jr', 'nao_informado')")
+
+            base_query += (
+                f" AND ({' AND '.join(excl_clauses)})"
+                f" AND ({' OR '.join(incl_clauses)})"
+            )
+            params.extend(excl_params + incl_params)
+
+        elif sen in ("pl", "pleno"):
+            # MODO FLEXÍVEL: inclui nao_informado e pl; exclui sr/lead/estagio
+            excl_clauses = []
+            excl_params  = []
+            for mark in SENIOR_MARKS + LEAD_MARKS + ESTAGIO_MARKS:
+                excl_clauses.append(f"LOWER(j.title) NOT LIKE ?")
+                excl_params.append(f"%{mark}%")
+
+            incl_clauses = []
+            incl_params  = []
+            for mark in PLENO_MARKS:
+                incl_clauses.append(f"LOWER(j.title) LIKE ?")
+                incl_params.append(f"%{mark}%")
+            incl_clauses.append("j.level IN ('pl', 'nao_informado')")
+
+            base_query += (
+                f" AND ({' AND '.join(excl_clauses)})"
+                f" AND ({' OR '.join(incl_clauses)})"
+            )
+            params.extend(excl_params + incl_params)
+
+        elif sen in ("sr", "senior", "sênior"):
+            # ESTRITO: exige marcadores de sênior no título ou level=sr
+            sr_incl = [f"LOWER(j.title) LIKE ?" for m in SENIOR_MARKS]
+            sr_params = [f"%{m}%" for m in SENIOR_MARKS]
+            base_query += f" AND (({' OR '.join(sr_incl)}) OR j.level = 'sr')"
+            params.extend(sr_params)
+
+        elif sen in ("lead", "especialista", "head"):
+            lead_incl = [f"LOWER(j.title) LIKE ?" for m in LEAD_MARKS]
+            lead_params = [f"%{m}%" for m in LEAD_MARKS]
+            base_query += f" AND (({' OR '.join(lead_incl)}) OR j.level = 'lead')"
+            params.extend(lead_params)
+
+        elif sen in ("estagio", "trainee"):
+            est_incl = [f"LOWER(j.title) LIKE ?" for m in ESTAGIO_MARKS]
+            est_params = [f"%{m}%" for m in ESTAGIO_MARKS]
+            base_query += f" AND (({' OR '.join(est_incl)}) OR j.level = 'estagio')"
+            params.extend(est_params)
+
+    base_query += " ORDER BY j.added_at DESC LIMIT 300"
 
     try:
-        with sqlite3.connect("vagas.db") as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            rows = cursor.execute(query, params).fetchall()
-            # Mapeamento do sqlite para o formato esperado pelo frontend (keys em ingles)
-            jobs = []
-            for r in rows:
-                row_dict = dict(r)
-                jobs.append({
-                    "id": row_dict.get("id"),
-                    "title": row_dict.get("titulo"),
-                    "company": row_dict.get("empresa"),
-                    "location": row_dict.get("cidade"),
-                    "level": row_dict.get("senioridade"),
-                    "link": row_dict.get("link"),
-                    "platform": row_dict.get("plataforma"),
-                    "requirements": row_dict.get("descricao"),
-                    "budget": row_dict.get("salario"),
-                    "status": row_dict.get("status"),
-                    "job_type": "CLT",
-                    "profession": row_dict.get("titulo")
-                })
-            return {"jobs": jobs}
+        conn = get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        rows = cursor.execute(base_query, params).fetchall()
+        conn.close()
+        jobs = []
+        for r in rows:
+            row_dict = dict(r)
+            jobs.append({
+                "id":           row_dict.get("id"),
+                "title":        row_dict.get("title") or "Vaga Sem Título",
+                "company":      row_dict.get("company") or "Empresa Confidencial",
+                "location":     row_dict.get("location") or "Remoto/Brasil",
+                "level":        row_dict.get("level") or "nao_informado",
+                "link":         row_dict.get("link") or "#",
+                "platform":     row_dict.get("platform") or "Geral",
+                "requirements": row_dict.get("requirements") or "",
+                "budget":       row_dict.get("budget") or "A combinar",
+                "status":       row_dict.get("status") or "Disponível",
+                "job_type":     row_dict.get("job_type") or "CLT",
+                "profession":   row_dict.get("profession") or "Outros",
+                "added_at":     row_dict.get("added_at") or "",
+                "lang":         row_dict.get("lang") or "pt",
+            })
+        return {"jobs": jobs}
     except Exception as e:
-        logger.error(f"Erro ao buscar vagas no DB SQL: {e}")
+        logger.error(f"Erro ao buscar vagas: {e}", exc_info=True)
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
+
 
 from pydantic import BaseModel
 class JobActionRequest(BaseModel):
