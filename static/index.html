@@ -1409,7 +1409,7 @@
             { id: "sound_designer", name: "Sound Designer", icon: "<i class='fa-solid fa-music'></i>", label_pt: "Sound Designer", label_en: "Sound Designer", kws: ["sound design", "sound designer", "compositor", "trilha sonora", "audition", "audio"] },
 
             // --- Categoria 5: Gestão de Tráfego & Performance (Subcategorias Dedicadas) ---
-            { id: "gestor_trafego", name: "Gestor de Tráfego (Geral)", icon: "<i class='fa-solid fa-chart-pie'></i>", label_pt: "Gestor de Tráfego (Geral)", label_en: "Traffic Manager (General)", kws: ["gestor de trafego", "trafego pago", "gestor de midia"] },
+            { id: "gestor_trafego", name: "Gestor de Tráfego (Geral)", icon: "<i class='fa-solid fa-chart-pie'></i>", label_pt: "Gestor de Tráfego (Geral)", label_en: "Traffic Manager (General)", kws: ["gestor de trafego", "gestao de trafego", "trafego pago", "trafego", "gestor de midia", "media buyer", "trafficker"] },
             { id: "meta_ads", name: "Meta Ads / Social Ads", icon: "<i class='fa-brands fa-facebook'></i>", label_pt: "Meta Ads / Social Ads", label_en: "Meta Ads / Social Ads", kws: ["meta ads", "facebook ads", "instagram ads", "tiktok ads", "social ads"] },
             { id: "google_ads", name: "Google Ads / SEM", icon: "<i class='fa-brands fa-google'></i>", label_pt: "Google Ads / SEM", label_en: "Google Ads / SEM", kws: ["google ads", "youtube ads", "sem", "search ads"] },
             { id: "media_buyer", name: "Media Buyer / Mídia Paga", icon: "<i class='fa-solid fa-money-bill-trend-up'></i>", label_pt: "Media Buyer / Mídia Paga", label_en: "Media Buyer / Paid Media", kws: ["media buyer", "compra de midia", "midia paga"] },
@@ -1425,6 +1425,28 @@
 
             // --- Geral ---
             { id: "outros", name: "Outros", icon: "<i class='fa-solid fa-folder'></i>", label_pt: "Outros", label_en: "Others", kws: ["outros", "geral", "suporte", "devops"] }
+        ];
+
+        const FRESHNESS_CATEGORIES = [
+            { id: "all", label_pt: "Todas as Datas", label_en: "All Dates", icon: "<i class='fa-solid fa-clock'></i>" },
+            { id: "24h", label_pt: "Últimas 24h", label_en: "Last 24h", icon: "<i class='fa-solid fa-bolt'></i>" },
+            { id: "7d", label_pt: "Últimos 7 dias", label_en: "Last 7 days", icon: "<i class='fa-solid fa-calendar-week'></i>" },
+            { id: "30d", label_pt: "Últimos 30 dias", label_en: "Last 30 days", icon: "<i class='fa-solid fa-calendar-days'></i>" }
+        ];
+
+        const WORKMODEL_CATEGORIES = [
+            { id: "all", label_pt: "Todos os Modelos", label_en: "All Models", icon: "<i class='fa-solid fa-briefcase'></i>" },
+            { id: "remoto", label_pt: "Remoto", label_en: "Remote", icon: "<i class='fa-solid fa-house-laptop'></i>" },
+            { id: "hibrido", label_pt: "Híbrido", label_en: "Hybrid", icon: "<i class='fa-solid fa-building-user'></i>" },
+            { id: "presencial", label_pt: "Presencial", label_en: "On-site", icon: "<i class='fa-solid fa-building'></i>" }
+        ];
+
+        const SENIORITY_CATEGORIES = [
+            { id: "all", label_pt: "Todas as Sênioridades", label_en: "All Seniorities", icon: "<i class='fa-solid fa-user-graduate'></i>" },
+            { id: "Júnior", label_pt: "Júnior / Estágio", label_en: "Junior / Intern", icon: "<i class='fa-solid fa-seedling'></i>" },
+            { id: "Pleno", label_pt: "Pleno", label_en: "Mid-level", icon: "<i class='fa-solid fa-user'></i>" },
+            { id: "Sênior", label_pt: "Sênior / Specialist", label_en: "Senior / Specialist", icon: "<i class='fa-solid fa-user-tie'></i>" },
+            { id: "ganhar experiência", label_pt: "Ganhar Experiência", label_en: "Gain Experience", icon: "<i class='fa-solid fa-hands-helping'></i>" }
         ];
 
         function normStr(str) {
@@ -1466,8 +1488,10 @@
             if (profLower) {
                 const catNameNorm = normStr(catObj.name || '');
                 const catLabelNorm = normStr(catObj.label_pt || '');
-                if (catNameNorm && (profLower === catNameNorm || profLower.includes(catNameNorm))) return true;
-                if (catLabelNorm && (profLower === catLabelNorm || profLower.includes(catLabelNorm))) return true;
+                const cleanCatName = catNameNorm.replace(/\s*\([^)]*\)/g, '').trim();
+                const cleanCatLabel = catLabelNorm.replace(/\s*\([^)]*\)/g, '').trim();
+                if (catNameNorm && (profLower === catNameNorm || profLower.includes(catNameNorm) || catNameNorm.includes(profLower) || (cleanCatName && (profLower.includes(cleanCatName) || cleanCatName.includes(profLower))))) return true;
+                if (catLabelNorm && (profLower === catLabelNorm || profLower.includes(catLabelNorm) || catLabelNorm.includes(profLower) || (cleanCatLabel && (profLower.includes(cleanCatLabel) || cleanCatLabel.includes(profLower))))) return true;
             }
 
             // Correspondência por palavras-chave
@@ -2169,22 +2193,34 @@
             renderCategoryDrawers();
             
             const catObj = PROFESSION_CATEGORIES.find(c => c.id === catId);
-            const profQuery = catObj && catObj.id !== 'all' ? catObj.name : 'all';
+            const profQuery = catObj && catObj.id !== 'all' ? catObj.id : '';
 
-            const container = document.getElementById('jobs-container');
+            estadoFiltros.categoria = profQuery;
+            atualizarBarraChipsVisual();
+
+            const container = document.getElementById('view-container');
             if (container) {
                 container.innerHTML = '<div style="text-align:center; padding: 40px; color:var(--text-secondary);"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p style="margin-top:10px;">Buscando vagas no servidor...</p></div>';
             }
 
             try {
-                let url = '/api/jobs?profession=' + encodeURIComponent(profQuery);
-                if (typeof userLat !== 'undefined' && userLat !== null && typeof userLon !== 'undefined' && userLon !== null) {
-                    url += `&lat=${userLat}&lon=${userLon}&radius=50.0`;
+                const params = new URLSearchParams();
+                if (estadoFiltros.estado) params.append('estado', estadoFiltros.estado);
+                if (estadoFiltros.cidade) params.append('cidade', estadoFiltros.cidade);
+                if (estadoFiltros.senioridade && estadoFiltros.senioridade !== 'todos') {
+                    params.append('senioridade', estadoFiltros.senioridade);
+                    params.append('nivel', estadoFiltros.senioridade);
                 }
-                const res = await fetch(url);
+                if (estadoFiltros.modalidade && estadoFiltros.modalidade !== 'todos') params.append('modalidade', estadoFiltros.modalidade);
+                if (profQuery) {
+                    params.append('categoria', profQuery);
+                    params.append('profession', profQuery);
+                }
+                if (estadoFiltros.q) params.append('q', estadoFiltros.q);
+
+                const res = await fetch(`/api/vagas?${params.toString()}`);
                 const data = await res.json();
-                allData = data.jobs || [];
-                // Não re-renderiza as gavetas para não resetar os counts de allData (já que este allData filtrado só tem as vagas da categoria)
+                allData = data.jobs || (Array.isArray(data) ? data : []);
                 filterData();
                 updateMetrics();
             } catch (e) {
