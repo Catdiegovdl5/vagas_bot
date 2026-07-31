@@ -23,7 +23,7 @@ async def rodar_qa():
                     if asyncio.iscoroutinefunction(modulo.scrape):
                         vagas = await modulo.scrape(keyword="Python", location="Brasil")
                     else:
-                        vagas = modulo.scrape("Python", "Brasil")
+                        vagas = await asyncio.to_thread(modulo.scrape, "Python", "Brasil")
                     f.write(f"  [SUCESSO] Vagas encontradas: {len(vagas or [])}\n\n")
             except Exception as e:
                 f.write(f"  [FALHA / ERRO DETECTADO]: {e}\n")
