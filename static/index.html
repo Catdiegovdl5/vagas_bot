@@ -2142,9 +2142,10 @@
         }
 
         function updateMetrics() {
-            document.getElementById('cnt-total').innerText = allData.length;
-            document.getElementById('cnt-relevant').innerText = allData.filter(j => j.status !== 'Ignorado').length;
-            document.getElementById('cnt-applied').innerText = allData.filter(j => j.status === 'Aplicado').length;
+            const activeList = (viewData && viewData.length > 0) ? viewData : allData;
+            document.getElementById('cnt-total').innerText = activeList.length;
+            document.getElementById('cnt-relevant').innerText = activeList.filter(j => j.status !== 'Ignorado').length;
+            document.getElementById('cnt-applied').innerText = activeList.filter(j => j.status === 'Aplicado').length;
 
             // Atualização dinâmica da contagem por plataforma
             const platCounts = {};
@@ -2626,22 +2627,28 @@
         function matchesSeniority(j, selected) {
             if (!selected || selected === 'all' || selected === 'todos') return true;
 
-            const title = (j.title || '').toLowerCase();
-            const req = (j.requirements || '').toLowerCase();
-            const level = (j.level || j.senioridade || '').toLowerCase();
+            const title = normStr((j.title || '').toLowerCase());
+            const req = normStr((j.requirements || '').toLowerCase());
+            const level = normStr((j.level || j.senioridade || '').toLowerCase());
             const text = `${title} ${level} ${req}`;
 
-            const isEstagio = /\b(estagio|estágio|trainee|intern)\b/i.test(text);
-            const isJr = /\b(jr|júnior|junior)\b/i.test(text);
+            const isEstagio = /\b(estagio|trainee|intern)\b/i.test(text);
+            const isJr = /\b(jr|junior)\b/i.test(text);
             const isPl = /\b(pl|pleno)\b/i.test(text);
-            const isSr = /\b(sr|sênior|senior)\b/i.test(text);
+            const isSr = /\b(sr|senior)\b/i.test(text);
             const isLead = /\b(lead|especialista|head|principal|tech lead|coordenador|gerente)\b/i.test(text);
 
             if (selected === 'estagio') return isEstagio;
             if (selected === 'sr') return isSr;
             if (selected === 'lead') return isLead;
-            if (selected === 'jr') return isJr || (!isSr && !isLead && !isEstagio);
-            if (selected === 'pl') return isPl || (!isSr && !isLead && !isEstagio);
+            if (selected === 'jr') {
+                if (isSr || isLead || isPl) return false;
+                return isJr || (!isSr && !isLead && !isEstagio);
+            }
+            if (selected === 'pl') {
+                if (isSr || isLead) return false;
+                return isPl || (!isSr && !isLead && !isEstagio);
+            }
 
             return true;
         }
@@ -2663,8 +2670,6 @@
                 elemento.classList.add('active');
             }
             filterData();
-            updateMetrics();
-            renderViews();
         }
 
         function openProfileModal() { document.getElementById('modal-profile').classList.add('active'); }
@@ -3256,5 +3261,32 @@
             <button class="btn btn-primary" onclick="sendProposalAdjustment()" style="height:36px;"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
+    <!-- BANNER DE STATUS E DEBUG VISUAL NO CANTO DA TELA -->
+    <div id="debug-toast" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: none; padding: 12px 18px; border-radius: 8px; font-size: 13px; font-family: sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"></div>
+
+    <script>
+    function mostrarStatusDebug(mensagem, tipo = 'sucesso') {
+      const toast = document.getElementById('debug-toast');
+      if (!toast) return;
+      toast.innerText = mensagem;
+      
+      if (tipo === 'erro') {
+        toast.style.background = '#ef4444';
+        toast.style.color = '#ffffff';
+      } else {
+        toast.style.background = '#10b981';
+        toast.style.color = '#ffffff';
+      }
+      
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+
+    // Intercepta erros globais de JavaScript na página
+    window.onerror = function(msg, url, lineNo) {
+      mostrarStatusDebug(`⚠️ Erro na função: ${msg} (Linha ${lineNo})`, 'erro');
+      return false;
+    };
+    </script>
 </body>
 </html>
