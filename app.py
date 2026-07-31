@@ -112,15 +112,53 @@ def serve_tma_proposal():
         return f.read()
 
 @app.get("/api/jobs")
-async def api_get_jobs(lat: float = None, lon: float = None, radius: float = 50.0, profession: str = None, level: str = None):
+@app.get("/api/vagas")
+async def api_get_jobs(
+    lat: float = None, 
+    lon: float = None, 
+    radius: float = 50.0, 
+    profession: str = None, 
+    level: str = None,
+    senioridade: str = None
+):
     try:
         jobs = await asyncio.to_thread(get_jobs, include_all=True, lat=lat, lon=lon, radius=radius)
-        if profession and profession.lower() != "all" and profession.lower() != "todos":
+        
+        target_level = senioridade or level
+        if target_level and target_level.lower() not in ["all", "todos", ""]:
+            tgt = target_level.lower().strip()
+            import re
+            def match_seniority(job):
+                job_lvl = (job.get("level") or job.get("senioridade") or "").lower()
+                job_title = (job.get("title") or "").lower()
+                job_req = (job.get("requirements") or "").lower()
+                full = f"{job_lvl} {job_title} {job_req}"
+
+                is_estagio = bool(re.search(r'\b(estag|estág|trainee|intern)\b', full, re.I))
+                is_jr = bool(re.search(r'\b(jun|jún|jr|junior|júnior)\b', full, re.I))
+                is_pl = bool(re.search(r'\b(plen|pl|pleno)\b', full, re.I))
+                is_sr = bool(re.search(r'\b(sen|sên|sr|senior|sênior)\b', full, re.I))
+                is_lead = bool(re.search(r'\b(lead|especialista|head|principal|coordenador|gerente)\b', full, re.I))
+
+                if tgt == 'estagio':
+                    return is_estagio
+                elif tgt == 'sr':
+                    return is_sr
+                elif tgt == 'lead':
+                    return is_lead
+                elif tgt == 'jr':
+                    return is_jr or (not is_sr and not is_lead and not is_estagio)
+                elif tgt == 'pl':
+                    return is_pl or (not is_sr and not is_lead and not is_estagio)
+                else:
+                    return tgt in full
+
+            jobs = [j for j in jobs if match_seniority(j)]
+
+        if profession and profession.lower() not in ["all", "todos", ""]:
             prof_clean = profession.lower().strip()
             jobs = [j for j in jobs if prof_clean in (j.get("profession") or "").lower() or prof_clean in (j.get("title") or "").lower()]
-        if level and level.lower() != "all" and level.lower() != "todos":
-            lvl_clean = level.lower().strip()
-            jobs = [j for j in jobs if lvl_clean in (j.get("level") or "").lower()]
+
         return {"jobs": jobs}
     except Exception as e:
         logger.error(f"Erro ao buscar vagas no DB: {e}")

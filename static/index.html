@@ -2328,11 +2328,7 @@
                     matchWm = (getJobWorkModel(j) === selectedWorkModel);
                 }
 
-                let matchSen = true;
-                if (selectedSeniority !== 'all') {
-                    const lvl = getJobSeniorityLevel(j);
-                    matchSen = (lvl === selectedSeniority);
-                }
+                let matchSen = matchesSeniority(j, selectedSeniority);
 
                 let matchFresh = true;
                 if (selectedFreshness !== 'all' && j.added_at) {
@@ -2616,16 +2612,38 @@
         function getJobSeniorityLevel(j) {
             const title = (j.title || '').toLowerCase();
             const req = (j.requirements || '').toLowerCase();
-            const level = (j.level || '').toLowerCase();
-            const seniority = (j.seniority || '').toLowerCase();
-            const text = `${title} ${level} ${seniority} ${req}`;
+            const level = (j.level || j.senioridade || '').toLowerCase();
+            const text = `${title} ${level} ${req}`;
 
-            if (/\b(estagio|estágio|trainee)\b/i.test(text)) return 'estagio';
+            if (/\b(estagio|estágio|trainee|intern)\b/i.test(text)) return 'estagio';
             if (/\b(jr|júnior|junior)\b/i.test(text)) return 'jr';
             if (/\b(pl|pleno)\b/i.test(text)) return 'pl';
             if (/\b(sr|sênior|senior)\b/i.test(text)) return 'sr';
-            if (/\b(lead|especialista|head|principal|tech lead)\b/i.test(text)) return 'lead';
+            if (/\b(lead|especialista|head|principal|tech lead|coordenador|gerente)\b/i.test(text)) return 'lead';
             return 'all';
+        }
+
+        function matchesSeniority(j, selected) {
+            if (!selected || selected === 'all' || selected === 'todos') return true;
+
+            const title = (j.title || '').toLowerCase();
+            const req = (j.requirements || '').toLowerCase();
+            const level = (j.level || j.senioridade || '').toLowerCase();
+            const text = `${title} ${level} ${req}`;
+
+            const isEstagio = /\b(estagio|estágio|trainee|intern)\b/i.test(text);
+            const isJr = /\b(jr|júnior|junior)\b/i.test(text);
+            const isPl = /\b(pl|pleno)\b/i.test(text);
+            const isSr = /\b(sr|sênior|senior)\b/i.test(text);
+            const isLead = /\b(lead|especialista|head|principal|tech lead|coordenador|gerente)\b/i.test(text);
+
+            if (selected === 'estagio') return isEstagio;
+            if (selected === 'sr') return isSr;
+            if (selected === 'lead') return isLead;
+            if (selected === 'jr') return isJr || (!isSr && !isLead && !isEstagio);
+            if (selected === 'pl') return isPl || (!isSr && !isLead && !isEstagio);
+
+            return true;
         }
 
         function getBadgeHTML(j) {

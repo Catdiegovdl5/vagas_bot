@@ -10,6 +10,24 @@ def get_connection():
     conn.execute('PRAGMA busy_timeout=5000')
     return conn
 
+def normalizar_senioridade(texto: str) -> str:
+    """Mapeia textos brutos das vagas para os códigos padronizados do filtro: estagio, jr, pl, sr, lead."""
+    if not texto:
+        return 'nao_informado'
+    import re
+    t = str(texto).lower()
+    if re.search(r'\b(estag|estág|trainee|intern)\b', t):
+        return 'estagio'
+    elif re.search(r'\b(jun|jún|jr|junior|júnior)\b', t):
+        return 'jr'
+    elif re.search(r'\b(plen|pl|pleno)\b', t):
+        return 'pl'
+    elif re.search(r'\b(sen|sên|sr|senior|sênior)\b', t):
+        return 'sr'
+    elif re.search(r'\b(lead|especialista|head|principal|coordenador|gerente)\b', t):
+        return 'lead'
+    return 'nao_informado'
+
 # =====================================================================
 # 🗄️ ABSTRAÇÃO DE MULTI-TENANCY PARA FUTURA TRANSIÇÃO POSTGRESQL RLS
 # =====================================================================
