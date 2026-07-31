@@ -12,23 +12,27 @@ def get_connection():
     conn.execute('PRAGMA busy_timeout=5000')
     return conn
 
-def normalizar_senioridade(texto: str) -> str:
-    """Mapeia textos brutos das vagas para os códigos padronizados do filtro: estagio, jr, pl, sr, lead."""
-    if not texto:
-        return 'nao_informado'
-    import re
-    t = str(texto).lower()
-    if re.search(r'\b(estag|estág|trainee|intern)\b', t):
-        return 'estagio'
-    elif re.search(r'\b(jun|jún|jr|junior|júnior)\b', t):
-        return 'jr'
-    elif re.search(r'\b(plen|pl|pleno)\b', t):
-        return 'pl'
-    elif re.search(r'\b(sen|sên|sr|senior|sênior)\b', t):
-        return 'sr'
-    elif re.search(r'\b(lead|especialista|head|principal|coordenador|gerente)\b', t):
-        return 'lead'
-    return 'nao_informado'
+
+# Delegação da normalização de senioridade para normalizer.py (fonte única de verdade)
+# Evita duplicidade de regras entre database.py e normalizer.py
+try:
+    from prioriti.normalizer import classificar_senioridade_precisa as normalizar_senioridade
+except ImportError:
+    try:
+        from normalizer import classificar_senioridade_precisa as normalizar_senioridade
+    except ImportError:
+        def normalizar_senioridade(titulo: str, descricao: str = "") -> str:
+            """Fallback de emergência — use normalizer.py como fonte de verdade."""
+            import re
+            t = str(titulo or "").lower()
+            if re.search(r'\b(estag|trainee|intern)\b', t): return 'jr'
+            if re.search(r'\b(jr|junior|júnior)\b', t): return 'jr'
+            if re.search(r'\b(pl|pleno)\b', t): return 'pl'
+            if re.search(r'\b(sr|senior|sênior)\b', t): return 'sr'
+            if re.search(r'\b(lead|especialista|head)\b', t): return 'lead'
+            return 'jr'
+
+
 
 # =====================================================================
 # 🗄️ ABSTRAÇÃO DE MULTI-TENANCY PARA FUTURA TRANSIÇÃO POSTGRESQL RLS

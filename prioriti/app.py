@@ -1,10 +1,30 @@
 import os
 import sys
+import asyncio
+import logging
+import sqlite3
+import unicodedata
+import hashlib
+import hmac
+import importlib
+import inspect
+import csv
+import io
+import time
+import json
+import re
+from logging.handlers import RotatingFileHandler
+from typing import Optional, List, Dict, Union
+from contextlib import asynccontextmanager
+from urllib.parse import parse_qsl
+
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
+from pydantic import BaseModel
+import httpx
+import uvicorn
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
@@ -15,15 +35,8 @@ if CURRENT_DIR not in sys.path:
 
 from prioriti.database import get_jobs, insert_jobs, init_db, mark_applied, mark_ignored, get_connection
 from prioriti.normalizer import normalizar_banco_dados
-import uvicorn
-import asyncio
-import logging
-import sqlite3
-import unicodedata
-from logging.handlers import RotatingFileHandler
-from typing import Optional, List, Dict, Union
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 load_dotenv()
 
 def remover_acentos(texto: str) -> str:
@@ -65,9 +78,6 @@ async def lifespan(app: FastAPI):
     logger.info("FastAPI Server encerrando conexões...")
 
 app = FastAPI(lifespan=lifespan)
-
-import httpx
-import time
 
 _last_alert_time = 0
 
@@ -301,40 +311,7 @@ def listar_vagas(
         logger.error(f"Erro ao listar vagas no banco: {e}")
         return {"total": 0, "count": 0, "jobs": [], "error": str(e)}
 
-    try:
-        conn = get_connection()
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        rows = cursor.execute(base_query, params).fetchall()
-        conn.close()
-        jobs = []
-        for r in rows:
-            row_dict = dict(r)
-            jobs.append({
-                "id":           row_dict.get("id"),
-                "title":        row_dict.get("title") or "Vaga Sem Título",
-                "company":      row_dict.get("company") or "Empresa Confidencial",
-                "location":     row_dict.get("location") or "Remoto/Brasil",
-                "level":        row_dict.get("level") or "nao_informado",
-                "link":         row_dict.get("link") or "#",
-                "platform":     row_dict.get("platform") or "Geral",
-                "requirements": row_dict.get("requirements") or "",
-                "budget":       row_dict.get("budget") or "A combinar",
-                "status":       row_dict.get("status") or "Disponível",
-                "job_type":     row_dict.get("job_type") or "CLT",
-                "profession":   row_dict.get("profession") or "Outros",
-                "added_at":     row_dict.get("added_at") or "",
-                "lang":         row_dict.get("lang") or "pt",
-            })
-        return {"jobs": jobs}
-    except Exception as e:
-        logger.error(f"Erro ao buscar vagas: {e}", exc_info=True)
-        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
-
-
-
-from pydantic import BaseModel
 class JobActionRequest(BaseModel):
     link: str
     reason: str = None
@@ -381,8 +358,6 @@ def api_save_profile(req: ProfileRequest, request: Request = None):
     )
     return {"status": "success", "message": "Perfil atualizado com sucesso!"}
 
-import importlib
-
 
 @app.get("/health")
 def health_check():
@@ -411,8 +386,6 @@ def api_metrics():
         "status": "online"
     }
 
-import hmac
-
 class PaymentWebhookPayload(BaseModel):
     event: str
     payment_id: str
@@ -420,12 +393,13 @@ class PaymentWebhookPayload(BaseModel):
     amount: float = 39.90
     token: str = None
 
-from fastapi.responses import HTMLResponse, JSONResponse
-
 @app.post("/api/webhook/payment")
 async def payment_webhook(req: PaymentWebhookPayload, request: Request):
     token_header = request.headers.get("X-Webhook-Secret") or req.token or ""
-    expected_secret = os.getenv("PAYMENT_WEBHOOK_SECRET", "super_secret_webhook_key_2026")
+    expected_secret = os.getenv("PAYMENT_WEBHOOK_SECRET")
+    if not expected_secret:
+        logger.error("PAYMENT_WEBHOOK_SECRET não configurado no .env — rejeição de segurança.")
+        return JSONResponse(status_code=500, content={"status": "error", "message": "Configuração de segurança do servidor ausente."})
     
     if not hmac.compare_digest(token_header, expected_secret):
         return JSONResponse(status_code=401, content={"status": "unauthorized", "message": "Assinatura do webhook inválida"})
@@ -444,12 +418,6 @@ async def n8n_webhook(request: Request):
     jobs = data.get("jobs", [])
     inserted = await asyncio.to_thread(insert_jobs, jobs)
     return {"status": "success", "inserted": inserted, "total_received": len(jobs)}
-
-from fastapi.responses import HTMLResponse, Response
-from database import get_jobs, insert_jobs, init_db, mark_applied, mark_ignored, get_user_profile
-import inspect
-import csv
-import io
 
 @app.get("/api/export_csv")
 def api_export_csv():
@@ -564,9 +532,6 @@ async def api_lgpd_purge(req: ProfileRequest):
 # COPILOTO DE PROPOSTAS (TMA Telegram & Web Unificados)
 # ─────────────────────────────────────────────────────────────
 
-import hashlib
-from urllib.parse import parse_qsl
-
 def verify_telegram_init_data(init_data: str, bot_token: str) -> dict:
     """Valida a assinatura HMAC-SHA256 dos dados do Telegram Mini App."""
     if not init_data or not bot_token:
@@ -591,8 +556,6 @@ def verify_telegram_init_data(init_data: str, bot_token: str) -> dict:
     except Exception as e:
         logger.error(f"Erro na verificação initData Telegram: {e}")
         return None
-
-from typing import Optional
 
 class ProposalStartRequest(BaseModel):
     init_data: Optional[str] = None
