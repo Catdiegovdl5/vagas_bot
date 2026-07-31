@@ -2896,19 +2896,16 @@
                 const res = await fetch(url);
                 const data = await res.json();
                 const vagas = data.jobs || (Array.isArray(data) ? data : []);
+                window.serverTotalJobs = data.total !== undefined ? data.total : vagas.length;
                 
                 allData = vagas;
                 filterData();
                 
-                // Atualiza o texto do contador na tela (além do updateMetrics padrao)
+                // Atualiza o texto do contador na tela
                 const contador = document.getElementById('results-counter') || document.getElementById('texto-contador-vagas');
                 if (contador) {
-                    const lang = currentLang || 'pt';
-                    if (typeof i18nData !== 'undefined' && i18nData[lang] && i18nData[lang].showing_jobs) {
-                        contador.innerText = i18nData[lang].showing_jobs.replace('{n}', viewData.length);
-                    } else {
-                        contador.innerText = `Mostrando ${viewData.length} vagas encontradas`;
-                    }
+                    const totalStr = window.serverTotalJobs.toLocaleString('pt-BR');
+                    contador.innerText = `Mostrando ${viewData.length} de ${totalStr} vagas encontradas`;
                 }
             } catch (err) {
                 console.error("Erro ao filtrar vagas pelo servidor:", err);

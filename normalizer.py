@@ -56,19 +56,23 @@ def normalizar_banco_dados():
     except sqlite3.OperationalError:
         pass  # Coluna já existe
 
-    # Busca todas as vagas do banco
-    cursor.execute("SELECT id, title, COALESCE(requirements, '') FROM jobs")
+    # Busca todas as vagas do banco (incluindo as que estão None)
+    cursor.execute("SELECT id, title, COALESCE(requirements, '') FROM jobs WHERE senioridade_norm IS NULL OR level IS NULL OR level = 'nao_informado'")
     rows = cursor.fetchall()
     
-    updates = []
-    for vaga_id, titulo, descricao in rows:
-        senioridade_correta = classificar_senioridade_precisa(titulo or "", descricao or "")
-        updates.append((senioridade_correta, senioridade_correta, vaga_id))
-        
-    cursor.executemany("UPDATE jobs SET senioridade_norm = ?, level = ? WHERE id = ?", updates)
-    conn.commit()
+    if rows:
+        updates = []
+        for vaga_id, titulo, descricao in rows:
+            senioridade_correta = classificar_senioridade_precisa(titulo or "", descricao or "")
+            updates.append((senioridade_correta, senioridade_correta, vaga_id))
+            
+        cursor.executemany("UPDATE jobs SET senioridade_norm = ?, level = ? WHERE id = ?", updates)
+        conn.commit()
+        print(f"[OK] {len(rows)} novas vagas normalizadas com sucesso no banco de dados!")
+    else:
+        print("[OK] Todas as vagas no banco de dados já possuem senioridade_norm definida.")
+
     conn.close()
-    print(f"[OK] {len(rows)} vagas normalizadas com sucesso no banco de dados!")
 
 if __name__ == "__main__":
     normalizar_banco_dados()

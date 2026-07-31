@@ -132,6 +132,7 @@ def listar_vagas(
     nivel: Optional[str] = None,
     modalidade: Optional[str] = "todos",
     categoria: Optional[str] = None,
+    subcategoria: Optional[str] = None,
     profession: Optional[str] = "",
     q: Optional[str] = None,
     lat: float = None,
@@ -141,17 +142,10 @@ def listar_vagas(
     """
     Endpoint unificado de busca inteligente de vagas.
     - Usa jobs.db (via get_connection) com tabela 'jobs'
-    - Suporta estado, cidade, senioridade (ou nivel), modalidade, categoria/profession e busca livre por palavra-chave (q)
+    - Suporta estado, cidade, senioridade, modalidade, categoria, subcategoria, e busca por palavra-chave (q)
+    - Retorna total real no banco sem distorções de paginação
     """
-    base_query = """
-        SELECT j.id, j.title, j.company, j.budget, j.link, j.platform,
-               j.job_type, j.profession, j.level, j.requirements,
-               j.location, j.lat, j.lon, j.lang, j.added_at,
-               CASE
-                   WHEN a.link IS NOT NULL THEN 'Aplicado'
-                   WHEN i.link IS NOT NULL THEN 'Ignorado'
-                   ELSE 'Disponível'
-               END AS status
+    from_where_clause = """
         FROM jobs j
         LEFT JOIN applied_jobs a ON j.link = a.link
         LEFT JOIN ignored_jobs i ON j.link = i.link
@@ -162,27 +156,28 @@ def listar_vagas(
     # ── 1. Filtro por estado ────────────────────────────────────
     if estado and estado.lower() not in ("todos", "all", ""):
         uf = estado.strip().upper()
-        base_query += " AND (UPPER(j.location) = ? OR UPPER(j.location) LIKE ?)"
+        from_where_clause += " AND (UPPER(j.location) = ? OR UPPER(j.location) LIKE ?)"
         params.extend([uf, f"%{uf}%"])
 
     # ── 2. Filtro por cidade ────────────────────────────────────
     if cidade and cidade.strip():
         cid = remover_acentos(cidade)
-        base_query += " AND (LOWER(j.location) LIKE ? OR LOWER(j.location) LIKE ?)"
+        from_where_clause += " AND (LOWER(j.location) LIKE ? OR LOWER(j.location) LIKE ?)"
         params.extend([f"%{cid}%", f"%{cidade.strip().lower()}%"])
 
     # ── 3. Filtro por modalidade (remoto, hibrido, presencial) ──
     if modalidade and modalidade.lower() not in ("todos", "all", ""):
         mod = remover_acentos(modalidade)
         if "remot" in mod:
-            base_query += " AND (LOWER(j.location) LIKE '%remot%' OR LOWER(j.title) LIKE '%remot%' OR LOWER(j.title) LIKE '%home office%')"
+            from_where_clause += " AND (LOWER(j.location) LIKE '%remot%' OR LOWER(j.title) LIKE '%remot%' OR LOWER(j.title) LIKE '%home office%')"
         elif "hibrid" in mod:
-            base_query += " AND (LOWER(j.location) LIKE '%hibrid%' OR LOWER(j.title) LIKE '%hibrid%')"
+            from_where_clause += " AND (LOWER(j.location) LIKE '%hibrid%' OR LOWER(j.title) LIKE '%hibrid%')"
         elif "presenc" in mod:
-            base_query += " AND (LOWER(j.location) LIKE '%presenc%' OR (LOWER(j.location) NOT LIKE '%remot%' AND LOWER(j.location) NOT LIKE '%hibrid%'))"
+            from_where_clause += " AND (LOWER(j.location) LIKE '%presenc%' OR (LOWER(j.location) NOT LIKE '%remot%' AND LOWER(j.location) NOT LIKE '%hibrid%'))"
 
-    # ── 4. Filtro Inteligente por Profissão / Categoria com Exclusão Visual ──
-    cat_target = remover_acentos(categoria or profession or "")
+    # ── 4. Filtro Inteligente por Profissão / Categoria / Subcategoria ──
+    raw_cat = subcategoria or categoria or profession or ""
+    cat_target = remover_acentos(raw_cat)
     DESIGNER_EXCLUSIONS = [
         "designer", "design", "webdesigner", "ui/ux", "ux/ui", "criativo",
         "arte finalista", "grafico", "gr%fico", "motion", "videomaker", "editor de v%deo", "editor de video"
@@ -195,36 +190,36 @@ def listar_vagas(
     if cat_target and cat_target not in ("all", "todos", ""):
         if any(tc in cat_target for tc in TRAFFIC_CATEGORIES):
             if "meta" in cat_target:
-                base_query += " AND (LOWER(j.title) LIKE '%meta ads%' OR LOWER(j.title) LIKE '%facebook ads%' OR LOWER(j.title) LIKE '%instagram ads%' OR LOWER(j.title) LIKE '%tiktok ads%' OR LOWER(j.title) LIKE '%social ads%')"
+                from_where_clause += " AND (LOWER(j.title) LIKE '%meta ads%' OR LOWER(j.title) LIKE '%facebook ads%' OR LOWER(j.title) LIKE '%instagram ads%' OR LOWER(j.title) LIKE '%tiktok ads%' OR LOWER(j.title) LIKE '%social ads%')"
             elif "google" in cat_target:
-                base_query += " AND (LOWER(j.title) LIKE '%google ads%' OR LOWER(j.title) LIKE '%youtube ads%' OR LOWER(j.title) LIKE '%sem%' OR LOWER(j.title) LIKE '%search ads%')"
+                from_where_clause += " AND (LOWER(j.title) LIKE '%google ads%' OR LOWER(j.title) LIKE '%youtube ads%' OR LOWER(j.title) LIKE '%sem%' OR LOWER(j.title) LIKE '%search ads%')"
             elif "buyer" in cat_target or "midia" in cat_target:
-                base_query += " AND (LOWER(j.title) LIKE '%media buyer%' OR LOWER(j.title) LIKE '%m%dia paga%' OR LOWER(j.title) LIKE '%compra de m%dia%')"
+                from_where_clause += " AND (LOWER(j.title) LIKE '%media buyer%' OR LOWER(j.title) LIKE '%m%dia paga%' OR LOWER(j.title) LIKE '%compra de m%dia%')"
             elif "growth" in cat_target or "performance" in cat_target:
-                base_query += " AND (LOWER(j.title) LIKE '%growth%' OR LOWER(j.title) LIKE '%performance%' OR LOWER(j.title) LIKE '%cro%')"
+                from_where_clause += " AND (LOWER(j.title) LIKE '%growth%' OR LOWER(j.title) LIKE '%performance%' OR LOWER(j.title) LIKE '%cro%')"
             else:
-                base_query += " AND (LOWER(j.title) LIKE '%tr%fego%' OR LOWER(j.title) LIKE '%media buyer%' OR LOWER(j.title) LIKE '%meta ads%' OR LOWER(j.title) LIKE '%google ads%' OR LOWER(j.title) LIKE '%facebook ads%' OR LOWER(j.title) LIKE '%trafficker%')"
+                from_where_clause += " AND (LOWER(j.title) LIKE '%tr%fego%' OR LOWER(j.title) LIKE '%media buyer%' OR LOWER(j.title) LIKE '%meta ads%' OR LOWER(j.title) LIKE '%google ads%' OR LOWER(j.title) LIKE '%facebook ads%' OR LOWER(j.title) LIKE '%trafficker%')"
 
             # EXCLUSÃO RIGOROSA: ignora vagas cujo TÍTULO seja estritamente de Designer/Criativo Visual
             for excl in DESIGNER_EXCLUSIONS:
-                base_query += " AND LOWER(j.title) NOT LIKE ?"
+                from_where_clause += " AND LOWER(j.title) NOT LIKE ?"
                 params.append(f"%{excl}%")
 
         elif any(dc in cat_target for dc in ["designer_grafico", "ui_ux", "motion_designer", "designer_performance", "design"]):
             if "ui" in cat_target or "ux" in cat_target:
-                base_query += " AND (LOWER(j.title) LIKE '%ui%' OR LOWER(j.title) LIKE '%ux%' OR LOWER(j.title) LIKE '%product design%')"
+                from_where_clause += " AND (LOWER(j.title) LIKE '%ui%' OR LOWER(j.title) LIKE '%ux%' OR LOWER(j.title) LIKE '%product design%')"
             elif "motion" in cat_target:
-                base_query += " AND (LOWER(j.title) LIKE '%motion%' OR LOWER(j.title) LIKE '%videomaker%' OR LOWER(j.title) LIKE '%editor%')"
+                from_where_clause += " AND (LOWER(j.title) LIKE '%motion%' OR LOWER(j.title) LIKE '%videomaker%' OR LOWER(j.title) LIKE '%editor%')"
             else:
-                base_query += " AND (LOWER(j.title) LIKE '%design%' OR LOWER(j.profession) LIKE '%design%')"
+                from_where_clause += " AND (LOWER(j.title) LIKE '%design%' OR LOWER(j.profession) LIKE '%design%')"
         else:
-            base_query += " AND (LOWER(j.profession) LIKE ? OR LOWER(j.title) LIKE ?)"
+            from_where_clause += " AND (LOWER(j.profession) LIKE ? OR LOWER(j.title) LIKE ?)"
             params.extend([f"%{cat_target}%", f"%{cat_target}%"])
 
     # ── 5. Busca por palavra-chave livre (q) ──────────────────────
     if q and q.strip():
         termo = remover_acentos(q)
-        base_query += " AND (LOWER(j.title) LIKE ? OR LOWER(j.company) LIKE ? OR LOWER(j.requirements) LIKE ?)"
+        from_where_clause += " AND (LOWER(j.title) LIKE ? OR LOWER(j.company) LIKE ? OR LOWER(j.requirements) LIKE ?)"
         params.extend([f"%{termo}%", f"%{termo}%", f"%{termo}%"])
 
     # ── 6. Filtro Rigoroso de Senioridade Normalizada (Precedência de Título) ──
@@ -239,10 +234,64 @@ def listar_vagas(
     sen_norm = sen_map.get(sen_key, sen_key)
 
     if sen_norm not in ("todos", "all", ""):
-        base_query += " AND (j.senioridade_norm = ? OR j.level = ?)"
+        from_where_clause += " AND (j.senioridade_norm = ? OR j.level = ?)"
         params.extend([sen_norm, sen_norm])
 
-    base_query += " ORDER BY j.added_at DESC LIMIT 300"
+    select_query = """
+        SELECT j.id, j.title, j.company, j.budget, j.link, j.platform,
+               j.job_type, j.profession, j.level, j.senioridade_norm, j.requirements,
+               j.location, j.lat, j.lon, j.lang, j.added_at,
+               CASE
+                   WHEN a.link IS NOT NULL THEN 'Aplicado'
+                   WHEN i.link IS NOT NULL THEN 'Ignorado'
+                   ELSE 'Disponível'
+               END AS status
+    """ + from_where_clause + " ORDER BY j.added_at DESC LIMIT 300"
+
+    count_query = "SELECT COUNT(DISTINCT j.id) " + from_where_clause
+
+    try:
+        conn = get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Executa a contagem real total no banco sem limite
+        total_matching = cursor.execute(count_query, params).fetchone()[0]
+
+        # Executa a busca paginada/limitada
+        rows = cursor.execute(select_query, params).fetchall()
+        conn.close()
+
+        jobs = []
+        for r in rows:
+            row_dict = dict(r)
+            jobs.append({
+                "id":           row_dict.get("id"),
+                "title":        row_dict.get("title") or "Título Não Informado",
+                "company":      row_dict.get("company") or "Empresa Confidencial",
+                "budget":       row_dict.get("budget") or "A combinar",
+                "link":         row_dict.get("link") or "#",
+                "platform":     row_dict.get("platform") or "web",
+                "job_type":     row_dict.get("job_type") or "presencial",
+                "profession":   row_dict.get("profession") or "Tecnologia",
+                "level":        row_dict.get("senioridade_norm") or row_dict.get("level") or "jr",
+                "senioridade_norm": row_dict.get("senioridade_norm") or "jr",
+                "requirements": row_dict.get("requirements") or "",
+                "location":     row_dict.get("location") or "Brasil",
+                "lat":          row_dict.get("lat"),
+                "lon":          row_dict.get("lon"),
+                "lang":         row_dict.get("lang") or "pt",
+                "added_at":     row_dict.get("added_at"),
+                "status":       row_dict.get("status") or "Disponível"
+            })
+        return {
+            "total": total_matching,
+            "count": len(jobs),
+            "jobs": jobs
+        }
+    except Exception as e:
+        logger.error(f"Erro ao listar vagas no banco: {e}")
+        return {"total": 0, "count": 0, "jobs": [], "error": str(e)}
 
     try:
         conn = get_connection()
