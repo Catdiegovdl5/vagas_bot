@@ -15,3 +15,5 @@ playwright
 playwright-stealth
 curl_cffi
 PyMuPDF
+fastapi
+uvicorn
