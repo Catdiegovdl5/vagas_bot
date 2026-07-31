@@ -2338,8 +2338,8 @@
                     const isLead = fullText.includes('lead') || fullText.includes('especialista') || fullText.includes('head');
                     
                     if (selectedSeniority === 'estagio') matchSen = isEstagio;
-                    else if (selectedSeniority === 'jr') matchSen = isJr || (!isSr && !isPl && !isLead && !isEstagio);
-                    else if (selectedSeniority === 'pl') matchSen = isPl || (!isJr && !isSr && !isLead && !isEstagio);
+                    else if (selectedSeniority === 'jr') matchSen = isJr;
+                    else if (selectedSeniority === 'pl') matchSen = isPl;
                     else if (selectedSeniority === 'sr') matchSen = isSr;
                     else if (selectedSeniority === 'lead') matchSen = isLead;
                 }
@@ -2630,7 +2630,7 @@
             if (fullText.includes('pleno') || fullText.includes(' pl')) return '<span class="tag-seniority pl">Pl</span>';
             if (fullText.includes('senior') || fullText.includes('sênior') || fullText.includes(' sr')) return '<span class="tag-seniority sr">Sr</span>';
             if (fullText.includes('lead') || fullText.includes('especialista') || fullText.includes('head')) return '<span class="tag-seniority lead">Lead</span>';
-            return '<span class="tag-seniority jr">Jr</span>'; // Default if undefined
+            return ''; // Default se não encontrar
         }
 
         function filtrarSenioridade(nivel, elemento) {
