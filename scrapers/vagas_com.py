@@ -195,19 +195,19 @@ async def scrape(keyword="Python", level="Todos", max_pages=1, location="", coun
                     title_el = card.find('a', class_=lambda c: c and 'link-vaga' in str(c).lower())
                     if not title_el:
                         title_el = card.find('h2')
-                    if not title_el:
+                    if not title_el or not getattr(title_el, 'text', None):
                         continue
                         
                     title = title_el.text.strip()
-                    link = title_el.get('href', '') if title_el.name == 'a' else ''
+                    link = title_el.get('href', '') if hasattr(title_el, 'name') and title_el.name == 'a' else ''
                     if link and not link.startswith('http'):
                         link = 'https://www.vagas.com.br' + link
                         
                     comp_el = card.find('span', class_=lambda c: c and 'empr' in str(c).lower())
-                    company = comp_el.text.strip() if comp_el else "Empresa Confidencial"
+                    company = comp_el.text.strip() if (comp_el and getattr(comp_el, 'text', None)) else "Empresa Confidencial"
                     
                     desc_el = card.find('div', class_=lambda c: c and 'detalhes' in str(c).lower())
-                    desc = desc_el.text.strip() if desc_el else f"Vaga para {title} no Vagas.com.br."
+                    desc = desc_el.text.strip() if (desc_el and getattr(desc_el, 'text', None)) else f"Vaga para {title} no Vagas.com.br."
                     
                     job_obj = {
                         "platform": "Vagas.com",

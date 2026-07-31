@@ -196,7 +196,7 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                     
                     # Título
                     title_el = card.find('p', class_=lambda c: c and 'q4uo1b' in c) or card.find('p')
-                    if not title_el:
+                    if not title_el or not getattr(title_el, 'text', None):
                         continue
                     title = title_el.text.strip()
                     # Limpa prefixos de oportunidade
@@ -211,13 +211,13 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                     # Salário/Budget
                     budget = "A Combinar"
                     salary_el = card.find('p', class_=lambda c: c and 'o118sj' in c)
-                    if salary_el:
+                    if salary_el and getattr(salary_el, 'text', None):
                         budget = salary_el.text.strip()
                     else:
                         # Fallback: procura por textos de salário
                         p_tags = card.find_all('p')
                         for p in p_tags:
-                            p_text = p.text.strip()
+                            p_text = p.text.strip() if getattr(p, 'text', None) else ""
                             if "R$" in p_text or "$" in p_text:
                                 budget = p_text
                                 break
@@ -225,12 +225,12 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                     # Tipo de contratação
                     j_type = "CLT/PJ"
                     type_el = card.find('p', class_=lambda c: c and '2fkfcz' in c)
-                    if type_el:
+                    if type_el and getattr(type_el, 'text', None):
                         j_type = type_el.text.strip()
                     
                     # Skills/Requirements
                     skill_elements = card.find_all('div', class_=lambda c: c and 'dqhvn' in c)
-                    skills = [s.text.strip() for s in skill_elements if s.text.strip()]
+                    skills = [s.text.strip() for s in skill_elements if getattr(s, 'text', None) and s.text.strip()]
                     if skills:
                         reqs = ", ".join(skills)
                     else:

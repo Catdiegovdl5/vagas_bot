@@ -168,7 +168,7 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
             for card in job_cards:
                 try:
                     title_el = card.find('h3') or card.find('h2')
-                    if not title_el:
+                    if not title_el or not getattr(title_el, 'text', None):
                         continue
                     title = title_el.text.strip()
                     
@@ -184,7 +184,7 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                     company = comp_el.get('title', "Empresa Confidencial") if comp_el else "Empresa Confidencial"
                     
                     tags = card.find_all('span', class_=lambda c: c and 'tag' in str(c).lower())
-                    tags_text = " | ".join([t.text.strip() for t in tags])
+                    tags_text = " | ".join([t.text.strip() for t in tags if getattr(t, 'text', None) and t.text.strip()])
                     
                     job_obj = {
                         "platform": "ProgramaThor",

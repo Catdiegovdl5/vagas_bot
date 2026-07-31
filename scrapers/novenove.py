@@ -26,19 +26,19 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
             links = soup.select('.title a, .project-title a, .result-item a.title')
             
             for a_tag in links[:15]:
-                title = a_tag.text.strip()
-                href = a_tag.get('href', '')
+                title = a_tag.text.strip() if (a_tag and getattr(a_tag, 'text', None)) else ""
+                href = a_tag.get('href', '') if a_tag else ""
                 if not title or not href or '#' in href:
                     continue
                     
                 link = "https://www.99freelas.com.br" + href if href.startswith('/') else href
                 
                 # Busca elemento pai ou container do item para extrair a descrição
-                parent = a_tag.find_parent('li') or a_tag.find_parent('div')
+                parent = a_tag.find_parent('li') or a_tag.find_parent('div') if a_tag else None
                 desc = "Sem descrição"
                 if parent:
                     desc_el = parent.select_one('.description, .project-description, .summary')
-                    if desc_el:
+                    if desc_el and getattr(desc_el, 'text', None):
                         desc = desc_el.text.strip()
                 
                 jobs.append({

@@ -286,7 +286,8 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                             pass
                         desc_el = page.query_selector(desc_sel)
                         if desc_el:
-                            description = desc_el.text_content().strip()
+                            raw_desc = desc_el.text_content()
+                            description = raw_desc.strip() if raw_desc else ""
                     except Exception:
                         pass
                     

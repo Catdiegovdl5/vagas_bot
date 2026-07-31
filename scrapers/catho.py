@@ -83,9 +83,11 @@ async def scrape(keyword="Python", level="Todos", max_pages=10, location="", cou
                     if not title_el:
                         continue
                         
-                    title = title_el.text.strip()
-                    
-                    link_el = title_el.find('a', href=True)
+                    title = title_el.text.strip() if (title_el and getattr(title_el, 'text', None)) else ""
+                    if not title:
+                        continue
+                        
+                    link_el = title_el.find('a', href=True) if title_el else None
                     if link_el:
                         link = link_el.get('href')
                         if link and not link.startswith('http'):
@@ -94,15 +96,15 @@ async def scrape(keyword="Python", level="Todos", max_pages=10, location="", cou
                         link = f"https://www.catho.com.br/vagas/{encoded_kw}/?q={encoded_kw}"
                         
                     comp_el = card.find('p')
-                    company = comp_el.text.strip() if comp_el else "Empresa Confidencial"
+                    company = comp_el.text.strip() if (comp_el and getattr(comp_el, 'text', None)) else "Empresa Confidencial"
                     
                     salary_el = card.find('div', class_=lambda c: c and 'salary' in str(c).lower())
-                    budget = salary_el.text.strip() if salary_el else "A Combinar"
+                    budget = salary_el.text.strip() if (salary_el and getattr(salary_el, 'text', None)) else "A Combinar"
                     
                     desc_el = card.find('span', class_=lambda c: c and 'description' in str(c).lower())
                     if not desc_el:
                         desc_el = card.find('div', class_=lambda c: c and 'description' in str(c).lower())
-                    desc = desc_el.text.strip() if desc_el else f"Vaga para {title} na Catho."
+                    desc = desc_el.text.strip() if (desc_el and getattr(desc_el, 'text', None)) else f"Vaga para {title} na Catho."
                     
                     job_obj = {
                         "platform": "Catho",

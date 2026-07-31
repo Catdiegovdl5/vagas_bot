@@ -161,39 +161,58 @@ test_cases = [
 # ─────────────────────────────────────────────
 # EXECUÇÃO
 # ─────────────────────────────────────────────
-print("\n" + "="*65)
-print("   VAGAS SNIPER BOT — TESTE DO MOTOR DE BUSCA")
-print("="*65)
+def test_motor():
+    passed = 0
+    failed = 0
+    failures = []
 
-passed = 0
-failed = 0
-failures = []
+    for (vaga, keyword, expected, desc) in test_cases:
+        result = simulate_filter(vaga, keyword)
+        ok = (result == expected)
+        if ok:
+            passed += 1
+        else:
+            failed += 1
+            label = "LIBEROU (devia BLOQUEAR)" if result else "BLOQUEOU (devia LIBERAR)"
+            failures.append(f"{desc} -> {label}")
 
-for (vaga, keyword, expected, desc) in test_cases:
-    result = simulate_filter(vaga, keyword)
-    ok = (result == expected)
-    if ok:
-        passed += 1
-        print(f"  {GREEN}PASS{RESET}  {desc}")
+    assert failed == 0, f"Motor de busca reprovado com {failed} falha(s): {failures}"
+
+if __name__ == "__main__":
+    print("\n" + "="*65)
+    print("   VAGAS SNIPER BOT — TESTE DO MOTOR DE BUSCA")
+    print("="*65)
+
+    passed = 0
+    failed = 0
+    failures = []
+
+    for (vaga, keyword, expected, desc) in test_cases:
+        result = simulate_filter(vaga, keyword)
+        ok = (result == expected)
+        if ok:
+            passed += 1
+            print(f"  {GREEN}PASS{RESET}  {desc}")
+        else:
+            failed += 1
+            label = "LIBEROU (devia BLOQUEAR)" if result else "BLOQUEOU (devia LIBERAR)"
+            print(f"  {RED}FAIL{RESET}  {desc}  -> {label}")
+            failures.append(desc)
+
+    total = passed + failed
+    fp_cases = [c for c in test_cases if not c[2]]
+    fp_blocked = sum(1 for c in fp_cases if not simulate_filter(c[0], c[1]))
+
+    print("\n" + "="*65)
+    print(f"  Resultado: {passed}/{total} testes passaram")
+    print(f"  Falsos-Positivos bloqueados: {fp_blocked}/{len(fp_cases)} ({100*fp_blocked//len(fp_cases)}%)")
+
+    if failed == 0:
+        print(f"\n  {GREEN}>> MOTOR APROVADO! 100% dos falsos-positivos bloqueados.{RESET}")
+        sys.exit(0)
     else:
-        failed += 1
-        label = "LIBEROU (devia BLOQUEAR)" if result else "BLOQUEOU (devia LIBERAR)"
-        print(f"  {RED}FAIL{RESET}  {desc}  -> {label}")
-        failures.append(desc)
+        print(f"\n  {RED}!!  MOTOR REPROVADO! {failed} teste(s) falharam:{RESET}")
+        for f in failures:
+            print(f"    -> {f}")
+        sys.exit(1)
 
-total = passed + failed
-fp_cases = [c for c in test_cases if not c[2]]  # esperado=False
-fp_blocked = sum(1 for c in fp_cases if not simulate_filter(c[0], c[1]))
-
-print("\n" + "="*65)
-print(f"  Resultado: {passed}/{total} testes passaram")
-print(f"  Falsos-Positivos bloqueados: {fp_blocked}/{len(fp_cases)} ({100*fp_blocked//len(fp_cases)}%)")
-
-if failed == 0:
-    print(f"\n  {GREEN}>> MOTOR APROVADO! 100% dos falsos-positivos bloqueados.{RESET}")
-    sys.exit(0)
-else:
-    print(f"\n  {RED}!!  MOTOR REPROVADO! {failed} teste(s) falharam:{RESET}")
-    for f in failures:
-        print(f"    -> {f}")
-    sys.exit(1)

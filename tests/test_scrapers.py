@@ -1,6 +1,8 @@
 import sys
 import os
 import json
+import asyncio
+import inspect
 
 # 1. Setup Playwright Mock before importing glassdoor
 class MockGlassdoorElement:
@@ -179,9 +181,14 @@ def test_scrapers():
         print(f"--- Running {name} Scraper ---")
         try:
             if name in ["Workana", "Remotar"]:
-                vagas = module.scrape(keyword="Desenvolvedor", level="Todos")
+                res = module.scrape(keyword="Desenvolvedor", level="Todos")
             else:
-                vagas = module.scrape(keyword="Desenvolvedor", level="Todos", country="Brasil")
+                res = module.scrape(keyword="Desenvolvedor", level="Todos", country="Brasil")
+                
+            if inspect.isawaitable(res):
+                vagas = asyncio.run(res)
+            else:
+                vagas = res
                 
             print(f"[{name}] Found {len(vagas)} jobs.")
             
