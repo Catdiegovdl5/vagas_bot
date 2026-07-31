@@ -2330,18 +2330,8 @@
 
                 let matchSen = true;
                 if (selectedSeniority !== 'all') {
-                    const fullText = ((j.title || '') + ' ' + (j.requirements || '')).toLowerCase();
-                    const isEstagio = fullText.includes('estagio') || fullText.includes('estágio') || fullText.includes('trainee');
-                    const isJr = fullText.includes('junior') || fullText.includes('júnior') || fullText.includes(' jr');
-                    const isPl = fullText.includes('pleno') || fullText.includes(' pl');
-                    const isSr = fullText.includes('senior') || fullText.includes('sênior') || fullText.includes(' sr');
-                    const isLead = fullText.includes('lead') || fullText.includes('especialista') || fullText.includes('head');
-                    
-                    if (selectedSeniority === 'estagio') matchSen = isEstagio;
-                    else if (selectedSeniority === 'jr') matchSen = isJr;
-                    else if (selectedSeniority === 'pl') matchSen = isPl;
-                    else if (selectedSeniority === 'sr') matchSen = isSr;
-                    else if (selectedSeniority === 'lead') matchSen = isLead;
+                    const lvl = getJobSeniorityLevel(j);
+                    matchSen = (lvl === selectedSeniority);
                 }
 
                 let matchFresh = true;
@@ -2623,14 +2613,29 @@
             }
         }
 
+        function getJobSeniorityLevel(j) {
+            const title = (j.title || '').toLowerCase();
+            const req = (j.requirements || '').toLowerCase();
+            const level = (j.level || '').toLowerCase();
+            const seniority = (j.seniority || '').toLowerCase();
+            const text = `${title} ${level} ${seniority} ${req}`;
+
+            if (/\b(estagio|estágio|trainee)\b/i.test(text)) return 'estagio';
+            if (/\b(jr|júnior|junior)\b/i.test(text)) return 'jr';
+            if (/\b(pl|pleno)\b/i.test(text)) return 'pl';
+            if (/\b(sr|sênior|senior)\b/i.test(text)) return 'sr';
+            if (/\b(lead|especialista|head|principal|tech lead)\b/i.test(text)) return 'lead';
+            return 'all';
+        }
+
         function getBadgeHTML(j) {
-            const fullText = ((j.title || '') + ' ' + (j.requirements || '')).toLowerCase();
-            if (fullText.includes('estagio') || fullText.includes('estágio') || fullText.includes('trainee')) return '<span class="tag-seniority estagio">Estágio</span>';
-            if (fullText.includes('junior') || fullText.includes('júnior') || fullText.includes(' jr')) return '<span class="tag-seniority jr">Jr</span>';
-            if (fullText.includes('pleno') || fullText.includes(' pl')) return '<span class="tag-seniority pl">Pl</span>';
-            if (fullText.includes('senior') || fullText.includes('sênior') || fullText.includes(' sr')) return '<span class="tag-seniority sr">Sr</span>';
-            if (fullText.includes('lead') || fullText.includes('especialista') || fullText.includes('head')) return '<span class="tag-seniority lead">Lead</span>';
-            return ''; // Default se não encontrar
+            const lvl = getJobSeniorityLevel(j);
+            if (lvl === 'estagio') return '<span class="tag-seniority estagio">Estágio</span>';
+            if (lvl === 'jr') return '<span class="tag-seniority jr">Jr</span>';
+            if (lvl === 'pl') return '<span class="tag-seniority pl">Pl</span>';
+            if (lvl === 'sr') return '<span class="tag-seniority sr">Sr</span>';
+            if (lvl === 'lead') return '<span class="tag-seniority lead">Lead</span>';
+            return '';
         }
 
         function filtrarSenioridade(nivel, elemento) {
