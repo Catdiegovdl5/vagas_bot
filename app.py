@@ -35,14 +35,17 @@ logger.addHandler(handler)
 
 logger.info("Sistema de Logs Iniciado com Sucesso.")
 
+from normalizer import normalizar_banco_dados
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Gerenciador de Ciclo de Vida (Lifespan) assíncrono modernizado do FastAPI.
     Executa tarefas de inicialização, como checar se o banco tem vagas,
-    e dispara rotinas de background (varredura contínua) antes de aceitar conexões.
+    normaliza a senioridade das vagas com precedência de título e dispara rotinas de background.
     """
     logger.info("FastAPI Server iniciado com sucesso via Lifespan Manager.")
+    normalizar_banco_dados()
     jobs = get_jobs()
     if not jobs:
         logger.info("Banco de dados sem vagas. Disparando Varredura Inicial de População de Dados...")
@@ -191,86 +194,20 @@ def listar_vagas(
         base_query += " AND (LOWER(j.title) LIKE ? OR LOWER(j.company) LIKE ? OR LOWER(j.requirements) LIKE ?)"
         params.extend([f"%{termo}%", f"%{termo}%", f"%{termo}%"])
 
-    # ── 6. Filtro de Senioridade — Modo Flexível ───────────────────────
-    SENIOR_MARKS  = ["s_nior", "senior", " sr ", "sênio", "s%nio"]
-    LEAD_MARKS    = ["lead", "especialista", "head ", "tech lead", "principal", "coordenador", "gerente"]
-    JUNIOR_MARKS  = ["jr", "j_nior", "junior", "j%nior", "jún"]
-    PLENO_MARKS   = ["pleno", " pl "]
-    ESTAGIO_MARKS = ["est_gio", "estagio", "trainee", "intern"]
+    # ── 6. Filtro Rigoroso de Senioridade Normalizada (Precedência de Título) ──
+    sen_key = (nivel or senioridade or "todos").lower().strip()
+    sen_map = {
+        'junior': 'jr', 'jr': 'jr', 'júnior': 'jr',
+        'pleno': 'pl', 'pl': 'pl',
+        'senior': 'sr', 'sênior': 'sr', 'sr': 'sr',
+        'lead': 'lead', 'especialista': 'lead', 'head': 'lead',
+        'estagio': 'jr', 'trainee': 'jr'
+    }
+    sen_norm = sen_map.get(sen_key, sen_key)
 
-    # Aceita tanto 'nivel' quanto 'senioridade'
-    sen = (nivel or senioridade or "todos").lower().strip()
-
-    if sen not in ("todos", "all", ""):
-
-        # Helper: build LIKE clause
-        def like_any(col, marks, negate=False):
-            op = "NOT LIKE" if negate else "LIKE"
-            clauses = [f"LOWER({col}) {op} ?" for _ in marks]
-            join = " AND " if negate else " OR "
-            return join.join(clauses), marks
-
-        if sen in ("jr", "junior"):
-            # MODO FLEXÍVEL: inclui nao_informado e jr; exclui sr/lead/pleno/estagio
-            excl_clauses = []
-            excl_params  = []
-            for mark in SENIOR_MARKS + LEAD_MARKS + PLENO_MARKS + ESTAGIO_MARKS:
-                excl_clauses.append(f"LOWER(j.title) NOT LIKE ?")
-                excl_params.append(f"%{mark}%")
-
-            incl_clauses = []
-            incl_params  = []
-            for mark in JUNIOR_MARKS:
-                incl_clauses.append(f"LOWER(j.title) LIKE ?")
-                incl_params.append(f"%{mark}%")
-            # also: level is jr or nao_informado
-            incl_clauses.append("j.level IN ('jr', 'nao_informado')")
-
-            base_query += (
-                f" AND ({' AND '.join(excl_clauses)})"
-                f" AND ({' OR '.join(incl_clauses)})"
-            )
-            params.extend(excl_params + incl_params)
-
-        elif sen in ("pl", "pleno"):
-            # MODO FLEXÍVEL: inclui nao_informado e pl; exclui sr/lead/estagio
-            excl_clauses = []
-            excl_params  = []
-            for mark in SENIOR_MARKS + LEAD_MARKS + ESTAGIO_MARKS:
-                excl_clauses.append(f"LOWER(j.title) NOT LIKE ?")
-                excl_params.append(f"%{mark}%")
-
-            incl_clauses = []
-            incl_params  = []
-            for mark in PLENO_MARKS:
-                incl_clauses.append(f"LOWER(j.title) LIKE ?")
-                incl_params.append(f"%{mark}%")
-            incl_clauses.append("j.level IN ('pl', 'nao_informado')")
-
-            base_query += (
-                f" AND ({' AND '.join(excl_clauses)})"
-                f" AND ({' OR '.join(incl_clauses)})"
-            )
-            params.extend(excl_params + incl_params)
-
-        elif sen in ("sr", "senior", "sênior"):
-            # ESTRITO: exige marcadores de sênior no título ou level=sr
-            sr_incl = [f"LOWER(j.title) LIKE ?" for m in SENIOR_MARKS]
-            sr_params = [f"%{m}%" for m in SENIOR_MARKS]
-            base_query += f" AND (({' OR '.join(sr_incl)}) OR j.level = 'sr')"
-            params.extend(sr_params)
-
-        elif sen in ("lead", "especialista", "head"):
-            lead_incl = [f"LOWER(j.title) LIKE ?" for m in LEAD_MARKS]
-            lead_params = [f"%{m}%" for m in LEAD_MARKS]
-            base_query += f" AND (({' OR '.join(lead_incl)}) OR j.level = 'lead')"
-            params.extend(lead_params)
-
-        elif sen in ("estagio", "trainee"):
-            est_incl = [f"LOWER(j.title) LIKE ?" for m in ESTAGIO_MARKS]
-            est_params = [f"%{m}%" for m in ESTAGIO_MARKS]
-            base_query += f" AND (({' OR '.join(est_incl)}) OR j.level = 'estagio')"
-            params.extend(est_params)
+    if sen_norm not in ("todos", "all", ""):
+        base_query += " AND (j.senioridade_norm = ? OR j.level = ?)"
+        params.extend([sen_norm, sen_norm])
 
     base_query += " ORDER BY j.added_at DESC LIMIT 300"
 

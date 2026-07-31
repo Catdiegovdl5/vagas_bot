@@ -2803,8 +2803,17 @@
         });
 
         function selecionarFiltroSenioridade(nivel, elemento) {
-            senioridadeSelecionada = nivel;
-            estadoFiltros.senioridade = nivel;
+            const mapaSenioridade = {
+                'júnior': 'jr', 'junior': 'jr', 'jr': 'jr',
+                'pleno': 'pl', 'pl': 'pl',
+                'sênior': 'sr', 'senior': 'sr', 'sr': 'sr',
+                'lead': 'lead', 'especialista': 'lead', 'head': 'lead',
+                'estágio': 'jr', 'estagio': 'jr', 'trainee': 'jr',
+                'todos': 'todos', 'all': 'todos'
+            };
+            const nivelNormalizado = mapaSenioridade[(nivel || '').toLowerCase()] || (nivel || 'todos').toLowerCase();
+            senioridadeSelecionada = nivelNormalizado;
+            estadoFiltros.senioridade = nivelNormalizado;
 
             // Sync selectedSeniority so filterData() badges remain consistent
             const apiToDrawer = {
@@ -2812,10 +2821,9 @@
                 'jr': 'Jr', 'junior': 'Jr',
                 'pl': 'Pl', 'pleno': 'Pl',
                 'sr': 'Sr', 'senior': 'Sr', 'sênior': 'Sr',
-                'lead': 'Lead',
-                'estagio': 'Estágio', 'trainee': 'Estágio'
+                'lead': 'Lead'
             };
-            selectedSeniority = apiToDrawer[nivel.toLowerCase()] || 'all';
+            selectedSeniority = apiToDrawer[nivelNormalizado] || 'all';
 
             // Atualiza a classe ativa visual do botão no segmented control
             document.querySelectorAll('.s-tab, .seniority-chip, .seniority-btn, [data-nivel]').forEach(btn => {
