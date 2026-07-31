@@ -10,6 +10,6 @@ PyPDF2
 loguru
 apify-client
 langdetect
-r e q u e s t s  
+requests
 playwright
 playwright-stealth

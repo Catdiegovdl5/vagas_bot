@@ -5,5 +5,22 @@ jobs.db
 *.log
 __pycache__/
 venv/
+.venv/
 *.pdf
 .pytest_cache/
+
+# Arquivos temporários e backups locais
+*.mine
+*.modified
+*.bak
+temp_html.txt
+curriculo*.txt
+repomix-output.xml
+
+# Bancos de dados de teste
+jobs_test.db
+*.sqlite3
+
+# Logs e imagens
+*.png
+
