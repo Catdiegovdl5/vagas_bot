@@ -9,11 +9,19 @@ import os
 import asyncio
 import logging
 import sqlite3
+import unicodedata
 from logging.handlers import RotatingFileHandler
 from typing import Optional, List, Dict, Union
 from dotenv import load_dotenv
 
 load_dotenv()
+
+def remover_acentos(texto: str) -> str:
+    """Remove acentos e padroniza para caixa baixa."""
+    if not texto:
+        return ""
+    nfkd = unicodedata.normalize('NFKD', texto)
+    return "".join([c for c in nfkd if not unicodedata.combining(c)]).lower().strip()
 
 # Configuração do Logger Segura (Limpa arquivos maiores que 1MB, guarda apenas 1 backup)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -115,23 +123,22 @@ def serve_tma_proposal():
 @app.get("/api/jobs")
 @app.get("/api/vagas")
 def listar_vagas(
-    estado: str = "",
-    cidade: str = "",
-    senioridade: str = "todos",
+    estado: Optional[str] = "",
+    cidade: Optional[str] = "",
+    senioridade: Optional[str] = "todos",
     nivel: Optional[str] = None,
-    profession: str = "",
+    modalidade: Optional[str] = "todos",
+    categoria: Optional[str] = None,
+    profession: Optional[str] = "",
+    q: Optional[str] = None,
     lat: float = None,
     lon: float = None,
     radius: float = 50.0
 ):
     """
-    Endpoint unificado de busca de vagas.
+    Endpoint unificado de busca inteligente de vagas.
     - Usa jobs.db (via get_connection) com tabela 'jobs'
-    - Filtro de senioridade rigoroso/Modo Flexível: 
-        * Sr/Lead/Estagio: somente vagas EXPLÍCITAS
-        * Jr/Pl: inclui vagas genéricas (nao_informado) + exclui outros níveis explícitos
-    - Suporta filtro por profession (categoria), estado, cidade
-    - Suporta tanto ?senioridade= quanto ?nivel=
+    - Suporta estado, cidade, senioridade (ou nivel), modalidade, categoria/profession e busca livre por palavra-chave (q)
     """
     base_query = """
         SELECT j.id, j.title, j.company, j.budget, j.link, j.platform,
@@ -149,22 +156,42 @@ def listar_vagas(
     """
     params = []
 
-    # ── Filtro por estado / cidade ────────────────────────────────────
+    # ── 1. Filtro por estado ────────────────────────────────────
     if estado and estado.lower() not in ("todos", "all", ""):
-        base_query += " AND LOWER(j.location) LIKE ?"
-        params.append(f"%{estado.lower()}%")
+        uf = estado.strip().upper()
+        base_query += " AND (UPPER(j.location) = ? OR UPPER(j.location) LIKE ?)"
+        params.extend([uf, f"%{uf}%"])
 
+    # ── 2. Filtro por cidade ────────────────────────────────────
     if cidade and cidade.strip():
-        base_query += " AND LOWER(j.location) LIKE ?"
-        params.append(f"%{cidade.lower().strip()}%")
+        cid = remover_acentos(cidade)
+        base_query += " AND (LOWER(j.location) LIKE ? OR LOWER(j.location) LIKE ?)"
+        params.extend([f"%{cid}%", f"%{cidade.strip().lower()}%"])
 
-    # ── Filtro por profissão / categoria ────────────────────────────
-    if profession and profession.lower() not in ("all", "todos", ""):
-        prof = profession.lower().strip()
+    # ── 3. Filtro por modalidade (remoto, hibrido, presencial) ──
+    if modalidade and modalidade.lower() not in ("todos", "all", ""):
+        mod = remover_acentos(modalidade)
+        if "remot" in mod:
+            base_query += " AND (LOWER(j.location) LIKE '%remot%' OR LOWER(j.title) LIKE '%remot%' OR LOWER(j.title) LIKE '%home office%')"
+        elif "hibrid" in mod:
+            base_query += " AND (LOWER(j.location) LIKE '%hibrid%' OR LOWER(j.title) LIKE '%hibrid%')"
+        elif "presenc" in mod:
+            base_query += " AND (LOWER(j.location) LIKE '%presenc%' OR (LOWER(j.location) NOT LIKE '%remot%' AND LOWER(j.location) NOT LIKE '%hibrid%'))"
+
+    # ── 4. Filtro por profissão / categoria ────────────────────────────
+    cat_target = categoria or profession
+    if cat_target and cat_target.lower() not in ("all", "todos", ""):
+        cat = cat_target.lower().strip()
         base_query += " AND (LOWER(j.profession) LIKE ? OR LOWER(j.title) LIKE ?)"
-        params.extend([f"%{prof}%", f"%{prof}%"])
+        params.extend([f"%{cat}%", f"%{cat}%"])
 
-    # ── Filtro de Senioridade — Modo Flexível ───────────────────────
+    # ── 5. Busca por palavra-chave livre (q) ──────────────────────
+    if q and q.strip():
+        termo = remover_acentos(q)
+        base_query += " AND (LOWER(j.title) LIKE ? OR LOWER(j.company) LIKE ? OR LOWER(j.requirements) LIKE ?)"
+        params.extend([f"%{termo}%", f"%{termo}%", f"%{termo}%"])
+
+    # ── 6. Filtro de Senioridade — Modo Flexível ───────────────────────
     SENIOR_MARKS  = ["s_nior", "senior", " sr ", "sênio", "s%nio"]
     LEAD_MARKS    = ["lead", "especialista", "head ", "tech lead", "principal", "coordenador", "gerente"]
     JUNIOR_MARKS  = ["jr", "j_nior", "junior", "j%nior", "jún"]

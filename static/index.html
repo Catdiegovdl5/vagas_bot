@@ -1000,6 +1000,19 @@
                 </div>
             </div>
 
+            <!-- BARRA DE FILTROS ATIVOS E FEEDBACK INTUITIVO -->
+            <div class="active-filters-bar" id="barra-filtros-ativos" style="display:none; margin-bottom:16px; padding:12px; background:#111827; border:1px solid #1f2937; border-radius:8px;">
+              <div style="font-size:12px; color:#9ca3af; margin-bottom:8px; font-weight:600;">
+                <i class="fa-solid fa-filter"></i> ESPECIFICAÇÕES ATIVAS:
+              </div>
+              <div id="container-chips-filtros" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                <!-- Chips adicionados dinamicamente via JS -->
+              </div>
+              <button type="button" onclick="limparTodosFiltros()" style="margin-top:8px; background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;">
+                <i class="fa-solid fa-trash"></i> Limpar Todos os Filtros
+              </button>
+            </div>
+
             <div class="table-toolbar">
                 <div class="search-field-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -2769,15 +2782,29 @@
             return '';
         }
 
+        // Estado Único do Painel de Filtros
+        const estadoFiltros = {
+          estado: '',
+          cidade: '',
+          senioridade: 'todos',
+          modalidade: 'todos',
+          categoria: '',
+          q: ''
+        };
+
         let senioridadeSelecionada = 'todos';
         // Alias para garantir compatibilidade com senioridadeGlobalAtiva
         Object.defineProperty(window, 'senioridadeGlobalAtiva', {
             get: () => senioridadeSelecionada,
-            set: (val) => { senioridadeSelecionada = val; }
+            set: (val) => { 
+                senioridadeSelecionada = val;
+                estadoFiltros.senioridade = val;
+            }
         });
 
         function selecionarFiltroSenioridade(nivel, elemento) {
             senioridadeSelecionada = nivel;
+            estadoFiltros.senioridade = nivel;
 
             // Sync selectedSeniority so filterData() badges remain consistent
             const apiToDrawer = {
@@ -2804,16 +2831,36 @@
 
         async function carregarVagasServidor() {
             const estadoSelect = document.getElementById('state-select');
-            const estado = estadoSelect ? (estadoSelect.value === 'Todos' ? '' : estadoSelect.value) : '';
+            const estado = estadoSelect ? (estadoSelect.value === 'Todos' ? '' : estadoSelect.value) : estadoFiltros.estado;
             const cidadeEl = document.getElementById('loc-input');
-            const cidade = cidadeEl ? cidadeEl.value : '';
+            const cidade = cidadeEl ? cidadeEl.value : estadoFiltros.cidade;
+            const searchEl = document.getElementById('search-input');
+            const qVal = searchEl ? searchEl.value : estadoFiltros.q;
 
-            const url = `/api/vagas?estado=${encodeURIComponent(estado)}&cidade=${encodeURIComponent(cidade)}&senioridade=${encodeURIComponent(senioridadeSelecionada)}&nivel=${encodeURIComponent(senioridadeSelecionada)}`;
+            estadoFiltros.estado = estado;
+            estadoFiltros.cidade = cidade;
+            estadoFiltros.senioridade = senioridadeSelecionada;
+            estadoFiltros.q = qVal;
+
+            atualizarBarraChipsVisual();
+
+            const params = new URLSearchParams();
+            if (estadoFiltros.estado) params.append('estado', estadoFiltros.estado);
+            if (estadoFiltros.cidade) params.append('cidade', estadoFiltros.cidade);
+            if (estadoFiltros.senioridade && estadoFiltros.senioridade !== 'todos') {
+                params.append('senioridade', estadoFiltros.senioridade);
+                params.append('nivel', estadoFiltros.senioridade);
+            }
+            if (estadoFiltros.modalidade && estadoFiltros.modalidade !== 'todos') params.append('modalidade', estadoFiltros.modalidade);
+            if (estadoFiltros.categoria) params.append('categoria', estadoFiltros.categoria);
+            if (estadoFiltros.q) params.append('q', estadoFiltros.q);
+
+            const url = `/api/vagas?${params.toString()}`;
 
             try {
                 const res = await fetch(url);
                 const data = await res.json();
-                const vagas = data.jobs || [];
+                const vagas = data.jobs || (Array.isArray(data) ? data : []);
                 
                 allData = vagas;
                 filterData();
@@ -2822,7 +2869,7 @@
                 const contador = document.getElementById('results-counter') || document.getElementById('texto-contador-vagas');
                 if (contador) {
                     const lang = currentLang || 'pt';
-                    if (i18nData && i18nData[lang] && i18nData[lang].showing_jobs) {
+                    if (typeof i18nData !== 'undefined' && i18nData[lang] && i18nData[lang].showing_jobs) {
                         contador.innerText = i18nData[lang].showing_jobs.replace('{n}', viewData.length);
                     } else {
                         contador.innerText = `Mostrando ${viewData.length} vagas encontradas`;
@@ -2833,7 +2880,82 @@
             }
         }
 
-        // Alias global para carregarVagasCompletas
+        function atualizarBarraChipsVisual() {
+          const barra = document.getElementById('barra-filtros-ativos');
+          const container = document.getElementById('container-chips-filtros');
+          if (!barra || !container) return;
+          container.innerHTML = '';
+          
+          let temFiltroAtivo = false;
+
+          const criarChip = (rotulo, valor, chave) => {
+            temFiltroAtivo = true;
+            const chip = document.createElement('span');
+            chip.style.cssText = "background:#1e293b; color:#60a5fa; padding:4px 10px; border-radius:12px; font-size:12px; border:1px solid #3b82f6; display:inline-flex; align-items:center; gap:6px;";
+            chip.innerHTML = `${rotulo}: <strong>${esc(valor)}</strong> <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="removerFiltroUnico('${chave}')"></i>`;
+            container.appendChild(chip);
+          };
+
+          if (estadoFiltros.estado) criarChip('UF', estadoFiltros.estado, 'estado');
+          if (estadoFiltros.cidade) criarChip('Cidade', estadoFiltros.cidade, 'cidade');
+          if (estadoFiltros.senioridade && estadoFiltros.senioridade !== 'todos') criarChip('Senioridade', estadoFiltros.senioridade, 'senioridade');
+          if (estadoFiltros.modalidade && estadoFiltros.modalidade !== 'todos') criarChip('Modalidade', estadoFiltros.modalidade, 'modalidade');
+          if (estadoFiltros.categoria) criarChip('Categoria', estadoFiltros.categoria, 'categoria');
+          if (estadoFiltros.q) criarChip('Busca', estadoFiltros.q, 'q');
+
+          barra.style.display = temFiltroAtivo ? 'block' : 'none';
+        }
+
+        function removerFiltroUnico(chave) {
+          if (chave === 'senioridade' || chave === 'modalidade') {
+            estadoFiltros[chave] = 'todos';
+            if (chave === 'senioridade') {
+                senioridadeSelecionada = 'todos';
+                selectedSeniority = 'all';
+                document.querySelectorAll('.s-tab, .seniority-chip, .seniority-btn, [data-nivel]').forEach(btn => btn.classList.remove('active'));
+            }
+          } else {
+            estadoFiltros[chave] = '';
+            if (chave === 'estado') {
+                const el = document.getElementById('state-select');
+                if (el) el.value = 'Todos';
+            }
+            if (chave === 'cidade') {
+                const el = document.getElementById('loc-input');
+                if (el) el.value = '';
+            }
+            if (chave === 'q') {
+                const el = document.getElementById('search-input');
+                if (el) el.value = '';
+            }
+          }
+          carregarVagasServidor();
+        }
+
+        function limparTodosFiltros() {
+          estadoFiltros.estado = '';
+          estadoFiltros.cidade = '';
+          estadoFiltros.senioridade = 'todos';
+          estadoFiltros.modalidade = 'todos';
+          estadoFiltros.categoria = '';
+          estadoFiltros.q = '';
+
+          senioridadeSelecionada = 'todos';
+          selectedSeniority = 'all';
+
+          const stEl = document.getElementById('state-select');
+          if (stEl) stEl.value = 'Todos';
+          const locEl = document.getElementById('loc-input');
+          if (locEl) locEl.value = '';
+          const qEl = document.getElementById('search-input');
+          if (qEl) qEl.value = '';
+
+          document.querySelectorAll('.s-tab, .seniority-chip, .seniority-btn, [data-nivel]').forEach(btn => btn.classList.remove('active'));
+
+          carregarVagasServidor();
+        }
+
+        window.aplicarEAtualizarVagas = carregarVagasServidor;
         window.carregarVagasCompletas = carregarVagasServidor;
 
         function openProfileModal() { document.getElementById('modal-profile').classList.add('active'); }
