@@ -2205,9 +2205,20 @@
 
         function selectSeniority(senId) {
             selectedSeniority = senId;
+            // Map drawer IDs to API senioridade codes
+            const senMap = {
+                'all': 'todos',
+                'Jr': 'jr', 'Júnior': 'jr', 'junior': 'jr',
+                'Pl': 'pl', 'Pleno': 'pl', 'pleno': 'pl',
+                'Sr': 'sr', 'Sênior': 'sr', 'senior': 'sr',
+                'Lead': 'lead', 'lead': 'lead',
+                'Estágio': 'estagio', 'estagio': 'estagio'
+            };
+            senioridadeSelecionada = senMap[senId] || senId.toLowerCase();
             currentPage = 1;
             renderSeniorityDrawers();
-            filterData();
+            // Trigger server-side reload for accurate Modo Flexível filtering
+            carregarVagasServidor();
         }
 
         function updateMetrics() {
@@ -2763,7 +2774,18 @@
         function selecionarFiltroSenioridade(nivel, elemento) {
             senioridadeSelecionada = nivel;
 
-            // Atualiza a classe ativa visual do botão
+            // Sync selectedSeniority so filterData() badges remain consistent
+            const apiToDrawer = {
+                'todos': 'all', 'all': 'all',
+                'jr': 'Jr', 'junior': 'Jr',
+                'pl': 'Pl', 'pleno': 'Pl',
+                'sr': 'Sr', 'senior': 'Sr', 'sênior': 'Sr',
+                'lead': 'Lead',
+                'estagio': 'Estágio', 'trainee': 'Estágio'
+            };
+            selectedSeniority = apiToDrawer[nivel.toLowerCase()] || 'all';
+
+            // Atualiza a classe ativa visual do botão no segmented control
             document.querySelectorAll('.s-tab, .seniority-chip').forEach(btn => {
                 btn.classList.remove('active');
             });
