@@ -118,6 +118,7 @@ def listar_vagas(
     estado: str = "",
     cidade: str = "",
     senioridade: str = "todos",
+    nivel: Optional[str] = None,
     profession: str = "",
     lat: float = None,
     lon: float = None,
@@ -130,6 +131,7 @@ def listar_vagas(
         * Sr/Lead/Estagio: somente vagas EXPLÍCITAS
         * Jr/Pl: inclui vagas genéricas (nao_informado) + exclui outros níveis explícitos
     - Suporta filtro por profession (categoria), estado, cidade
+    - Suporta tanto ?senioridade= quanto ?nivel=
     """
     base_query = """
         SELECT j.id, j.title, j.company, j.budget, j.link, j.platform,
@@ -163,14 +165,14 @@ def listar_vagas(
         params.extend([f"%{prof}%", f"%{prof}%"])
 
     # ── Filtro de Senioridade — Modo Flexível ───────────────────────
-    # Marcadores de nível ALTO explícito no título (excluem vagas de outros filtros)
     SENIOR_MARKS  = ["s_nior", "senior", " sr ", "sênio", "s%nio"]
     LEAD_MARKS    = ["lead", "especialista", "head ", "tech lead", "principal", "coordenador", "gerente"]
-    JUNIOR_MARKS  = ["jr", "j_nior", "junior", "j%nior"]
+    JUNIOR_MARKS  = ["jr", "j_nior", "junior", "j%nior", "jún"]
     PLENO_MARKS   = ["pleno", " pl "]
     ESTAGIO_MARKS = ["est_gio", "estagio", "trainee", "intern"]
 
-    sen = (senioridade or "todos").lower().strip()
+    # Aceita tanto 'nivel' quanto 'senioridade'
+    sen = (nivel or senioridade or "todos").lower().strip()
 
     if sen not in ("todos", "all", ""):
 

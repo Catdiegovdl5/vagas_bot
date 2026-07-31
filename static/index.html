@@ -2770,6 +2770,11 @@
         }
 
         let senioridadeSelecionada = 'todos';
+        // Alias para garantir compatibilidade com senioridadeGlobalAtiva
+        Object.defineProperty(window, 'senioridadeGlobalAtiva', {
+            get: () => senioridadeSelecionada,
+            set: (val) => { senioridadeSelecionada = val; }
+        });
 
         function selecionarFiltroSenioridade(nivel, elemento) {
             senioridadeSelecionada = nivel;
@@ -2786,7 +2791,7 @@
             selectedSeniority = apiToDrawer[nivel.toLowerCase()] || 'all';
 
             // Atualiza a classe ativa visual do botão no segmented control
-            document.querySelectorAll('.s-tab, .seniority-chip').forEach(btn => {
+            document.querySelectorAll('.s-tab, .seniority-chip, .seniority-btn, [data-nivel]').forEach(btn => {
                 btn.classList.remove('active');
             });
             if (elemento) {
@@ -2803,7 +2808,7 @@
             const cidadeEl = document.getElementById('loc-input');
             const cidade = cidadeEl ? cidadeEl.value : '';
 
-            const url = `/api/vagas?estado=${encodeURIComponent(estado)}&cidade=${encodeURIComponent(cidade)}&senioridade=${encodeURIComponent(senioridadeSelecionada)}`;
+            const url = `/api/vagas?estado=${encodeURIComponent(estado)}&cidade=${encodeURIComponent(cidade)}&senioridade=${encodeURIComponent(senioridadeSelecionada)}&nivel=${encodeURIComponent(senioridadeSelecionada)}`;
 
             try {
                 const res = await fetch(url);
@@ -2814,15 +2819,22 @@
                 filterData();
                 
                 // Atualiza o texto do contador na tela (além do updateMetrics padrao)
-                const contador = document.getElementById('results-counter');
+                const contador = document.getElementById('results-counter') || document.getElementById('texto-contador-vagas');
                 if (contador) {
-                    const lang = currentLang;
-                    contador.innerText = i18nData[lang].showing_jobs.replace('{n}', viewData.length);
+                    const lang = currentLang || 'pt';
+                    if (i18nData && i18nData[lang] && i18nData[lang].showing_jobs) {
+                        contador.innerText = i18nData[lang].showing_jobs.replace('{n}', viewData.length);
+                    } else {
+                        contador.innerText = `Mostrando ${viewData.length} vagas encontradas`;
+                    }
                 }
             } catch (err) {
                 console.error("Erro ao filtrar vagas pelo servidor:", err);
             }
         }
+
+        // Alias global para carregarVagasCompletas
+        window.carregarVagasCompletas = carregarVagasServidor;
 
         function openProfileModal() { document.getElementById('modal-profile').classList.add('active'); }
         function closeProfileModal() { document.getElementById('modal-profile').classList.remove('active'); }
