@@ -13,3 +13,5 @@ langdetect
 requests
 playwright
 playwright-stealth
+curl_cffi
+PyMuPDF
