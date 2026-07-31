@@ -673,35 +673,78 @@
         details.group > summary:hover { background: var(--hover-bg); }
         details.group > .drawer-content { padding: 12px 16px; border-top: 1px solid var(--border-default); display: flex; flex-wrap: wrap; gap: 8px; background: var(--bg-body); }
         /* ============================================================
-           FILTRO & BADGES DE SENIORIDADE
-           ============================================================ */
+   FILTRO DE SENIORIDADE PROFISSIONAL (SEGMENTED CONTROL)
+   ============================================================ */
 
-        /* Grupo de Filtro de Senioridade */
-        .seniority-filter-group {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-          margin-top: 8px;
-        }
+.seniority-segmented-container {
+  margin-top: 14px;
+  margin-bottom: 18px;
+}
 
-        .seniority-chip {
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid var(--border-default);
-          color: #9ca3af;
-          padding: 5px 10px;
-          border-radius: 6px;
-          font-size: 11px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.15s ease;
-          user-select: none;
-        }
+.seniority-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
-        .seniority-chip:hover, .seniority-chip.active {
-          background: var(--neon-purple);
-          color: #ffffff;
-          border-color: var(--neon-purple-hover);
-        }
+.seniority-segmented-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #0d131f;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 6px;
+}
+
+.s-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: all 0.15s ease;
+  user-select: none;
+  width: 100%;
+}
+
+.s-tab:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.s-tab.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #3b82f6;
+  font-weight: 600;
+}
+
+.s-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.s-tab.active .s-badge {
+  background: rgba(0, 0, 0, 0.3);
+}
 
         /* Badges de Compatibilidade de Senioridade */
         .tag-seniority {
@@ -878,16 +921,42 @@
                 </div>
             </div>
 
-            <div class="filter-section">
-                <div class="filter-title"><i class="fas fa-layer-group"></i> Senioridade / Experiência</div>
-                <div class="seniority-filter-group">
-                    <button type="button" class="seniority-chip active" onclick="filtrarSenioridade('all', this)">Todas</button>
-                    <button type="button" class="seniority-chip" onclick="filtrarSenioridade('estagio', this)">Estágio</button>
-                    <button type="button" class="seniority-chip" onclick="filtrarSenioridade('jr', this)">Júnior (Jr)</button>
-                    <button type="button" class="seniority-chip" onclick="filtrarSenioridade('pl', this)">Pleno (Pl)</button>
-                    <button type="button" class="seniority-chip" onclick="filtrarSenioridade('sr', this)">Sênior (Sr)</button>
-                    <button type="button" class="seniority-chip" onclick="filtrarSenioridade('lead', this)">Lead / Esp</button>
-                </div>
+            <div class="seniority-segmented-container">
+              <div class="seniority-label">
+                <i class="fas fa-layer-group"></i> Nível de Senioridade
+              </div>
+              
+              <div class="seniority-segmented-control">
+                <button type="button" class="s-tab active" onclick="selecionarFiltroSenioridade('todos', this)">
+                  <span>Todos os Níveis</span>
+                  <span class="s-badge" id="badge-sen-all">0</span>
+                </button>
+
+                <button type="button" class="s-tab" onclick="selecionarFiltroSenioridade('estagio', this)">
+                  <span>Estágio / Trainee</span>
+                  <span class="s-badge" id="badge-sen-estagio">0</span>
+                </button>
+
+                <button type="button" class="s-tab" onclick="selecionarFiltroSenioridade('jr', this)">
+                  <span>Júnior</span>
+                  <span class="s-badge" id="badge-sen-jr">0</span>
+                </button>
+
+                <button type="button" class="s-tab" onclick="selecionarFiltroSenioridade('pl', this)">
+                  <span>Pleno</span>
+                  <span class="s-badge" id="badge-sen-pl">0</span>
+                </button>
+
+                <button type="button" class="s-tab" onclick="selecionarFiltroSenioridade('sr', this)">
+                  <span>Sênior</span>
+                  <span class="s-badge" id="badge-sen-sr">0</span>
+                </button>
+
+                <button type="button" class="s-tab" onclick="selecionarFiltroSenioridade('lead', this)">
+                  <span>Especialista / Lead</span>
+                  <span class="s-badge" id="badge-sen-lead">0</span>
+                </button>
+              </div>
             </div>
         </aside>
 
@@ -2147,6 +2216,32 @@
             document.getElementById('cnt-relevant').innerText = activeList.filter(j => j.status !== 'Ignorado').length;
             document.getElementById('cnt-applied').innerText = activeList.filter(j => j.status === 'Aplicado').length;
 
+            // Atualização dinâmica dos badges de senioridade
+            if (allData && allData.length > 0) {
+                const senCounts = { all: allData.length, estagio: 0, jr: 0, pl: 0, sr: 0, lead: 0 };
+                allData.forEach(j => {
+                    if (matchesSeniority(j, 'estagio')) senCounts.estagio++;
+                    if (matchesSeniority(j, 'jr')) senCounts.jr++;
+                    if (matchesSeniority(j, 'pl')) senCounts.pl++;
+                    if (matchesSeniority(j, 'sr')) senCounts.sr++;
+                    if (matchesSeniority(j, 'lead')) senCounts.lead++;
+                });
+
+                const bAll = document.getElementById('badge-sen-all');
+                const bEst = document.getElementById('badge-sen-estagio');
+                const bJr = document.getElementById('badge-sen-jr');
+                const bPl = document.getElementById('badge-sen-pl');
+                const bSr = document.getElementById('badge-sen-sr');
+                const bLd = document.getElementById('badge-sen-lead');
+
+                if (bAll) bAll.innerText = senCounts.all;
+                if (bEst) bEst.innerText = senCounts.estagio;
+                if (bJr) bJr.innerText = senCounts.jr;
+                if (bPl) bPl.innerText = senCounts.pl;
+                if (bSr) bSr.innerText = senCounts.sr;
+                if (bLd) bLd.innerText = senCounts.lead;
+            }
+
             // Atualização dinâmica da contagem por plataforma
             const platCounts = {};
             allData.forEach(j => {
@@ -2663,9 +2758,13 @@
             return '';
         }
 
+        function selecionarFiltroSenioridade(nivel, elemento) {
+            filtrarSenioridade(nivel, elemento);
+        }
+
         function filtrarSenioridade(nivel, elemento) {
-            selectedSeniority = nivel;
-            document.querySelectorAll('.seniority-chip').forEach(btn => btn.classList.remove('active'));
+            selectedSeniority = (nivel === 'todos' || nivel === 'all') ? 'all' : nivel;
+            document.querySelectorAll('.s-tab, .seniority-chip').forEach(btn => btn.classList.remove('active'));
             if (elemento) {
                 elemento.classList.add('active');
             }
