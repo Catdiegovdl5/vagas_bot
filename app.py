@@ -181,12 +181,45 @@ def listar_vagas(
         elif "presenc" in mod:
             base_query += " AND (LOWER(j.location) LIKE '%presenc%' OR (LOWER(j.location) NOT LIKE '%remot%' AND LOWER(j.location) NOT LIKE '%hibrid%'))"
 
-    # ── 4. Filtro por profissão / categoria ────────────────────────────
-    cat_target = categoria or profession
-    if cat_target and cat_target.lower() not in ("all", "todos", ""):
-        cat = cat_target.lower().strip()
-        base_query += " AND (LOWER(j.profession) LIKE ? OR LOWER(j.title) LIKE ?)"
-        params.extend([f"%{cat}%", f"%{cat}%"])
+    # ── 4. Filtro Inteligente por Profissão / Categoria com Exclusão Visual ──
+    cat_target = remover_acentos(categoria or profession or "")
+    DESIGNER_EXCLUSIONS = [
+        "designer", "design", "webdesigner", "ui/ux", "ux/ui", "criativo",
+        "arte finalista", "grafico", "gr%fico", "motion", "videomaker", "editor de v%deo", "editor de video"
+    ]
+    TRAFFIC_CATEGORIES = [
+        "gestor_trafego", "gestor_trafego_geral", "meta_ads", "google_ads",
+        "media_buyer", "growth_performance", "especialista_ads", "growth_hacker", "trafego", "tr%fego"
+    ]
+
+    if cat_target and cat_target not in ("all", "todos", ""):
+        if any(tc in cat_target for tc in TRAFFIC_CATEGORIES):
+            if "meta" in cat_target:
+                base_query += " AND (LOWER(j.title) LIKE '%meta ads%' OR LOWER(j.title) LIKE '%facebook ads%' OR LOWER(j.title) LIKE '%instagram ads%' OR LOWER(j.title) LIKE '%tiktok ads%' OR LOWER(j.title) LIKE '%social ads%')"
+            elif "google" in cat_target:
+                base_query += " AND (LOWER(j.title) LIKE '%google ads%' OR LOWER(j.title) LIKE '%youtube ads%' OR LOWER(j.title) LIKE '%sem%' OR LOWER(j.title) LIKE '%search ads%')"
+            elif "buyer" in cat_target or "midia" in cat_target:
+                base_query += " AND (LOWER(j.title) LIKE '%media buyer%' OR LOWER(j.title) LIKE '%m%dia paga%' OR LOWER(j.title) LIKE '%compra de m%dia%')"
+            elif "growth" in cat_target or "performance" in cat_target:
+                base_query += " AND (LOWER(j.title) LIKE '%growth%' OR LOWER(j.title) LIKE '%performance%' OR LOWER(j.title) LIKE '%cro%')"
+            else:
+                base_query += " AND (LOWER(j.title) LIKE '%tr%fego%' OR LOWER(j.title) LIKE '%media buyer%' OR LOWER(j.title) LIKE '%meta ads%' OR LOWER(j.title) LIKE '%google ads%' OR LOWER(j.title) LIKE '%facebook ads%' OR LOWER(j.title) LIKE '%trafficker%')"
+
+            # EXCLUSÃO RIGOROSA: ignora vagas cujo TÍTULO seja estritamente de Designer/Criativo Visual
+            for excl in DESIGNER_EXCLUSIONS:
+                base_query += " AND LOWER(j.title) NOT LIKE ?"
+                params.append(f"%{excl}%")
+
+        elif any(dc in cat_target for dc in ["designer_grafico", "ui_ux", "motion_designer", "designer_performance", "design"]):
+            if "ui" in cat_target or "ux" in cat_target:
+                base_query += " AND (LOWER(j.title) LIKE '%ui%' OR LOWER(j.title) LIKE '%ux%' OR LOWER(j.title) LIKE '%product design%')"
+            elif "motion" in cat_target:
+                base_query += " AND (LOWER(j.title) LIKE '%motion%' OR LOWER(j.title) LIKE '%videomaker%' OR LOWER(j.title) LIKE '%editor%')"
+            else:
+                base_query += " AND (LOWER(j.title) LIKE '%design%' OR LOWER(j.profession) LIKE '%design%')"
+        else:
+            base_query += " AND (LOWER(j.profession) LIKE ? OR LOWER(j.title) LIKE ?)"
+            params.extend([f"%{cat_target}%", f"%{cat_target}%"])
 
     # ── 5. Busca por palavra-chave livre (q) ──────────────────────
     if q and q.strip():
