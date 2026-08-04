@@ -24,3 +24,7 @@ jobs_test.db
 # Logs e imagens
 *.png
 
+
+# Projeto paralelo isolado
+gerar_proposta.py
+gerador_propostas/
