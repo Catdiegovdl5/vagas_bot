@@ -403,7 +403,12 @@ Exemplo: {{"keyword": "vendedor", "location": "Londrina/PR", "level": "Júnior",
                 temperature=0.1,
                 response_format={"type": "json_object"}
             )
-            result_json = json.loads(response.choices[0].message.content)
+            try:
+                result_json = json.loads(response.choices[0].message.content)
+            except Exception:
+                result_json = {}
+            if not isinstance(result_json, dict):
+                result_json = {}
             return {
                 "keyword": result_json.get("keyword", "Vagas"),
                 "location": result_json.get("location", "Brasil (Remoto)"),
@@ -487,10 +492,11 @@ Sua missão é gerar uma proposta comercial de ALTA CONVERSÃO adaptada ao perfi
 Estilo/Tom Selecionado: {style_choice}
 Nível de Senioridade Alvo: {seniority_choice}
 
---- SYSTEM_PROPOSAL_RULES (REGRAS ESTRITAS DE PROPOSTA) ---
-1. REGRA 1 (SAUDAÇÃO): NUNCA utilize placeholders como "[Nome do Contratante]" ou "[Nome da Empresa]". Inicie a proposta estritamente com "Olá," ou "Bom dia," ou "Olá! Tudo bem?". Ir direto ao ponto sem enrolação.
-2. REGRA 2 (MATCH DE SENIORIDADE: {seniority_choice}): Adapte a tom e o foco para o nível {seniority_choice}. Se {seniority_choice} == "Júnior", enfatize capacidade operacional técnica, vontade de aprender rápido, agilidade com ferramentas (n8n, Meta Ads, GTM, GA4) e execução precisa sem soar superqualificado.
-3. REGRA 3 (DIRETO AO PONTO E ZERO PLACEHOLDERS): Remova TOTALMENTE placeholders vazios como "[Valor]", "[Período/Mês]", "[Número] dias" ou "[Seu Nome]". Se a vaga não tem orçamento explícito, declare com autoridade o valor estimado de mercado ou mencione que o valor exato e prazo serão alinhados em 5 minutos de conversa.
+--- SYSTEM_PROPOSAL_RULES (REGRAS ESTRITAS DE PROPOSTA B2B WORKANA) ---
+1. REGRA 1 (SEM SAUDAÇÕES GENÉRICAS): PROIBIDO saudações genéricas como "Olá, espero que esteja bem", "Sou o candidato ideal" ou colchetes. A primeira frase deve atacar diretamente a dor técnica ou o gargalo citado no projeto.
+2. REGRA 2 (SOLUÇÃO EM 3 PASSOS PRÁTICOS): Apresente a solução dividida em 3 passos práticos de execução técnica (1. Mapeamento Estratégico, 2. Implementação Ágil, 3. Acompanhamento Contínuo).
+3. REGRA 3 (FECHAMENTO COM PERGUNTA): Finalize sempre com uma pergunta estratégica para forçar a resposta do cliente e agendar uma conversa imediata.
+4. REGRA 4 (TOM E ROI): Mantenha tom direto, sênior ({seniority_choice}), focado no Retorno sobre Investimento (ROI) e sem enrolação.
 {questions_block}
 
 --- PERFIL E SENIORIDADE DO CANDIDATO ---
@@ -498,13 +504,11 @@ Qualificações & Experiência:
 {resume_text if resume_text else "Especialista em Tráfego Pago, GTM Server-Side, Meta CAPI, GA4, Python e Automações com IA (n8n/Make)."}
 
 --- ESTRUTURA DA PROPOSTA ---
-1. 👤 **Saudação Direta:** "Olá," ou "Bom dia," sem nomes genéricos entre colchetes.
-2. 🪝 **O Gancho (The Hook):** Aborde a dor/necessidade principal do cliente na PRIMEIRA linha.
-3. ⚙️ **A Solução (The How):** Detalhe como resolverá o problema com ferramentas técnicas reais (GTM, Meta Ads, Google Ads, GA4, n8n, Python).
-4. 📌 **Respostas às Perguntas (se houver):** Bloco destacado com respostas técnicas em negrito.
-5. 🏅 **A Autoridade (The Proof):** Comprove senioridade citando qualificações reais e o portfólio {portfolio_link}.
-6. 💰 **Investimento e Prazo:** Proposta transparente sem colchetes [Valor].
-7. 🎯 **O Fechamento (CTA Ativa):** Finalize com uma pergunta estratégica para resposta imediata.
+1. 🪝 **O Gancho (The Hook):** Ataque a dor/necessidade principal do cliente na PRIMEIRA frase (Sem 'Olá espero que esteja bem').
+2. ⚙️ **A Solução (3 Passos Práticos):** Detalhe como resolverá o problema em 3 passos técnicos (GTM, Meta Ads, Google Ads, GA4, n8n, Python).
+3. 📌 **Respostas às Perguntas (se houver):** Bloco destacado com respostas técnicas em negrito.
+4. 🏅 **A Autoridade (The Proof):** Comprove senioridade citando qualificações reais e o portfólio {portfolio_link}.
+5. 🎯 **O Fechamento (Pergunta Estratégica):** Finalize com uma pergunta direta sobre o projeto para resposta imediata.
 
 --- DADOS DA VAGA / PROJETO ---
 Título da Vaga: {job_title}
@@ -524,6 +528,17 @@ Escreva APENAS o texto final pronto para envio ao cliente."""
 
     # Extração de modelo dinâmico BYOK
     clean_model_id = model_choice.split(":")[-1] if ":" in model_choice else model_choice
+
+    # Provedor 0: Ollama Local (Qwen 2.5 7B)
+    if "ollama" in model_choice.lower() or "qwen" in model_choice.lower() or "local" in model_choice.lower():
+        try:
+            from ai_module import _call_ollama
+            ollama_res = await asyncio.to_thread(_call_ollama, prompt, 600, "qwen2.5:7b")
+            if ollama_res:
+                return ollama_res
+            logger.info("Ollama local offline. Redirecionando para modelos na nuvem (Groq/Gemini)...")
+        except Exception as e:
+            logger.warning(f"Erro ao chamar Ollama local: {e}")
 
     # 1. Roteamento Groq API (BYOK)
     if ("groq" in model_choice or "llama" in clean_model_id or "qwen" in clean_model_id) and groq_key:

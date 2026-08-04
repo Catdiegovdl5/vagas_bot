@@ -23,9 +23,26 @@ _OPENROUTER_KEY = os.environ.get('OPENROUTER_API_KEY', '')
 _GEMINI_KEYS   = [v for k, v in os.environ.items() if k.startswith('GEMINI_API_KEY') and v]
 _OPENAI_KEY    = os.environ.get('OPENAI_API_KEY', '')
 
-def _get_groq_key() -> str:
-    """Retorna uma chave Groq aleatória do pool para distribuir a carga."""
-    return random.choice(_GROQ_KEYS) if _GROQ_KEYS else ''
+def _call_ollama(prompt: str, max_tokens: int = 500, model: str = "qwen2.5:7b") -> str | None:
+    """Tenta uma chamada ao Ollama local (http://localhost:11434/api/generate). Retorna None se offline."""
+    import requests
+    try:
+        url = "http://localhost:11434/api/generate"
+        payload = {
+            "model": model,
+            "prompt": prompt,
+            "stream": False,
+            "options": {"temperature": 0.4, "top_p": 0.9}
+        }
+        resp = requests.post(url, json=payload, timeout=25)
+        if resp.status_code == 200:
+            res_text = resp.json().get("response", "").strip()
+            if res_text:
+                return res_text
+    except Exception as e:
+        logger.warning(f"[AI] Ollama local ({model}) falhou ou não está ativo: {e}")
+    return None
+
 
 def _call_groq(prompt: str, max_tokens: int, api_key: str) -> str | None:
     """Tenta uma chamada Groq com a chave fornecida. Retorna None em caso de falha."""
@@ -43,18 +60,25 @@ def _call_groq(prompt: str, max_tokens: int, api_key: str) -> str | None:
     return None
 
 
-def _call_ai(prompt: str, max_tokens: int = 500, user_groq_key: str = "") -> str:
+def _call_ai(prompt: str, max_tokens: int = 500, user_groq_key: str = "", model_choice: str = "") -> str:
     """
-    Chama a IA com fallback automático:
-    0. Chave Groq PESSOAL do usuário (prioridade máxima)
-    1. Groq pool rotativo (3 chaves gratuitas)
-    2. NVIDIA NIM
-    3. OpenRouter
-    4. Gemini pool rotativo
-    5. OpenAI
-    6. Fallback local
+    Chama a IA com fallback automático inteligente:
+    0. Ollama Local (Qwen 2.5 7B) se especificado ou disponível
+    1. Chave Groq PESSOAL do usuário (prioridade máxima)
+    2. Groq pool rotativo
+    3. NVIDIA NIM
+    4. OpenRouter
+    5. Gemini pool rotativo
+    6. OpenAI
+    7. Fallback local
     """
     import requests
+
+    if "ollama" in model_choice.lower() or "qwen" in model_choice.lower():
+        ollama_res = _call_ollama(prompt, max_tokens, "qwen2.5:7b")
+        if ollama_res:
+            return ollama_res
+        logger.info("[AI] Ollama offline. Redirecionando automaticamente para Groq/Gemini...")
 
     # 0. Chave pessoal do usuário (prioridade máxima)
     if user_groq_key:
