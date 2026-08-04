@@ -1,3 +1,2 @@
 @echo off
-cd /d "%~dp0"
-call start.bat
+call iniciar_tudo.bat

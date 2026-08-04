@@ -1,10 +1,32 @@
 import json
-import requests
+import os
 import sys
+import time
+import subprocess
+import requests
 
-# Configurações do Ollama Local
+# Configurações do Ollama Local & Fallback
 OLLAMA_URL = "http://localhost:11434/api/generate"
 MODELO = "qwen2.5:7b"
+
+
+def checar_ou_iniciar_ollama() -> bool:
+    """Verifica se o servidor Ollama está ativo em localhost:11434. Se não tiver, tenta iniciar em segundo plano."""
+    try:
+        r = requests.get("http://localhost:11434/api/tags", timeout=2)
+        if r.status_code == 200:
+            return True
+    except Exception:
+        pass
+
+    print("[Ollama] Tentando iniciar o serviço Ollama em segundo plano...")
+    try:
+        subprocess.Popen(["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        time.sleep(3)
+        r = requests.get("http://localhost:11434/api/tags", timeout=3)
+        return r.status_code == 200
+    except Exception:
+        return False
 
 
 def gerar_proposta_workana(descricao_projeto: str) -> str:
@@ -22,40 +44,75 @@ def gerar_proposta_workana(descricao_projeto: str) -> str:
 
     user_prompt = f"Crie uma proposta comercial estratégica para o seguinte projeto da Workana:\n\n{descricao_projeto}"
 
-    payload = {
-        "model": MODELO,
-        "prompt": f"{system_prompt}\n\n{user_prompt}",
-        "stream": False,
-        "options": {
-            "temperature": 0.4,  # Baixa temperatura para evitar alucinações técnicas
-            "top_p": 0.9,
-        },
-    }
+    # 1. Tenta primeiro via Ollama Local (Qwen 2.5 7B)
+    if checar_ou_iniciar_ollama():
+        payload = {
+            "model": MODELO,
+            "prompt": f"{system_prompt}\n\n{user_prompt}",
+            "stream": False,
+            "options": {"temperature": 0.4, "top_p": 0.9},
+        }
 
+        try:
+            print("[Ollama Local] Gerando proposta com Qwen 2.5 7B...")
+            response = requests.post(OLLAMA_URL, json=payload, timeout=60)
+            response.raise_for_status()
+            data = response.json()
+            res = data.get("response", "").strip()
+            if res:
+                return res
+        except Exception as e:
+            print(f"[Ollama Warning] Falha na resposta local ({e}). Redirecionando para nuvem...")
+
+    # 2. Fallback Inteligente para Nuvem (Groq / Gemini / OpenAI)
+    print("[IA Nuvem] Utilizando motor de IA em nuvem (Groq / Gemini)...")
     try:
-        response = requests.post(OLLAMA_URL, json=payload, timeout=60)
-        response.raise_for_status()
-        data = response.json()
-        return data.get("response", "").strip()
+        from ai_module import _call_ai
+        res_cloud = _call_ai(f"{system_prompt}\n\n{user_prompt}", max_tokens=800)
+        if res_cloud:
+            return res_cloud
     except Exception as e:
-        return f"Erro ao conectar ao Ollama local (localhost:11434): {str(e)}\nCertifique-se de que o Ollama está rodando ('ollama run qwen2.5:7b')."
+        print(f"[IA Nuvem Warning] {e}")
+
+    return "Não foi possível conectar ao Ollama nem às IAs em nuvem. Verifique suas chaves no .env ou inicie o Ollama com 'ollama run qwen2.5:7b'."
+
+
+def ler_entrada_multilinha() -> str:
+    """Lê todas as linhas coladas pelo usuário até pressionar Enter em linha em branco ou Ctrl+Z."""
+    print("\n📋 Cole a descrição completa do projeto da Workana abaixo.")
+    print("(Pressione ENTER duas vezes ou ENTER em linha em branco para finalizar):\n")
+    print("-" * 60)
+
+    linhas = []
+    while True:
+        try:
+            linha = input()
+            if not linha.strip() and linhas:
+                break
+            linhas.append(linha)
+        except EOFError:
+            break
+
+    return "\n".join(linhas).strip()
 
 
 if __name__ == "__main__":
     print("==================================================")
-    print("   ASSISTENTE DE PROPOSTAS WORKANA (OLLAMA LOCAL) ")
-    print("   Modelo: Qwen 2.5 7B Instruct (qwen2.5:7b)      ")
+    print("   ASSISTENTE DE PROPOSTAS WORKANA (SNIPER BOT)   ")
+    print("   Modelo Principal: Qwen 2.5 7B (Ollama Local)   ")
     print("==================================================")
-    
+
     if len(sys.argv) > 1:
         projeto = " ".join(sys.argv[1:])
     else:
-        projeto = input("\nCole a descrição completa do projeto da Workana aqui:\n\n")
+        projeto = ler_entrada_multilinha()
 
-    if projeto.strip():
-        print("\nGerando proposta estratégica B2B com Qwen 2.5...\n" + "-" * 50)
+    if projeto:
+        print("\n" + "=" * 60)
+        print("🚀 GERANDO PROPOSTA ESTRATÉGICA B2B...")
+        print("=" * 60 + "\n")
         proposta = gerar_proposta_workana(projeto)
         print(proposta)
-        print("-" * 50)
+        print("\n" + "=" * 60)
     else:
-        print("Descrição vazia. Encerrando.")
+        print("Nenhuma descrição colada. Encerrando.")
