@@ -437,16 +437,36 @@ Exemplo: {{"keyword": "vendedor", "location": "Londrina/PR", "level": "Júnior",
     if "clt" in text_lower: contract = "CLT"
     elif "pj" in text_lower or "freelance" in text_lower: contract = "PJ"
 
-    if "sem faculdade" in text_lower or "sem diploma" in text_lower: edu = "Sem Formação"
-
     for term in ["python", "desenvolvedor", "vendedor", "sdr", "designer", "operador", "pintor", "mecanico", "soldador", "logistica", "almoxarife"]:
         if term in text_lower:
             kw = term
             break
 
     return {"keyword": kw, "location": loc, "level": lvl, "contract": contract, "education": edu}
+
+
+def limpar_formatacao_humana_ia(texto: str) -> str:
+    """Remove totalmente títulos robóticos de seções de IA (ex: **O Gancho:**, **A Solução:**, etc.) e limpa o texto."""
+    if not texto:
+        return ""
+    ai_labels = [
+        r'\*?\*?O Gancho.*?\:?\*?\*?',
+        r'\*?\*?A Solução.*?\:?\*?\*?',
+        r'\*?\*?A Autoridade.*?\:?\*?\*?',
+        r'\*?\*?O Fechamento.*?\:?\*?\*?',
+        r'\*?\*?Respostas às Perguntas.*?\:?\*?\*?',
+        r'\*?\*?Saudação Direta.*?\:?\*?\*?',
+        r'\*?\*?Investimento e Prazo.*?\:?\*?\*?',
+    ]
+    for lbl in ai_labels:
+        texto = re.sub(lbl, '', texto, flags=re.IGNORECASE)
+
+    texto = re.sub(r'\n{3,}', '\n\n', texto)
+    return texto.strip()
+
+
 async def generate_custom_proposal(resume_text: str, job_title: str, job_requirements: str, user_instruction: str = "", history: list = None, model_choice: str = "gemini-3.1-flash-lite", length_choice: str = "6-pilares", style_choice: str = "alta-conversao", seniority_choice: str = "Junior", custom_questions: str = "") -> str:
-    """Gera ou refina uma proposta comercial consultiva focada na autoridade do candidato e no modelo de IA escolhido."""
+    """Gera ou refina uma proposta comercial consultiva humana, direta e sem cara de IA."""
     openrouter_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
     groq_key = os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API_KEY_1") or os.getenv("GROQ_API_KEY_2")
     gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY_1")
@@ -478,37 +498,27 @@ async def generate_custom_proposal(resume_text: str, job_title: str, job_require
 O contratante enviou o seguinte questionário no projeto:
 {custom_questions.strip()}
 
-REGRA DE FORMATO PARA PERGUNTAS:
-Crie um bloco destacado intitulado "📌 Respostas às Suas Perguntas".
-Para CADA pergunta acima enviada pelo cliente:
-1. Escreva a pergunta exata em negrito (ex: **Pergunta:** ...)
-2. Responda com PROFUNDIDADE TÉCNICA E SENIORIDADE ({seniority_choice}) demonstrando como o candidato executa a demanda com maestria técnica e usando dados reais do seu currículo. NUNCA responda apenas "Sim" ou "Não"."""
+Para CADA pergunta acima enviada pelo cliente, responda de forma técnica, direta e em primeira pessoa do singular ("eu"). NUNCA use "Nós" nem responda apenas "Sim" ou "Não"."""
 
-    prompt = f"""Você é um Estrategista Sênior e Consultor de Vendas representando o candidato cadastrado no SaaS.
-Sua missão é gerar uma proposta comercial de ALTA CONVERSÃO adaptada ao perfil técnico e ao nível de senioridade do profissional.
+    prompt = f"""Você é um especialista humano criando uma proposta comercial direta e natural no chat do Workana.
+Sua missão é gerar uma proposta comercial em primeira pessoa ("eu"), simples, convincente e 100% HUMANA, sem NENHUMA cara de IA.
 
 --- PREFERÊNCIAS PRÉVIAS DO USUÁRIO ---
 {length_rule}
 Estilo/Tom Selecionado: {style_choice}
 Nível de Senioridade Alvo: {seniority_choice}
 
---- SYSTEM_PROPOSAL_RULES (REGRAS ESTRITAS DE PROPOSTA B2B WORKANA) ---
-1. REGRA 1 (SEM SAUDAÇÕES GENÉRICAS): PROIBIDO saudações genéricas como "Olá, espero que esteja bem", "Sou o candidato ideal" ou colchetes. A primeira frase deve atacar diretamente a dor técnica ou o gargalo citado no projeto.
-2. REGRA 2 (SOLUÇÃO EM 3 PASSOS PRÁTICOS): Apresente a solução dividida em 3 passos práticos de execução técnica (1. Mapeamento Estratégico, 2. Implementação Ágil, 3. Acompanhamento Contínuo).
-3. REGRA 3 (FECHAMENTO COM PERGUNTA): Finalize sempre com uma pergunta estratégica para forçar a resposta do cliente e agendar uma conversa imediata.
-4. REGRA 4 (TOM E ROI): Mantenha tom direto, sênior ({seniority_choice}), focado no Retorno sobre Investimento (ROI) e sem enrolação.
+--- REGRAS MANDATÓRIAS (HUMANIZAÇÃO TOTAL) ---
+1. ZERO TÍTULOS DE SEÇÃO: NUNCA inclua títulos como "**O Gancho:**", "**A Solução:**", "**A Autoridade:**" ou "**O Fechamento:**". O texto deve ser corrido, limpo e natural.
+2. PRIMEIRO PESSOA ("EU"): Escreva em 1ª pessoa ("eu faço", "eu organizo", "eu configuro"). NUNCA use "nós" ou "nossa empresa".
+3. SEM SAUDAÇÕES GENÉRICAS: Vá direto à necessidade principal na primeira linha.
+4. LINGUAGEM FÁCIL: Use frases curtas, parágrafos bem espaçados e lista simples (1, 2, 3) sem jargões frios.
+5. PERGUNTA FINAL: Encerre com uma pergunta simples sobre o projeto para alinhar no chat em 5 minutos.
 {questions_block}
 
---- PERFIL E SENIORIDADE DO CANDIDATO ---
+--- PERFIL DO CANDIDATO ---
 Qualificações & Experiência:
-{resume_text if resume_text else "Especialista em Tráfego Pago, GTM Server-Side, Meta CAPI, GA4, Python e Automações com IA (n8n/Make)."}
-
---- ESTRUTURA DA PROPOSTA ---
-1. 🪝 **O Gancho (The Hook):** Ataque a dor/necessidade principal do cliente na PRIMEIRA frase (Sem 'Olá espero que esteja bem').
-2. ⚙️ **A Solução (3 Passos Práticos):** Detalhe como resolverá o problema em 3 passos técnicos (GTM, Meta Ads, Google Ads, GA4, n8n, Python).
-3. 📌 **Respostas às Perguntas (se houver):** Bloco destacado com respostas técnicas em negrito.
-4. 🏅 **A Autoridade (The Proof):** Comprove senioridade citando qualificações reais e o portfólio {portfolio_link}.
-5. 🎯 **O Fechamento (Pergunta Estratégica):** Finalize com uma pergunta direta sobre o projeto para resposta imediata.
+{resume_text if resume_text else "Especialista em Tráfego Pago, GTM Server-Side, Meta CAPI, GA4, Python e Automações com IA (n8n/Make). Portfólio: " + portfolio_link}
 
 --- DADOS DA VAGA / PROJETO ---
 Título da Vaga: {job_title}
@@ -516,9 +526,9 @@ Descrição e Requisitos:
 {job_requirements}
 
 --- INSTRUÇÕES DO CHAT ---
-{user_instruction if user_instruction else "Gere a versão final perfeita e sem colchetes."}
+{user_instruction if user_instruction else "Gere o texto final humano, direto e pronto para envio."}
 
-Escreva APENAS o texto final pronto para envio ao cliente."""
+Escreva APENAS a mensagem final da proposta em linguagem humana simples, SEM rótulos de seção, sem colchetes e pronta para envio."""
 
     # Validação e tarifação via TokenBudgetGuard para evitar estouro financeiro
     try:
@@ -535,7 +545,7 @@ Escreva APENAS o texto final pronto para envio ao cliente."""
             from ai_module import _call_ollama
             ollama_res = await asyncio.to_thread(_call_ollama, prompt, 600, "qwen2.5:7b")
             if ollama_res:
-                return ollama_res
+                return limpar_formatacao_humana_ia(ollama_res)
             logger.info("Ollama local offline. Redirecionando para modelos na nuvem (Groq/Gemini)...")
         except Exception as e:
             logger.warning(f"Erro ao chamar Ollama local: {e}")
@@ -551,7 +561,7 @@ Escreva APENAS o texto final pronto para envio ao cliente."""
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.4
             )
-            return res.choices[0].message.content.strip()
+            return limpar_formatacao_humana_ia(res.choices[0].message.content.strip())
         except Exception as e:
             logger.warning(f"Erro Groq BYOK ({clean_model_id}) em generate_custom_proposal: {e}")
 
@@ -566,7 +576,7 @@ Escreva APENAS o texto final pronto para envio ao cliente."""
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.4
             )
-            return res.choices[0].message.content.strip()
+            return limpar_formatacao_humana_ia(res.choices[0].message.content.strip())
         except Exception as e:
             logger.warning(f"Erro OpenRouter em generate_custom_proposal ({target_ai_model}): {e}")
 
@@ -580,7 +590,7 @@ Escreva APENAS o texto final pronto para envio ao cliente."""
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.4
             )
-            return res.choices[0].message.content.strip()
+            return limpar_formatacao_humana_ia(res.choices[0].message.content.strip())
         except Exception as e:
             logger.warning(f"Erro Groq em generate_custom_proposal: {e}")
 
@@ -591,7 +601,7 @@ Escreva APENAS o texto final pronto para envio ao cliente."""
             client = genai.Client(api_key=gemini_key)
             gemini_sdk_model = 'gemini-2.5-flash' if 'flash' in model_choice else 'gemini-2.5-flash-lite'
             res = await asyncio.to_thread(client.models.generate_content, model=gemini_sdk_model, contents=prompt)
-            return res.text.strip()
+            return limpar_formatacao_humana_ia(res.text.strip())
         except Exception as e:
             logger.warning(f"Erro Gemini em generate_custom_proposal: {e}")
 
