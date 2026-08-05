@@ -1,6 +1,12 @@
 import asyncio
 import importlib
 import PyPDF2
+import io
+import html
+try:
+    import fitz
+except ImportError:
+    fitz = None
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
@@ -1155,21 +1161,22 @@ async def select_mode(callback: CallbackQuery):
         for p in FREELANCE_PLATFORMS + EMPREGO_PLATFORMS: settings["platforms"][p] = True
 
     # Vai para o menu de nichos
+    # Vai para o menu de nichos com a nova taxonomia do sistema
     menus_markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🧠 Especialista em IA", callback_data="nicho_ai")],
-        [InlineKeyboardButton(text="💻 Desenvolvimento", callback_data="nicho_dev")],
-        [InlineKeyboardButton(text="📊 Dados & RPA", callback_data="nicho_dados")],
-        [InlineKeyboardButton(text="📈 Growth & Mkt", callback_data="nicho_mkt")],
-        [InlineKeyboardButton(text="🎬 Audiovisual & Criação", callback_data="nicho_audio")],
-        [InlineKeyboardButton(text="🏢 Base / Apoio Adm", callback_data="nicho_base")],
-        [InlineKeyboardButton(text="🎯 Júnior", callback_data="nicho_junior")],
-        [InlineKeyboardButton(text="🚀 Pleno", callback_data="nicho_pleno")],
+        [InlineKeyboardButton(text="✨ IA Generativa & IA para Conteúdo", callback_data="nicho_aigen")],
+        [InlineKeyboardButton(text="💻 Engenharia de IA & Dados", callback_data="nicho_iadados")],
+        [InlineKeyboardButton(text="📈 Inteligência de Vendas & Aquisição", callback_data="nicho_vendas")],
+        [InlineKeyboardButton(text="🎨 Criativos de Performance & Audiovisual", callback_data="nicho_criativos")],
+        [InlineKeyboardButton(text="📦 Logística, Expedição & Armazenagem", callback_data="nicho_logistica")],
+        [InlineKeyboardButton(text="💼 Administrativo, Comercial & Varejo", callback_data="nicho_adm")],
+        [InlineKeyboardButton(text="🎯 Filtrar por Senioridade (Jr/Pl/Sr)", callback_data="nicho_senioridade")],
+        [InlineKeyboardButton(text="📍 Filtrar por Cidade / Localização", callback_data="nicho_localizacao")],
         [InlineKeyboardButton(text="🔙 Voltar ao Modo", callback_data="hunt_menu")]
     ])
     modo_labels = {"freelance": "🚀 Freelance", "emprego": "💼 Emprego", "ambos": "🌐 Ambos"}
     await callback.message.edit_text(
-        f"*Modo: {modo_labels[modo]}*\n\n🎯 Selecione o Nicho Estratégico:",
-        reply_markup=menus_markup, parse_mode="Markdown"
+        f"<b>Modo: {modo_labels[modo]}</b>\n\n🎯 <b>Selecione a Categoria / Nicho Estratégico:</b>",
+        reply_markup=menus_markup, parse_mode="HTML"
     )
 
 @dp.callback_query(F.data.startswith("nicho_"))
@@ -1178,79 +1185,67 @@ async def show_niche_jobs(callback: CallbackQuery):
     nicho = callback.data.split("_")[1]
     
     menus = {
-        "ai": [
-            "Especialista em IA",
-            "Engenheiro de IA",
-            "Desenvolvedor de Agentes IA",
-            "Prompt Engineer",
-            "Machine Learning Engineer",
-            "Cientista de Dados"
+        "aigen": [
+            ("└ AI para Conteúdo & Copywriting", "hunt_ai_conteudo_copy"),
+            ("└ AI Generativa de Mídia (Vídeo/Imagem/Áudio)", "hunt_ai_midia_audiovisual"),
+            ("└ Engenharia de Agentes & IA-Ops", "hunt_ai_ops_agents"),
+            ("✨ IA Generativa (Geral)", "hunt_ia_generativa")
         ],
-        "dev": [
-            "Desenvolvedor Python",
-            "Desenvolvedor Backend",
-            "Desenvolvedor Node",
-            "Desenvolvedor React",
-            "Desenvolvedor Fullstack",
-            "Desenvolvedor Django",
-            "Desenvolvedor FastAPI"
+        "iadados": [
+            ("└ Dev Fullstack / Backend", "hunt_desenvolvimento_backend"),
+            ("└ IA-Ops / MLOps Specialist", "hunt_ia_ops"),
+            ("└ Analytics Engineer", "hunt_analytics_engineer"),
+            ("└ Engenharia de Dados (ETL & Pipelines)", "hunt_engenharia_dados"),
+            ("└ Server-Side Tracking (sGTM)", "hunt_server_side_tracking")
         ],
-        "dados": [
-            "Analista de Power BI",
-            "Desenvolvedor RPA",
-            "Analista de Dados",
-            "Engenheiro de Dados",
-            "Analista de Analytics",
-            "Analista SQL"
+        "vendas": [
+            ("Gestor de Tráfego (Meta/Google Ads)", "hunt_gestor_trafego"),
+            ("Growth & Performance Marketing", "hunt_growth_performance"),
+            ("SDR Técnico / Inside Sales", "hunt_sdr_tecnico"),
+            ("Media Buyer / Mídia Paga", "hunt_media_buyer")
         ],
-        "mkt": [
-            "Gestor de Tráfego",
-            "Growth Hacker",
-            "Analista de Marketing Digital",
-            "SDR",
-            "Copywriter",
-            "Especialista em SEO",
-            "Analista de CRM"
+        "criativos": [
+            ("Editor de Vídeo & Audiovisual", "hunt_editor_video"),
+            ("Motion Designer", "hunt_motion_designer"),
+            ("Designer Gráfico", "hunt_designer_grafico"),
+            ("Social Media Specialist", "hunt_social_media"),
+            ("UX/UI Designer", "hunt_ux_designer")
         ],
-        "audio": [
-            "Editor de Vídeo",
-            "Video Maker",
-            "Social Media",
-            "Designer Gráfico",
-            "UX Designer"
+        "logistica": [
+            ("Assistente de Logística", "hunt_assistente_logistica"),
+            ("Almoxarife / Controle de Estoque", "hunt_almoxarife"),
+            ("Operador de Empilhadeira", "hunt_operador_empilhadeira"),
+            ("Motorista / Entregador", "hunt_motorista"),
+            ("Conferente de Carga", "hunt_conferente")
         ],
-        "base": [
-            "Assistente Administrativo",
-            "Recepcionista",
-            "Suporte Técnico N1",
-            "Assistente de Faturamento",
-            "Assistente de Logística",
-            "Assistente Financeiro",
-            "Telemarketing",
-            "Analista de RH"
+        "adm": [
+            ("Assistente Administrativo", "hunt_assistente_administrativo"),
+            ("Assistente Financeiro / Contas", "hunt_assistente_financeiro"),
+            ("Recepcionista / Atendimento", "hunt_recepcionista"),
+            ("Analista de RH / DP", "hunt_analista_rh"),
+            ("Data Entry / Digitador", "hunt_data_entry")
         ],
-        "junior": [
-            "Desenvolvedor Junior Python",
-            "Desenvolvedor Junior React",
-            "Desenvolvedor Junior Fullstack",
-            "Analista de Dados Junior",
-            "Analista de Marketing Junior"
+        "senioridade": [
+            ("👶 Nível Júnior", "hunt_level_junior"),
+            ("⚡ Nível Pleno", "hunt_level_pleno"),
+            ("🚀 Nível Sênior", "hunt_level_senior"),
+            ("🏆 Nível Lead / Especialista", "hunt_level_lead")
         ],
-        "pleno": [
-            "Desenvolvedor Pleno Python",
-            "Desenvolvedor Pleno React",
-            "Desenvolvedor Pleno Fullstack",
-            "Analista de Dados Pleno",
-            "Gestor de Trafego Pleno"
+        "localizacao": [
+            ("🏠 Apenas Vagas Remotas", "hunt_loc_remoto"),
+            ("🏙️ São Paulo - SP", "hunt_loc_saopaulo"),
+            ("🌆 Londrina - PR", "hunt_loc_londrina"),
+            ("🏘️ Assaí - PR", "hunt_loc_assai"),
+            ("📍 Curitiba - PR", "hunt_loc_curitiba")
         ]
     }
     
     profs = menus.get(nicho, [])
-    buttons = [[InlineKeyboardButton(text=p, callback_data=f"hunt_{p}")] for p in profs]
+    buttons = [[InlineKeyboardButton(text=label, callback_data=cb_data)] for label, cb_data in profs]
     buttons.append([InlineKeyboardButton(text="🔙 Voltar aos Nichos", callback_data="hunt_menu")])
     
     markup = InlineKeyboardMarkup(inline_keyboard=buttons)
-    await callback.message.edit_text("🎯 *Selecione a Tecnologia/Profissão:*", reply_markup=markup, parse_mode="Markdown")
+    await callback.message.edit_text("🎯 <b>Selecione a Tecnologia ou Subcategoria:</b>", reply_markup=markup, parse_mode="HTML")
 
 # ----------------- PROCESSO DE BUSCA -----------------
 @dp.callback_query(F.data.startswith("auto_apply_"))
@@ -1374,9 +1369,48 @@ async def process_hunt(callback: CallbackQuery):
         except Exception:
             await callback.message.answer("Ative pelo menos uma plataforma em Configurações!")
         return
-        
-    await callback.answer()
+
     keyword = callback.data.split("_", 1)[1]
+
+    if keyword.startswith("level_"):
+        lvl = keyword.replace("level_", "").capitalize()
+        settings["level"] = lvl
+        await callback.answer(f"⚡ Senioridade definida como: {lvl}!", show_alert=True)
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="✨ IA Generativa", callback_data="nicho_aigen")],
+            [InlineKeyboardButton(text="💻 Engenharia de IA & Dados", callback_data="nicho_iadados")],
+            [InlineKeyboardButton(text="🎯 Caçar Vagas Agora", callback_data="hunt_menu")]
+        ])
+        await callback.message.edit_text(
+            f"<b>Filtro de Senioridade Atualizado:</b> <code>{html.escape(lvl)}</code>\n\n🎯 Selecione a categoria para buscar com este nível:",
+            reply_markup=markup, parse_mode="HTML"
+        )
+        return
+
+    if keyword.startswith("loc_"):
+        loc_key = keyword.replace("loc_", "")
+        loc_map = {
+            "remoto": "Brasil (Remoto)",
+            "saopaulo": "São Paulo",
+            "londrina": "Londrina",
+            "assai": "Assaí",
+            "curitiba": "Curitiba"
+        }
+        loc_val = loc_map.get(loc_key, loc_key.capitalize())
+        settings["location"] = loc_val
+        await callback.answer(f"📍 Localização definida como: {loc_val}!", show_alert=True)
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="✨ IA Generativa", callback_data="nicho_aigen")],
+            [InlineKeyboardButton(text="💻 Engenharia de IA & Dados", callback_data="nicho_iadados")],
+            [InlineKeyboardButton(text="🎯 Caçar Vagas Agora", callback_data="hunt_menu")]
+        ])
+        await callback.message.edit_text(
+            f"<b>Filtro de Localização Atualizado:</b> <code>{html.escape(loc_val)}</code>\n\n🎯 Selecione a categoria para buscar nesta localização:",
+            reply_markup=markup, parse_mode="HTML"
+        )
+        return
+
+    await callback.answer()
     await _do_hunt(keyword, callback.message, callback=callback)
 
 
@@ -2052,6 +2086,36 @@ def check_co_occurrence(text_norm, kw_norm, job=None):
     return True
 
 SEARCH_MAPPING = {
+    # --- Nichos das Categorias Principais ---
+    "ai_conteudo_copy":                 "especialista em ia generativa",
+    "ai_midia_audiovisual":             "especialista em ia generativa",
+    "ai_ops_agents":                    "desenvolvedor de agentes ia",
+    "ia_generativa":                    "especialista em ia generativa",
+    "desenvolvimento_backend":          "desenvolvedor backend",
+    "ia_ops":                           "arquiteto automacao ia ops",
+    "analytics_engineer":               "analista de analytics",
+    "engenharia_dados":                 "engenharia de dados",
+    "server_side_tracking":             "especialista tracking elite",
+    "gestor_trafego":                   "gestor de trafego",
+    "growth_performance":               "growth hacker",
+    "sdr_tecnico":                      "sdr",
+    "media_buyer":                      "gestor de trafego",
+    "editor_video":                     "editor de video",
+    "motion_designer":                  "motion designer",
+    "designer_grafico":                 "designer grafico",
+    "social_media":                     "social media",
+    "ux_designer":                      "ux designer",
+    "assistente_logistica":             "assistente de logistica",
+    "almoxarife":                       "almoxarife",
+    "operador_empilhadeira":            "assistente de logistica",
+    "motorista":                        "assistente de logistica",
+    "conferente":                       "auxiliar de logistica",
+    "assistente_administrativo":        "assistente administrativo",
+    "assistente_financeiro":            "assistente financeiro",
+    "recepcionista":                    "recepcionista",
+    "analista_rh":                      "analista de rh",
+    "data_entry":                       "assistente administrativo",
+
     # --- Broad Category Macro Keywords ---
     "Operações Físicas":                "operacoes fisicas",
     "Indústria":                        "industria",
@@ -3087,7 +3151,7 @@ async def send_compact_job_list(message: types.Message, jobs: list, chat_id: str
         await asyncio.sleep(0.5)
 
 async def send_job_cards(message: types.Message, jobs: list, chat_id: str):
-    """Envia as vagas em formato de Cartões Individuais (1 a 1)."""
+    """Envia as vagas em formato de Cartões Individuais (1 a 1) usando HTML Seguro."""
     import auto_apply
     count = 0
     
@@ -3104,9 +3168,10 @@ async def send_job_cards(message: types.Message, jobs: list, chat_id: str):
                 else:
                     raise
 
-    def safe_md(val, default="Não informado."):
-        s = str(val) if val else default
-        return s.replace("_", "\\_").replace("*", "\\*").replace("[", "\\[").replace("`", "\\`")
+    def safe_html(val, default="Não informado."):
+        if not val:
+            return default
+        return html.escape(str(val))
 
     for job in jobs:
         link = job.get('link', '')
@@ -3118,12 +3183,6 @@ async def send_job_cards(message: types.Message, jobs: list, chat_id: str):
             apply_result = {}
         else:
             apply_result = await asyncio.to_thread(auto_apply.auto_apply, job, str(chat_id))
-        
-        badges = ""
-        if job.get('ai_salary_declared') and job.get('budget') and 'combinar' not in str(job.get('budget', '')).lower():
-            badges = f"\n💰 {safe_md(str(job.get('budget', '')))}"
-        if job.get('ai_has_benefits'):
-            badges += " | 🎁 Com Benefícios" if badges else "\n🎁 Com Benefícios"
         
         base_url = os.getenv('BASE_URL', 'http://localhost:8000')
         tma_url = f"{base_url}/tma/proposal?job_title={job.get('title', 'Vaga')}"
@@ -3148,20 +3207,25 @@ async def send_job_cards(message: types.Message, jobs: list, chat_id: str):
             )])
         
         markup = InlineKeyboardMarkup(inline_keyboard=buttons)
-        req_preview = safe_md(job.get('requirements', ''))[:200].replace('\n', ' ') + "..." if job.get('requirements') else "Não informado."
+        
+        titulo_escapado = safe_html(job.get('title', 'Vaga'))
+        empresa_escapada = safe_html(job.get('company', 'Não informada'))
+        localizacao_escapada = safe_html(job.get('location', 'Remoto / Não informado'))
+        fonte_escapada = safe_html(job.get('platform', 'N/A'))
+        
         text = (
-            f"💎 *{safe_md(job.get('title', 'Vaga'))}*\n"
-            f"🏢 Empresa: `{safe_md(job.get('company', 'N/A'))}`\n"
-            f"🌐 Fonte: `{safe_md(job.get('platform', 'N/A'))}`\n\n"
-            f"📝 *Resumo:* _{req_preview}_"
+            f"💼 <b>Nova Vaga Encontrada!</b>\n\n"
+            f"📌 <b>Título:</b> {titulo_escapado}\n"
+            f"🏢 <b>Empresa:</b> {empresa_escapada}\n"
+            f"📍 <b>Local:</b> {localizacao_escapada}\n"
+            f"🌐 <b>Fonte:</b> {fonte_escapada}\n\n"
+            f"🔗 <a href=\"{link}\">Ver Vaga Completa</a>"
         )
-        if badges.strip():
-            text += f"\n{badges}"
         if len(text) > 4000:
-            text = text[:4000] + "..."
+            text = text[:3900] + f"...\n\n🔗 <a href=\"{link}\">Ver Vaga Completa</a>"
             
         try:
-            await send_with_retry(lambda: message.answer(text, reply_markup=markup, parse_mode="Markdown"))
+            await send_with_retry(lambda: message.answer(text, reply_markup=markup, parse_mode="HTML", disable_web_page_preview=True))
             count += 1
             await asyncio.sleep(1.0)
         except Exception as e:
@@ -3820,66 +3884,123 @@ async def callback_lgpd_purge_do(callback: CallbackQuery):
     await asyncio.to_thread(purge_user_data_lgpd, user_id)
     await callback.message.answer("🗑️ <b>Todos os seus dados foram excluídos com sucesso das nossas bases.</b>\nSe desejar utilizar o robô novamente no futuro, basta digitar /start.", parse_mode="HTML")
 
+def recommend_top_jobs_for_resume(resume_text: str, limit: int = 5):
+    """
+    Busca até 'limit' vagas ativas no banco de dados SQLite jobs.db 
+    com base no conteúdo do currículo.
+    """
+    import sqlite3
+    from prioriti.database import DB_PATH
+    
+    if not os.path.exists(DB_PATH):
+        return []
+        
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        c = conn.cursor()
+        c.execute("""
+            SELECT id, title, company, budget, link, platform, requirements, location
+            FROM jobs
+            ORDER BY id DESC LIMIT 150
+        """)
+        rows = c.fetchall()
+        if not rows:
+            return []
+            
+        resume_lower = resume_text.lower()
+        scored = []
+        for r in rows:
+            job_dict = {
+                'id': r[0], 'title': r[1], 'company': r[2],
+                'budget': r[3], 'link': r[4], 'platform': r[5],
+                'requirements': r[6], 'location': r[7]
+            }
+            title = (r[1] or '').lower()
+            reqs = (r[6] or '').lower()
+            score = 0
+            for word in title.split():
+                if len(word) > 3 and word in resume_lower:
+                    score += 3
+            for word in reqs.split():
+                if len(word) > 4 and word in resume_lower:
+                    score += 1
+            scored.append((score, job_dict))
+            
+        scored.sort(key=lambda x: x[0], reverse=True)
+        return [j[1] for j in scored[:limit]]
+    except Exception as e:
+        logger.error(f"Erro ao recomendar vagas para o currículo: {e}")
+        return []
+    finally:
+        conn.close()
+
 @dp.message(F.document)
 async def handle_document(message: types.Message, bot: Bot):
-    if not message.document.file_name.lower().endswith('.pdf'):
-        await message.answer("❌ Por favor, envie o seu currículo em formato PDF.")
+    file_name = message.document.file_name.lower()
+    if not (file_name.endswith('.pdf') or file_name.endswith('.txt')):
+        await message.answer("❌ Por favor, envie o seu currículo em formato PDF (.pdf) ou Texto (.txt).")
         return
         
-    msg_status = await message.answer("📄 <b>Lendo PDF com PyMuPDF Engine (RAM)...</b>", parse_mode="HTML")
+    msg_status = await message.answer("📄 <b>Lendo currículo (PDF/TXT)...</b>", parse_mode="HTML")
     user_id = message.chat.id
     
     try:
-        # Baixa os bytes do PDF diretamente em RAM (Sem gravar em disco)
         file_info = await bot.get_file(message.document.file_id)
         downloaded_file = await bot.download_file(file_info.file_path)
-        pdf_bytes = downloaded_file.read() if hasattr(downloaded_file, 'read') else downloaded_file
+        file_bytes = downloaded_file.read() if hasattr(downloaded_file, 'read') else downloaded_file
         
-        pdf_stream = io.BytesIO(pdf_bytes)
-        
-        def _parse_pdf_ram(stream):
-            text = ""
-            with fitz.open(stream=stream, filetype="pdf") as doc:
-                for page in doc:
-                    text += page.get_text() + "\n"
-            return text
+        full_text = ""
+        if file_name.endswith('.pdf'):
+            pdf_stream = io.BytesIO(file_bytes)
+            if fitz:
+                def _parse_pdf_ram(stream):
+                    text = ""
+                    with fitz.open(stream=stream, filetype="pdf") as doc:
+                        for page in doc:
+                            text += page.get_text() + "\n"
+                    return text
+                full_text = await asyncio.to_thread(_parse_pdf_ram, pdf_stream)
+            else:
+                def _parse_pypdf(stream):
+                    text = ""
+                    reader = PyPDF2.PdfReader(stream)
+                    for page in reader.pages:
+                        text += (page.extract_text() or "") + "\n"
+                    return text
+                full_text = await asyncio.to_thread(_parse_pypdf, pdf_stream)
+        elif file_name.endswith('.txt'):
+            full_text = file_bytes.decode('utf-8', errors='ignore')
             
-        full_text = await asyncio.to_thread(_parse_pdf_ram, pdf_stream)
-        
         if not full_text.strip():
-            await msg_status.edit_text("❌ O PDF enviado parece estar vazio ou escaneado como imagem sem texto.")
+            await msg_status.edit_text("❌ O arquivo enviado parece estar vazio ou não contém texto extraível.")
             return
 
-        name = "Candidato(a)"
-        skills_list = ["Tecnologia", "Análise de Dados", "Python"]
-        seniority = "Júnior / Pleno"
-        professions = ["Desenvolvedor Python", "Analytics Engineer", "IA-Ops Specialist"]
+        name = message.from_user.full_name if message.from_user else "Candidato(a)"
+        upsert_user_profile(str(user_id), full_name=name, resume_text=full_text)
         
-        skills_str = ", ".join(skills_list)
-        upsert_user_profile(str(user_id), full_name=name, resume_text=full_text, skills=skills_str)
+        top_jobs = await asyncio.to_thread(recommend_top_jobs_for_resume, full_text, 5)
         
-        buttons = [[InlineKeyboardButton(text=f"🚀 Disparar Busca: {prof}", callback_data=f"hunt_{prof}")] for prof in professions]
-        buttons.append([InlineKeyboardButton(text="👤 Ver Perfil Completo", callback_data="menu_perfil"),
-                        InlineKeyboardButton(text=f"🎯 Caçar Vagas", callback_data="hunt_menu")])
-        markup = InlineKeyboardMarkup(inline_keyboard=buttons)
-        
-        prof_bullets = "\n".join([f"• <b>{prof}</b>" for prof in professions])
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="👤 Ver Meu Perfil", callback_data="menu_perfil"),
+             InlineKeyboardButton(text="🎯 Caçar Vagas", callback_data="hunt_menu")]
+        ])
         
         preview_msg = (
-            f"📄 <b>Análise do Currículo Concluída em RAM!</b>\n\n"
-            f"👤 <b>Candidato(a):</b> <code>{name}</code>\n"
-            f"📊 <b>Principais Habilidades:</b> <code>{skills_str}</code>\n"
-            f"📈 <b>Senioridade Detectada:</b> <code>{seniority}</code>\n\n"
-            f"🎯 <b>Carreiras Mais Recomendadas:</b> \n"
-            f"{prof_bullets}\n\n"
-            f"👇 <b>Clique abaixo para iniciar a busca automatizada:</b>"
+            f"📄 <b>Análise de Currículo Concluída!</b>\n\n"
+            f"👤 <b>Candidato(a):</b> <code>{html.escape(name)}</code>\n"
+            f"📊 <b>Caracteres Analisados:</b> <code>{len(full_text)}</code>\n"
+            f"🎯 <b>Vagas Recomendadas no Banco:</b> <code>{len(top_jobs)}</code>\n\n"
+            f"<i>Abaixo estão as 5 vagas mais alinhadas com seu perfil:</i>"
         )
         
         await msg_status.edit_text(preview_msg, reply_markup=markup, parse_mode="HTML")
+        
+        if top_jobs:
+            await send_job_cards(message, top_jobs, str(user_id))
     except Exception as e:
-        logger.error(f"Erro ao processar PDF: {e}")
+        logger.error(f"Erro ao processar currículo: {e}")
         tb_safe = html.escape(str(e))
-        await msg_status.edit_text(f"❌ <b>Erro ao processar PDF:</b> <code>{tb_safe}</code>", parse_mode="HTML")
+        await msg_status.edit_text(f"❌ <b>Erro ao processar currículo:</b> <code>{tb_safe}</code>", parse_mode="HTML")
 
 @dp.message()
 async def echo_message(message: types.Message):
