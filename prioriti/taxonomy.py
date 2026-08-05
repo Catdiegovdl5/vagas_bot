@@ -1,5 +1,5 @@
 """
-Módulo de Taxonomia Expandida para Engenharia de IA & Dados no vagas_bot
+Módulo de Taxonomia Expandida para Engenharia de IA & Dados e IA Generativa no vagas_bot
 """
 
 TAXONOMIA_IA_DADOS = {
@@ -47,5 +47,25 @@ TAXONOMIA_IA_DADOS = {
         "nome": "Server-Side Tracking (sGTM)",
         "category": "Dados & Analytics",
         "keywords": ["server-side tracking", "sgtm", "google tag manager", "conversion api", "capi", "postback", "web analytics"]
+    }
+}
+
+TAXONOMIA_AI_GENERATIVA = {
+    "ai_generativa": {
+        "nome": "IA Generativa & IA para Conteúdo",
+        "subcategorias": {
+            "ai_conteudo_copy": {
+                "nome": "AI para Conteúdo & Copywriting (LLMs/Prompts)",
+                "keywords": ["prompt engineer", "llm", "rag", "gpt-4", "claude", "copywriting ia", "ai content", "agente de ia"]
+            },
+            "ai_midia_audiovisual": {
+                "nome": "AI Generativa de Mídia (Vídeo, Imagem e Áudio)",
+                "keywords": ["stable diffusion", "comfyui", "midjourney", "google veo", "runway", "elevenlabs", "suno", "imagem ia", "video ia"]
+            },
+            "ai_ops_agents": {
+                "nome": "Engenharia de Agentes & IA-Ops",
+                "keywords": ["crewai", "autogen", "langgraph", "vector db", "chromadb", "pinecone", "vllm", "ollama"]
+            }
+        }
     }
 }

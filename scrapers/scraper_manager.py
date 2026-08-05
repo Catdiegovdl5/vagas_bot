@@ -3,13 +3,14 @@ import inspect
 import importlib
 from typing import List, Dict, Any
 
-from scrapers import gupy, linkedin, infojobs
+from scrapers import gupy, linkedin, infojobs, ai_generativa
 
 # Modulos de scrapers disponiveis
 SCRAPER_MODULES = [
     gupy,
     linkedin,
     infojobs,
+    ai_generativa,
 ]
 
 # Tenta importar scrapers adicionais se disponiveis no ambiente
