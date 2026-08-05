@@ -2244,7 +2244,31 @@ def classify_job_profession(job):
     prof = None
 
     # Priority 1: Specific Sub-Professions & Roles (Title match first)
-    if 'operador cnc' in title_norm or 'cnc' in title_norm or 'torneiro' in title_norm:
+    if any(k in full_norm for k in ["stable diffusion", "comfyui", "midjourney", "google veo", "runway", "computer vision", "opencv", "yolo", "visao computacional"]):
+        prof = "AI para Vídeo & Imagem"
+        cat = "Desenvolvimento Backend & IA"
+    elif any(k in full_norm for k in ["elevenlabs", "whisper", "audio ai", "voice cloning", "sintese de voz"]):
+        prof = "AI para Áudio & Voz"
+        cat = "Desenvolvimento Backend & IA"
+    elif any(k in full_norm for k in ["llm", "prompt engineering", "rag", "gpt-4", "claude", "fine-tuning", "agentes de ia", "copilot"]):
+        prof = "AI para Conteúdo & Texto (LLM / RAG)"
+        cat = "Desenvolvimento Backend & IA"
+    elif any(k in full_norm for k in ["n8n", "make.com", "crewai", "autogen", "langgraph", "automacao de processos", "zapier"]):
+        prof = "Agentes Autônomos & Workflows (n8n/CrewAI)"
+        cat = "Desenvolvimento Backend & IA"
+    elif any(k in full_norm for k in ["mlops", "llmops", "langchain", "llamaindex", "chromadb", "pinecone", "vllm"]):
+        prof = "IA-Ops / MLOps Specialist"
+        cat = "Desenvolvimento Backend & IA"
+    elif any(k in full_norm for k in ["dbt", "snowflake", "bigquery", "looker"]):
+        prof = "Analytics Engineer"
+        cat = "Dados & Analytics"
+    elif any(k in full_norm for k in ["airflow", "pyspark", "kafka", "data lake", "data warehouse", "pipeline de dados"]):
+        prof = "Engenharia de Dados (ETL)"
+        cat = "Dados & Analytics"
+    elif any(k in full_norm for k in ["server-side tracking", "sgtm", "conversion api", "meta capi"]):
+        prof = "Server-Side Tracking (sGTM)"
+        cat = "Dados & Analytics"
+    elif 'operador cnc' in title_norm or 'cnc' in title_norm or 'torneiro' in title_norm:
         prof = 'Operador CNC'
         cat = 'Operações Físicas'
     elif 'pintor' in title_norm and ('industrial' in title_norm or 'fabrica' in title_norm or 'producao' in title_norm or 'pinto' in title_norm or title_norm.strip() in ('pintor industrial', 'pintor')):

@@ -10,6 +10,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <meta id="meta-description" name="description" content="Sniper Console — Encontre vagas de tecnologia, marketing, vendas, engenharia e áreas operacionais atualizadas em tempo real.">
+    <link id="canonical-url" rel="canonical" href="http://localhost:8000/">
+
+    <!-- SEO & Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Sniper Console — Vagas Bot SaaS",
+      "url": "http://localhost:8000/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "http://localhost:8000/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
     <style>
         :root[data-theme="dark"] {
             --bg-canvas: #090d16;
@@ -1417,11 +1435,16 @@
             { id: "sdr_tecnico", name: "SDR Técnico", icon: "<i class='fa-solid fa-phone'></i>", label_pt: "SDR Técnico", label_en: "Technical SDR", kws: ["sdr", "bdr", "inside sales", "prospeccao", "sales development", "closer", "outbound"] },
             { id: "web_analytics", name: "Web Analytics / GTM", icon: "<i class='fa-solid fa-chart-column'></i>", label_pt: "Web Analytics", label_en: "Web Analytics", kws: ["ga4", "gtm", "google tag manager", "google analytics", "analytics", "tracking"] },
 
-            // --- Categoria 6: Engenharia de IA e Dados ---
-            { id: "ia_ops", name: "IA-Ops Specialist", icon: "<i class='fa-solid fa-robot'></i>", label_pt: "IA-Ops Specialist", label_en: "IA-Ops Specialist", kws: ["n8n", "make", "zapier", "ia generativa", "chatgpt", "llm", "prompt engineer", "agentes ia", "automacao"] },
-            { id: "analytics_engineer", name: "Analytics Engineer", icon: "<i class='fa-solid fa-chart-line'></i>", label_pt: "Analytics Engineer", label_en: "Analytics Engineer", kws: ["analytics engineer", "power bi", "powerbi", "data analyst", "analista de dados", "looker", "dbt", "databricks"] },
-            { id: "server_side_tracking", name: "Server-Side Tracking", icon: "<i class='fa-solid fa-gear'></i>", label_pt: "Server-Side Tracking", label_en: "Server-Side Tracking", kws: ["server-side", "gtm server", "stape", "meta capi", "conversions api", "tracking server"] },
-            { id: "dev_fullstack", name: "Dev Fullstack", icon: "<i class='fa-brands fa-python'></i>", label_pt: "Dev Fullstack / Backend", label_en: "Fullstack / Backend Dev", kws: ["python", "fastapi", "django", "node", "react", "fullstack", "backend", "sql", "postgresql", "php"] },
+            // --- Categoria 6: Engenharia de IA & Dados ---
+            { id: "desenvolvimento_backend", name: "Dev Fullstack / Backend", icon: "<i class='fa-brands fa-python'></i>", label_pt: "Dev Fullstack / Backend", label_en: "Fullstack / Backend Dev", kws: ["backend", "fullstack", "fastapi", "django", "express", "nest.js", "python", "node.js", "api rest"] },
+            { id: "ia_ops", name: "IA-Ops / MLOps Specialist", icon: "<i class='fa-solid fa-robot'></i>", label_pt: "IA-Ops / MLOps Specialist", label_en: "IA-Ops / MLOps Specialist", kws: ["mlops", "llmops", "langchain", "llamaindex", "vector db", "chromadb", "pinecone", "vllm"] },
+            { id: "ai_conteudo_texto", name: "AI para Conteúdo & Texto (LLM / RAG)", icon: "<i class='fa-solid fa-file-signature'></i>", label_pt: "AI para Conteúdo & Texto (LLM / RAG)", label_en: "AI for Content & Text (LLM / RAG)", kws: ["llm", "prompt engineering", "rag", "gpt-4", "claude", "fine-tuning", "agentes de ia", "copilot"] },
+            { id: "ai_video_imagem", name: "AI para Vídeo & Imagem", icon: "<i class='fa-solid fa-photo-film'></i>", label_pt: "AI para Vídeo & Imagem", label_en: "AI for Video & Image", kws: ["stable diffusion", "comfyui", "midjourney", "google veo", "runway", "computer vision", "opencv", "yolo", "visão computacional"] },
+            { id: "ai_audio_voz", name: "AI para Áudio & Voz", icon: "<i class='fa-solid fa-microphone-lines'></i>", label_pt: "AI para Áudio & Voz", label_en: "AI for Audio & Voice", kws: ["elevenlabs", "whisper", "tts", "stt", "audio ai", "voice cloning", "síntese de voz"] },
+            { id: "agentes_automacao", name: "Agentes Autônomos & Workflows", icon: "<i class='fa-solid fa-bolt'></i>", label_pt: "Agentes Autônomos & Workflows (n8n/CrewAI)", label_en: "Autonomous Agents & Workflows", kws: ["n8n", "make.com", "crewai", "autogen", "langgraph", "automação de processos", "zapier", "webhooks"] },
+            { id: "analytics_engineer", name: "Analytics Engineer", icon: "<i class='fa-solid fa-chart-line'></i>", label_pt: "Analytics Engineer", label_en: "Analytics Engineer", kws: ["dbt", "snowflake", "bigquery", "looker", "power bi", "databricks", "sql avançado"] },
+            { id: "engenharia_dados", name: "Engenharia de Dados (ETL)", icon: "<i class='fa-solid fa-database'></i>", label_pt: "Engenharia de Dados (ETL & Pipelines)", label_en: "Data Engineering (ETL)", kws: ["airflow", "spark", "pyspark", "kafka", "data lake", "data warehouse", "etl", "pipeline de dados"] },
+            { id: "server_side_tracking", name: "Server-Side Tracking (sGTM)", icon: "<i class='fa-solid fa-gear'></i>", label_pt: "Server-Side Tracking (sGTM)", label_en: "Server-Side Tracking (sGTM)", kws: ["server-side tracking", "sgtm", "google tag manager", "conversion api", "capi", "postback", "web analytics"] },
 
             // --- Geral ---
             { id: "outros", name: "Outros", icon: "<i class='fa-solid fa-folder'></i>", label_pt: "Outros", label_en: "Others", kws: ["outros", "geral", "suporte", "devops"] }
@@ -3605,6 +3628,60 @@
       mostrarStatusDebug(`⚠️ Erro na função: ${msg} (Linha ${lineNo})`, 'erro');
       return false;
     };
+
+    async function inicializarSEOEURLAmigavel() {
+        const path = window.location.pathname;
+        const parts = path.split('/').filter(Boolean);
+        const metaDesc = document.getElementById('meta-description');
+        const canonical = document.getElementById('canonical-url');
+        
+        if (canonical) canonical.href = window.location.href;
+
+        if (parts[0] === 'vagas') {
+            const cat = parts[1] || '';
+            const cid = parts[2] || '';
+            if (cat) {
+                if (typeof estadoFiltros !== 'undefined') estadoFiltros.categoria = cat;
+                if (typeof selectedCategory !== 'undefined') selectedCategory = cat;
+            }
+            if (cid && typeof estadoFiltros !== 'undefined') {
+                estadoFiltros.cidade = cid;
+            }
+            const catTitle = cat ? cat.replace(/_/g, ' ').toUpperCase() : 'Todas as Categorias';
+            const cidTitle = cid ? ` em ${cid.replace(/-/g, ' ').toUpperCase()}` : '';
+            document.title = `Vagas de ${catTitle}${cidTitle} — Sniper Console`;
+            if (metaDesc) {
+                metaDesc.content = `Confira as melhores vagas de emprego para ${catTitle}${cidTitle}. Vagas atualizadas diariamente.`;
+            }
+            if (typeof carregarVagasServidor === 'function') {
+                carregarVagasServidor();
+            }
+        } else if (parts[0] === 'vaga' && parts[1]) {
+            const jobId = parts[1];
+            try {
+                const res = await fetch(`/api/job/${jobId}/schema.json`);
+                if (res.ok) {
+                    const schemaData = await res.json();
+                    document.title = `${schemaData.title || 'Vaga'} — Sniper Console`;
+                    if (metaDesc) {
+                        metaDesc.content = `Vaga de ${schemaData.title} na empresa ${schemaData.hiringOrganization?.name || 'Confidencial'}. Inscreva-se já!`;
+                    }
+                    let scriptSchema = document.getElementById('job-posting-schema');
+                    if (!scriptSchema) {
+                        scriptSchema = document.createElement('script');
+                        scriptSchema.id = 'job-posting-schema';
+                        scriptSchema.type = 'application/ld+json';
+                        document.head.appendChild(scriptSchema);
+                    }
+                    scriptSchema.textContent = JSON.stringify(schemaData, null, 2);
+                }
+            } catch (e) {
+                console.error('Erro ao carregar Schema.org JobPosting:', e);
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', inicializarSEOEURLAmigavel);
     </script>
 </body>
 </html>
