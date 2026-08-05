@@ -146,9 +146,18 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def serve_dashboard():
-    """Rota principal: Serve o painel web (HTML) estático."""
-    with open(os.path.join(STATIC_DIR, "index.html"), "r", encoding="utf-8") as f:
-        return f.read()
+    """Rota principal: Serve o painel web (HTML) estático com cabeçalhos de No-Cache."""
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    with open(index_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    return HTMLResponse(
+        content=content,
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
+    )
 
 # ─────────────────────────────────────────────────────────────
 # ROTAS DE SEO, SITEMAP DINÂMICO E SCHEMA.ORG (JOBPOSTING)
