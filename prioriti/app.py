@@ -13,6 +13,7 @@ import io
 import time
 import json
 import re
+import html
 from logging.handlers import RotatingFileHandler
 from typing import Optional, List, Dict, Union
 from contextlib import asynccontextmanager
@@ -93,18 +94,32 @@ async def global_exception_handler(request: Request, exc: Exception):
         admin_id = os.getenv("ADMIN_TELEGRAM_ID", "43991652706")
         if bot_token:
             try:
-                async with httpx.AsyncClient(timeout=5) as client:
-                    msg = f"🚨 *CRITICAL UNHANDLED ERROR*\n📍 Rota: `{request.url.path}`\n❌ Exceção: `{str(exc)[:250]}`"
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    path_safe = html.escape(str(request.url.path))
+                    exc_safe = html.escape(str(exc)[:250])
+                    msg = (
+                        f"🚨 <b>CRITICAL UNHANDLED ERROR</b>\n"
+                        f"📍 <b>Rota:</b> <code>{path_safe}</code>\n"
+                        f"❌ <b>Exceção:</b> <code>{exc_safe}</code>"
+                    )
                     await client.post(
                         f"https://api.telegram.org/bot{bot_token}/sendMessage",
-                        json={"chat_id": admin_id, "text": msg, "parse_mode": "Markdown"}
+                        json={"chat_id": admin_id, "text": msg, "parse_mode": "HTML"}
                     )
             except Exception as e:
                 logger.error(f"Falha ao enviar alerta de erro via Telegram: {e}")
                 
     return JSONResponse(status_code=500, content={"status": "error", "message": "Ocorreu um erro interno de servidor."})
 
-# Middleware de Segurança e Hardening (Headers de Proteção Anti-Clickjacking & Anti-XSS)
+# Registra o Middleware Capturador Contextual de Erros com Autocorreção IA
+try:
+    from middleware.error_reporter import error_reporter_middleware
+    @app.middleware("http")
+    async def custom_error_middleware(request: Request, call_next):
+        return await error_reporter_middleware(request, call_next)
+except Exception as err_mw:
+    logger.warning(f"Erro ao registrar middleware error_reporter: {err_mw}")
+
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -135,11 +150,118 @@ def serve_dashboard():
     with open(os.path.join(STATIC_DIR, "index.html"), "r", encoding="utf-8") as f:
         return f.read()
 
+# ─────────────────────────────────────────────────────────────
+# ROTAS DE SEO, SITEMAP DINÂMICO E SCHEMA.ORG (JOBPOSTING)
+# ─────────────────────────────────────────────────────────────
+
+@app.get("/sitemap.xml", response_class=Response)
+def get_dynamic_sitemap():
+    """Gera sitemap.xml dinâmico com todas as vagas ativas do banco e URLs amigáveis."""
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("SELECT id, title, location, added_at FROM jobs ORDER BY added_at DESC LIMIT 5000")
+    rows = c.fetchall()
+    conn.close()
+
+    xml_lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+    ]
+    
+    # URL Principal e Categorias Principais
+    base_url = "http://localhost:8000"
+    categories = [
+        "gestor_trafego", "meta_ads", "google_ads", "dev_fullstack", 
+        "python", "ia_ops", "sdr", "logistica", "administrativo"
+    ]
+    
+    xml_lines.append(f"  <url><loc>{base_url}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>")
+    for cat in categories:
+        xml_lines.append(f"  <url><loc>{base_url}/vagas/{cat}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>")
+
+    # URLs das Vagas Individuais
+    for r in rows:
+        job_id = r[0]
+        title_slug = remover_acentos(r[1] or "vaga").replace(" ", "-").replace("/", "-")
+        date_str = (r[3] or "2026-08-01")[:10]
+        xml_lines.append(f"  <url><loc>{base_url}/vaga/{job_id}/{title_slug}</loc><lastmod>{date_str}</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>")
+
+    xml_lines.append('</urlset>')
+    return Response(content="\n".join(xml_lines), media_type="application/xml")
+
+@app.get("/api/job/{job_id}/schema.json")
+def get_job_schema_org(job_id: str):
+    """Retorna a marcação JSON-LD estritamente compatível com Schema.org/JobPosting para o Google."""
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM jobs WHERE id = ?", (job_id,))
+    r = c.fetchone()
+    conn.close()
+
+    if not r:
+        return JSONResponse(status_code=404, content={"status": "error", "message": "Vaga não encontrada."})
+
+    job = dict(r)
+    posted_date = job.get("added_at") or "2026-08-01T00:00:00Z"
+    loc_str = job.get("location") or "Brasil"
+    is_remote = "remot" in loc_str.lower() or "home office" in loc_str.lower()
+
+    schema = {
+        "@context": "https://schema.org/",
+        "@type": "JobPosting",
+        "title": job.get("title", "Vaga Tech"),
+        "description": html.escape(job.get("requirements") or job.get("title") or "Detalhes da vaga"),
+        "identifier": {
+            "@type": "PropertyValue",
+            "name": job.get("company", "Empresa Confidencial"),
+            "value": str(job.get("id"))
+        },
+        "datePosted": posted_date,
+        "validThrough": "2026-12-31T23:59:59Z",
+        "employmentType": "FULL_TIME",
+        "hiringOrganization": {
+            "@type": "Organization",
+            "name": job.get("company", "Empresa Confidencial"),
+            "sameAs": job.get("link", "#")
+        },
+        "jobLocation": {
+            "@type": "Place",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": loc_str,
+                "addressCountry": "BR"
+            }
+        }
+    }
+
+    if is_remote:
+        schema["jobLocationType"] = "TELECOMMUTE"
+        schema["applicantLocationRequirements"] = {
+            "@type": "Country",
+            "name": "BR"
+        }
+
+    return schema
+
 @app.get("/tma/proposal", response_class=HTMLResponse)
 def serve_tma_proposal():
     """Rota do Telegram Mini App (TMA): Serve a interface de geração de propostas via IA."""
     with open(os.path.join(STATIC_DIR, "index.html"), "r", encoding="utf-8") as f:
         return f.read()
+
+@app.get("/vagas/{categoria}", response_class=HTMLResponse)
+@app.get("/vagas/{categoria}/{cidade}", response_class=HTMLResponse)
+@app.get("/vaga/{job_id}/{slug}", response_class=HTMLResponse)
+def serve_seo_friendly_pages(categoria: str = None, cidade: str = None, job_id: str = None, slug: str = None):
+    """Serve a aplicação web frontend para rotas de SEO amigáveis."""
+    with open(os.path.join(STATIC_DIR, "index.html"), "r", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/api/test_error_trigger")
+def trigger_test_error():
+    """Rota de teste para validar o Middleware Capturador de Erros e Agente de Autocorreção IA."""
+    raise ValueError("Erro de teste para validação do Middleware ErrorReporter e AI Self-Healer")
 
 @app.get("/api/jobs")
 @app.get("/api/vagas")
@@ -474,7 +596,7 @@ async def api_get_available_models(user_id: str = "web_user", request: Request =
             try:
                 import requests
                 def fetch_groq():
-                    res = requests.get("https://api.groq.com/openai/v1/models", headers={"Authorization": f"Bearer {effective_groq}"}, timeout=4)
+                    res = requests.get("https://api.groq.com/openai/v1/models", headers={"Authorization": f"Bearer {effective_groq}"}, timeout=10.0)
                     if res.status_code == 200:
                         return [m["id"] for m in res.json().get("data", [])]
                     return []
@@ -748,8 +870,12 @@ async def trigger_hunt(request: Request):
             logger.info(f"[{plat_clean.upper()}] Inicializando Scraper (Até 10 páginas)...")
             module = importlib.import_module(f"scrapers.{plat_clean}")
             sig = inspect.signature(module.scrape)
+            category = data.get("category", "")
+            seniority = data.get("seniority", level)
             candidate_kwargs = {
                 "keyword": keyword,
+                "category": category,
+                "seniority": seniority,
                 "level": level,
                 "location": location,
                 "country": location,
@@ -812,6 +938,8 @@ async def api_search(request: Request):
     if isinstance(platforms, str):
         platforms = [p.strip() for p in platforms.split(",")]
     keyword = data.get("keyword", "Python")
+    category = data.get("category", "")
+    seniority = data.get("seniority", "")
     level = data.get("level", "Todos")
     location = data.get("location", "Todos")
 
@@ -820,10 +948,23 @@ async def api_search(request: Request):
         plat_clean = PLATFORM_MODULE_MAP.get(plat_raw, plat_raw.replace(".", "_").replace(" ", "_"))
         try:
             module = importlib.import_module(f"scrapers.{plat_clean}")
+            sig = inspect.signature(module.scrape)
+            candidate_kwargs = {
+                "keyword": keyword,
+                "category": category,
+                "seniority": seniority,
+                "level": level,
+                "location": location,
+                "country": location,
+                "max_pages": 10
+            }
+            has_kwargs = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values())
+            kwargs = candidate_kwargs if has_kwargs else {k: v for k, v in candidate_kwargs.items() if k in sig.parameters}
+
             if inspect.iscoroutinefunction(module.scrape):
-                jobs = await module.scrape(keyword=keyword, level=level, location=location, country=location, max_pages=10)
+                jobs = await module.scrape(**kwargs)
             else:
-                jobs = await asyncio.to_thread(module.scrape, keyword=keyword, level=level, location=location, country=location, max_pages=10)
+                jobs = await asyncio.to_thread(module.scrape, **kwargs)
             return jobs if isinstance(jobs, list) else []
         except Exception as e:
             logger.error(f"[{plat_clean.upper()}] Erro no scraper search: {str(e)}")
