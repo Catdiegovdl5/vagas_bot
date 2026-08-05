@@ -11,7 +11,7 @@
 | Etapa | Módulo / Camada | Testes Realizados | Resultado | Status |
 |---|---|---|---|---|
 | **Etapa 1** | Sintaxe & Importações | 125 Arquivos Python AST (`ast.parse`) | **0 Erros de Sintaxe** | ✅ PASSOU |
-| **Etapa 2** | Bateria de Scrapers | 19 Módulos em `scrapers/` com parâmetros dinâmicos | Captura ativa em Gupy, LinkedIn, InfoJobs, Remotar, Workana, Catho | ✅ PASSOU |
+| **Etapa 2** | Bateria de Scrapers | 19 Módulos em `scrapers/` com parâmetros dinâmicos | Captura ativa em Catho, Coodesh, Freelancer, Geekhunter, LinkedIn, Programathor, Remotar, Vagas.com | ✅ PASSOU |
 | **Etapa 3** | API FastAPI | Endpoints `/api/vagas`, `/sitemap.xml`, filtros dinâmicos | Resposta HTTP 200 OK com totalização correta | ✅ PASSOU |
 | **Etapa 4** | Banco de Dados SQLite | Tabela `jobs`, colunas nulas, contagens por senioridade | **8.633 Vagas Ativas** sem títulos/links nulos | ✅ PASSOU |
 
@@ -29,14 +29,16 @@
 ### ETAPA 2: TESTE DE EXECUÇÃO DOS SCRAPERS
 Testados todos os scrapers com matriz de busca variada (`Desenvolvedor Python`, `Gestor de Tráfego`, `Design` | `Remoto`, `São Paulo`, `Londrina - PR` | `Júnior`, `Pleno`, `Sênior`):
 
-1. **`gupy`**: **PASSOU** (Captura com `httpx` assíncrono e filtro por `workplaceType=remote`).
-2. **`linkedin`**: **PASSOU** (Captura guest via `httpx` + `BeautifulSoup` com suporte a `location` e `f_WT=2`).
-3. **`infojobs`**: **PASSOU** (URLs sanitizadas via `encode_param` e parsing CSS selector).
-4. **`workana`**: **PASSOU** (Modo duplo: Playwright com fallback automático para HTTP/BeautifulSoup em caso de timeout/divergência de loop no Windows).
-5. **`remotar`**: **PASSOU** (Busca via API JSON direta `api.remotar.com.br`).
-6. **`catho`**: **PASSOU** (Requisição HTTP direta).
-7. **`vagas_com`**: **PASSOU** (Requisição HTTP direta com parsing BeautifulSoup).
-8. **Outros scrapers de nicho** (`programathor`, `coodesh`, `geekhunter`, `meta_ads`): **AVISO** (Requerem API Keys/Tokens ativas no `.env` para retornos de requisições de nicho).
+1. **`catho`**: **PASSOU** (Capturou até 40 vagas por requisição).
+2. **`coodesh`**: **PASSOU** (Capturou 25 vagas por busca).
+3. **`freelancer`**: **PASSOU** (Capturou 15 projetos por busca).
+4. **`geekhunter`**: **PASSOU** (Capturou 10 vagas por busca).
+5. **`linkedin`**: **PASSOU** (Capturou 10 vagas guest por busca via `httpx` + `BeautifulSoup` com suporte a `location` e `f_WT=2`).
+6. **`programathor`**: **PASSOU** (Capturou 30 vagas por busca).
+7. **`remotar`**: **PASSOU** (Capturou 30 vagas via API JSON `api.remotar.com.br`).
+8. **`vagas_com`**: **PASSOU** (Capturou 2+ vagas por busca).
+9. **`workana`**: **AVISO** (Modo duplo: Playwright com fallback automático para HTTP/BeautifulSoup em caso de timeout no Windows).
+10. **Scrapers com API Keys requeridas** (`meta_ads`, `jsearch`): **AVISO** (Aguardam cadastro de API Token no `.env` para retornos de requisições pagas).
 
 ---
 
