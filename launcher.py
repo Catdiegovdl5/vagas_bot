@@ -2,17 +2,13 @@ import os
 import time
 import subprocess
 import sys
-import psutil
 
 def get_latest_mtime(directory="."):
     max_mtime = 0
-    # Avoid scanning too many unnecessary folders
-    ignore_dirs = {".git", "__pycache__", ".venv", "venv", "node_modules", ".vscode", "brain"}
+    ignore_dirs = {".git", "__pycache__", ".venv", "venv", "node_modules", ".vscode", "brain", "logs", "patches"}
     
     for root, dirs, files in os.walk(directory):
-        # Remove ignored directories in-place
         dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith('.')]
-        
         for file in files:
             if file.endswith(('.py', '.html', '.css', '.js')):
                 filepath = os.path.join(root, file)
@@ -27,44 +23,57 @@ def get_latest_mtime(directory="."):
 def kill_process_tree(pid):
     """Safely kills a process and all its children on Windows."""
     try:
+        import psutil
         parent = psutil.Process(pid)
         children = parent.children(recursive=True)
         for child in children:
             child.kill()
         parent.kill()
-    except psutil.NoSuchProcess:
+    except Exception:
         pass
 
 def start_services():
-    print("\n[1/2] Acordando o Sniper Bot (Telegram)...")
-    bot_process = subprocess.Popen([sys.executable, "bot.py"])
+    bot_process = None
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+    if bot_token:
+        print("[1/2] Acordando o Sniper Bot (Telegram)...")
+        try:
+            bot_process = subprocess.Popen([sys.executable, "bot.py"])
+        except Exception as e:
+            print(f"[Aviso] Não foi possível iniciar o bot.py: {e}")
+    else:
+        print("[1/2] TELEGRAM_BOT_TOKEN não configurado. Modo apenas Web Server ativo.")
 
-    print("[2/2] Acordando o Servidor Web (FastAPI)...")
+    print("[2/2] Acordando o Servidor Web FastAPI (http://localhost:8000)...")
     app_process = subprocess.Popen([sys.executable, "app.py"])
     
     return bot_process, app_process
 
 def stop_services(bot_process, app_process):
-    print("\n[!] Encerrando processos antigos...")
-    if bot_process:
+    if bot_process and bot_process.poll() is None:
         kill_process_tree(bot_process.pid)
-    if app_process:
+    if app_process and app_process.poll() is None:
         kill_process_tree(app_process.pid)
-    
-    # Optional wait to ensure port is freed
     time.sleep(1)
 
 def main():
     print("=========================================")
-    print("🚀 INICIANDO ECOSSISTEMA (HOT-RELOAD) 🚀")
+    print("   INICIANDO ECOSSISTEMA SNIPER BOT SAAS  ")
     print("=========================================")
     
-    # Initial startup
     bot_process, app_process = start_services()
     last_mtime = get_latest_mtime()
     
+    # Abre o navegador automaticamente
+    try:
+        import webbrowser
+        time.sleep(2)
+        webbrowser.open("http://localhost:8000/")
+    except Exception:
+        pass
+
     print("\n=======================================================")
-    print("TUDO PRONTO! O ECOSSISTEMA NATIVO ESTÁ NO AR.")
+    print("TUDO PRONTO! PAINEL WEB NO AR EM http://localhost:8000/")
     print("Monitorando alterações em arquivos (.py, .html, .css, .js)...")
     print("Para DESLIGAR tudo, pressione Ctrl+C.")
     print("=======================================================\n")
@@ -73,42 +82,33 @@ def main():
         while True:
             time.sleep(2)
             
-            # Check if any process died unexpectedly
-            bot_died = bot_process.poll() is not None
-            app_died = app_process.poll() is not None
-            
-            if bot_died or app_died:
-                print("\n[ERRO] Um dos serviços caiu inesperadamente. Reiniciando...")
+            # Verifica apenas se o servidor web caiu
+            if app_process and app_process.poll() is not None:
+                print("\n[ERRO] O Servidor Web caiu inesperadamente. Reiniciando...")
                 stop_services(bot_process, app_process)
                 bot_process, app_process = start_services()
                 last_mtime = get_latest_mtime()
                 continue
                 
-            # Check for file changes
+            # Verifica se algum arquivo mudou
             current_mtime = get_latest_mtime()
             if current_mtime > last_mtime:
-                print("\n[♻️ HOT-RELOAD] Alteração de arquivo detectada! Reiniciando serviços...")
+                print("\n[HOT-RELOAD] Alteração de arquivo detectada! Reiniciando serviços...")
                 stop_services(bot_process, app_process)
                 bot_process, app_process = start_services()
                 last_mtime = current_mtime
-                print("\n[✅ HOT-RELOAD] Serviços reiniciados com sucesso.")
 
     except KeyboardInterrupt:
         print("\nDesligando sistema de forma manual (Ctrl+C)...")
     except Exception as e:
         print(f"\nQueda detectada no sistema: {e}")
     finally:
-        print("Limpando subprocessos e portas...")
         stop_services(bot_process, app_process)
-        print("Serviços encerrados. Volte sempre!")
+        print("Serviços encerrados.")
 
 if __name__ == "__main__":
-    # Ensure psutil is installed for process tree killing
     try:
         import psutil
     except ImportError:
-        print("Instalando psutil nativamente para gerenciamento de processos...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "psutil"])
-        import psutil
-        
     main()

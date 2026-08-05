@@ -1,32 +1,26 @@
 @echo off
 title Sniper Bot - Inicializador Unificado
+cd /d "%~dp0"
+
 echo ========================================================
-echo        SNIPER BOT - INICIALIZADOR UNIFICADO 🚀
+echo        SNIPER BOT - INICIALIZADOR UNIFICADO
 echo ========================================================
 echo.
-echo [1/3] Encerrando instancias antigas do Bot e Servidor Web...
-taskkill /FI "WINDOWTITLE eq Sniper Telegram Bot*" /F >nul 2>&1
-taskkill /FI "WINDOWTITLE eq Sniper Web Server*" /F >nul 2>&1
-timeout /t 2 /nobreak >nul
 
+REM 1. Liberando porta 8000
+echo [1/3] Liberando a porta 8000...
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8000 ^| findstr LISTENING') do taskkill /f /pid %%a > NUL 2>&1
+
+REM 2. Ativando ambiente virtual
 echo [2/3] Ativando ambiente virtual (.venv)...
 if exist .venv\Scripts\activate.bat (
     call .venv\Scripts\activate.bat
 ) else (
-    echo [ERRO] Ambiente virtual .venv nao encontrado!
-    pause
-    exit /b
+    echo Utilizando Python do sistema...
 )
 
-echo [3/3] Iniciando Servidor Web (FastAPI) e Bot Telegram...
-start "Sniper Web Server" cmd /k "uvicorn app:app --reload --log-level debug --port 8000"
-start "Sniper Telegram Bot" cmd /k "python -u bot.py"
+REM 3. Iniciando Launcher Hot-Reload
+echo [3/3] Iniciando Servidor Web FastAPI (http://localhost:8000)...
+python launcher.py
 
-echo.
-echo ========================================================
-echo   ✅ Tudo Pronto! 
-echo   - Painel Web: http://localhost:8000
-echo   - Bot do Telegram: Conectado e Operativo
-echo ========================================================
-echo.
 pause
