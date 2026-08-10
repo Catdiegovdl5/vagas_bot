@@ -1,5 +1,6 @@
 import requests
 import urllib.parse
+import hashlib
 from bs4 import BeautifulSoup
 
 try:
@@ -175,78 +176,92 @@ def scrape(keyword="Python", level="Todos", contract="Todos", location="", count
         r = None
         if requests_cffi:
             try:
-                r = requests_cffi.get(url, headers=headers, impersonate="chrome110", timeout=15)
+                r = requests_cffi.get(url, headers=headers, impersonate="chrome110", timeout=10.0)
             except Exception:
                 r = None
         if r is None:
-            r = requests.get(url, headers=headers, timeout=15)
+            try:
+                r = requests.get(url, headers=headers, timeout=10.0)
+            except Exception:
+                r = None
             
-        if r.status_code == 200:
-            data = r.json()
-            results = data.get('data', [])
-            for item in results[:30]:
-                title = item.get('title', '')
-                if not title:
-                    continue
-                
-                company = "Start-up Gringa"
-                if item.get('company') and item.get('company').get('name'):
-                    company = item.get('company').get('name')
-                elif item.get('companyDisplayName'):
-                    company = item.get('companyDisplayName')
-                
-                # Link individual da vaga na Remotar
-                job_url = item.get('externalLink') or item.get('url')
-                if not job_url and item.get('slug'):
-                    job_url = f"https://remotar.com.br/job/{item.get('slug')}"
-                if not job_url:
-                    job_url = f"https://remotar.com.br/search?q={encoded_kw}"
-                
-                # Tipo de contratação
-                title_upper = title.upper()
-                j_type = "PJ" if "PJ" in title_upper or "FREELANCE" in title_upper else "CLT"
-                
-                # Salário/Budget
-                budget = "A Combinar"
-                salary_info = item.get('jobSalary')
-                if salary_info and salary_info.get('type') != 'uninformed':
-                    curr = salary_info.get('currency') or 'BRL'
-                    val_from = salary_info.get('from')
-                    val_to = salary_info.get('to')
-                    if val_from or val_to:
-                        budget = f"{curr} {val_from or 0} - {val_to or 0}"
-                
-                # Descrição limpa
-                sub = item.get('subtitle') or ''
-                desc_html = item.get('description') or ''
-                more = item.get('moreInfos') or ''
-                
-                full_html = f"<p>{sub}</p> {desc_html} <p>{more}</p>"
-                clean_text = BeautifulSoup(full_html, 'html.parser').get_text(separator=' ').strip()
-                
-                # Remover espaços extras
-                req_text = " ".join(clean_text.split())
-                if not req_text:
-                    req_text = f"Vaga 100% Remota. Requisitos: proficiência em {keyword}."
-                
-                job_obj = {
-                    "platform": "Remotar",
-                    "title": title,
-                    "company": company,
-                    "budget": budget,
-                    "link": job_url,
-                    "job_type": j_type,
-                    "profession": keyword,
-                    "level": level,
-                    "requirements": req_text
-                }
-                try:
-                    from bot import classify_job_profession
-                    job_obj = classify_job_profession(job_obj)
-                except Exception:
-                    pass
-                jobs.append(job_obj)
+        if r and getattr(r, "status_code", None) == 200:
+            try:
+                data = r.json()
+            except Exception:
+                data = {}
+            if isinstance(data, dict):
+                raw_results = data.get('data')
+                results = raw_results if isinstance(raw_results, list) else []
+                for item in results[:30]:
+                    if not isinstance(item, dict):
+                        continue
+                    title = item.get('title', '')
+                    if not title:
+                        continue
+                    
+                    company = "Start-up Gringa"
+                    comp_obj = item.get('company')
+                    if isinstance(comp_obj, dict) and comp_obj.get('name'):
+                        company = comp_obj.get('name')
+                    elif item.get('companyDisplayName'):
+                        company = item.get('companyDisplayName')
+                    
+                    # Link individual da vaga na Remotar
+                    job_url = item.get('externalLink') or item.get('url')
+                    if not job_url and item.get('slug'):
+                        job_url = f"https://remotar.com.br/job/{item.get('slug')}"
+                    if not job_url:
+                        job_url = f"https://remotar.com.br/search?q={encoded_kw}"
+                    
+                    # Tipo de contratação
+                    title_upper = title.upper()
+                    j_type = "PJ" if "PJ" in title_upper or "FREELANCE" in title_upper else "CLT"
+                    
+                    # Salário/Budget
+                    budget = "A Combinar"
+                    salary_info = item.get('jobSalary')
+                    if isinstance(salary_info, dict) and salary_info.get('type') != 'uninformed':
+                        curr = salary_info.get('currency') or 'BRL'
+                        val_from = salary_info.get('from')
+                        val_to = salary_info.get('to')
+                        if val_from or val_to:
+                            budget = f"{curr} {val_from or 0} - {val_to or 0}"
+                    
+                    # Descrição limpa
+                    sub = item.get('subtitle') or ''
+                    desc_html = item.get('description') or ''
+                    more = item.get('moreInfos') or ''
+                    
+                    full_html = f"<p>{sub}</p> {desc_html} <p>{more}</p>"
+                    clean_text = BeautifulSoup(full_html, 'html.parser').get_text(separator=' ').strip()
+                    
+                    # Remover espaços extras
+                    req_text = " ".join(clean_text.split())
+                    if not req_text:
+                        req_text = f"Vaga 100% Remota. Requisitos: proficiência em {keyword}."
+                    
+                    job_id = hashlib.md5(job_url.encode('utf-8')).hexdigest()[:16]
+                    job_obj = {
+                        "id": job_id,
+                        "platform": "Remotar",
+                        "title": title,
+                        "company": company,
+                        "budget": budget,
+                        "link": job_url,
+                        "job_type": j_type,
+                        "profession": keyword,
+                        "level": level,
+                        "requirements": req_text
+                    }
+                    try:
+                        from bot import classify_job_profession
+                        job_obj = classify_job_profession(job_obj)
+                    except Exception:
+                        pass
+                    jobs.append(job_obj)
                 
     except Exception as e:
         print(f"Remotar Scraper Error: {e}")
     return jobs
+

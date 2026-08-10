@@ -1,5 +1,6 @@
 import os
 import re
+import hashlib
 from bs4 import BeautifulSoup
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -42,14 +43,21 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
         # Busca usando a sintaxe nativa do Gmail
         query = 'subject:vaga OR subject:alert'
         results = service.users().messages().list(userId='me', q=query, maxResults=5).execute()
-        messages = results.get('messages', [])
+        messages = results.get('messages', []) if isinstance(results, dict) else []
 
         for msg in messages:
+            if not isinstance(msg, dict) or not msg.get('id'):
+                continue
             try:
                 msg_data = service.users().messages().get(userId='me', id=msg['id'], format='full').execute()
+                if not isinstance(msg_data, dict):
+                    continue
                 
-                payload = msg_data.get('payload', {})
-                parts = payload.get('parts', [])
+                payload = msg_data.get('payload') if isinstance(msg_data, dict) else {}
+                if not isinstance(payload, dict):
+                    payload = {}
+                raw_parts = payload.get('parts')
+                parts = raw_parts if isinstance(raw_parts, list) else []
                 
                 body = ""
                 
@@ -80,13 +88,15 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
 
                 if parts:
                     for part in parts:
-                        if part.get('mimeType') == 'text/html':
-                            data = part['body'].get('data')
+                        if isinstance(part, dict) and part.get('mimeType') == 'text/html':
+                            part_body = part.get('body')
+                            data = part_body.get('data') if isinstance(part_body, dict) else None
                             if data:
                                 body = decode_gmail_body(data)
                             break
                 else:
-                    data = payload.get('body', {}).get('data')
+                    body_obj = payload.get('body')
+                    data = body_obj.get('data') if isinstance(body_obj, dict) else None
                     if data:
                         body = decode_gmail_body(data)
 
@@ -102,7 +112,9 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                     
                     if ("jobs/view" in href or "viewjob" in href or "job-post" in href or "rc/clk" in href):
                         if len(text) > 4:
-                            jobs.append({
+                            job_id = hashlib.md5(href.encode('utf-8')).hexdigest()[:16]
+                            job_obj = {
+                                "id": job_id,
                                 "platform": "Gmail API",
                                 "title": text,
                                 "company": "Notificação por E-mail",
@@ -112,13 +124,20 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                                 "profession": keyword,
                                 "level": level,
                                 "requirements": "Vaga coletada pela API Oficial do Google."
-                            })
+                            }
+                            try:
+                                from bot import classify_job_profession
+                                job_obj = classify_job_profession(job_obj)
+                            except Exception:
+                                pass
+                            jobs.append(job_obj)
             except Exception as item_err:
-                print(f"Erro ao parsear mensagem {msg.get('id')}: {item_err}")
+                print(f"Erro ao parsear mensagem {msg.get('id') if isinstance(msg, dict) else ''}: {item_err}")
                 continue
 
     except Exception as e:
         print(f"Erro no scraper Gmail API: {e}")
 
-    unique_jobs = {j["link"]: j for j in jobs}
+    unique_jobs = {j["link"]: j for j in jobs if isinstance(j, dict) and "link" in j}
     return list(unique_jobs.values())[:20]
+

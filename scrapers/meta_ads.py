@@ -1,5 +1,6 @@
 from apify_client import ApifyClient
 import urllib.parse
+import hashlib
 
 import os
 APIFY_TOKEN = os.environ.get("APIFY_API_TOKEN", "")
@@ -40,6 +41,8 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
         
         dataset_id = run["defaultDatasetId"] if isinstance(run, dict) else getattr(run, "defaultDatasetId", getattr(run, "default_dataset_id", None))
         for item in client.dataset(dataset_id).iterate_items():
+            if not isinstance(item, dict):
+                continue
             text = item.get('primaryText', '') or item.get('content', '')
             if not text and not item.get('linkUrl'):
                 continue
@@ -48,19 +51,29 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                 text = "Sem descrição"
                 
             title = f"💎 Vaga Patrocinada (Meta Ads) - {item.get('pageName', 'Empresa Confidencial')}"
+            link = item.get('linkUrl') or item.get('urlInAdLibrary', 'https://facebook.com/ads/library')
+            job_id = hashlib.md5(link.encode('utf-8')).hexdigest()[:16]
             
-            jobs.append({
+            job_obj = {
+                "id": job_id,
                 "platform": "Meta Ads",
                 "title": title,
                 "company": item.get('pageName', 'Empresa Confidencial'),
                 "budget": "A Combinar (Investimento Ads)",
-                "link": item.get('linkUrl') or item.get('urlInAdLibrary', 'https://facebook.com/ads/library'),
+                "link": link,
                 "job_type": "PJ/CLT",
                 "profession": keyword,
                 "level": level,
                 "requirements": text[:350] + "..." if len(text) > 350 else text
-            })
+            }
+            try:
+                from bot import classify_job_profession
+                job_obj = classify_job_profession(job_obj)
+            except Exception:
+                pass
+            jobs.append(job_obj)
     except Exception as e:
         print(f"Erro no Meta Ads (Apify): {e}")
         
     return jobs
+

@@ -1,23 +1,28 @@
 """
-Motor de Auto-Apply: Preenche formulários simples de candidatura 
-usando os dados do currículo do usuário.
+Motor de Auto-Apply: Preenche formulários e realiza candidaturas automáticas / simplificadas
+usando os dados do currículo do candidato e automação resiliente.
 
-Estratégia:
-- Para vagas Gupy: Usa a API de candidatura da Gupy (POST)
-- Para vagas com Easy Apply (LinkedIn): Abre o link direto
-- Para vagas genéricas: Envia e-mail com currículo anexado (se houver e-mail na vaga)
-- Fallback: Retorna o link direto para aplicação manual
+Estratégia & Recursos:
+- Stealth Chrome com camuflagem (--disable-blink-features=AutomationControlled, user-agent desktop)
+- Handler específico Gupy (GupyAutoApplyHandler) com seletores flexíveis
+- Handler específico LinkedIn (LinkedInAutoApplyHandler) com suporte a Easy Apply
+- Persistência de sessão de cookies JSON (gupy_cookies.json, linkedin_cookies.json)
+- Captura de telas (screenshots) para diagnósticos de erro em falhas imprevisíveis
+- Fallback seguro via e-mail e geração de links diretos de candidatura
 """
 
 import os
 import re
+import json
+import time
 import sqlite3
 import requests
 from loguru import logger
 
+# --- Utilitários de Extração de Dados do Currículo ---
 
 def extract_email_from_text(text: str) -> str:
-    """Extrai o primeiro e-mail encontrado no texto da vaga."""
+    """Extrai o primeiro e-mail encontrado no texto da vaga ou currículo."""
     pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
     match = re.search(pattern, text)
     return match.group(0) if match else None
@@ -27,64 +32,250 @@ def prepare_candidate_data(user_id: str = None) -> dict:
     """Lê o currículo e extrai dados básicos do candidato para preenchimento de formulários."""
     curriculo_path = f"curriculo_{user_id}.txt" if user_id else "curriculo.txt"
     data = {
-        "name": "",
-        "email": "",
-        "phone": "",
+        "name": "Diego Santos",
+        "email": "diego@example.com",
+        "phone": "+5511999999999",
         "resume_text": "",
         "resume_pdf_path": "temp_curriculo.pdf"
     }
     
     if os.path.exists(curriculo_path):
-        with open(curriculo_path, "r", encoding="utf-8") as f:
-            text = f.read()
-            data["resume_text"] = text
-            
-            # Extrair e-mail do candidato
-            email = extract_email_from_text(text)
-            if email:
-                data["email"] = email
+        try:
+            with open(curriculo_path, "r", encoding="utf-8") as f:
+                text = f.read()
+                data["resume_text"] = text
                 
-            # Extrair telefone (formato BR)
-            phone_pattern = r'(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?\d{4,5}[-\s]?\d{4}'
-            phone_match = re.search(phone_pattern, text)
-            if phone_match:
-                data["phone"] = phone_match.group(0)
-                
-            # Extrair nome (primeira linha não vazia que não parece ser um cargo)
-            lines = [l.strip() for l in text.split('\n') if l.strip()]
-            if lines:
-                first_line = lines[0]
-                # Se a primeira linha não contém @ ou números longos, provavelmente é o nome
-                if '@' not in first_line and not re.search(r'\d{5,}', first_line):
-                    data["name"] = first_line
+                email = extract_email_from_text(text)
+                if email:
+                    data["email"] = email
+                    
+                phone_pattern = r'(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?\d{4,5}[-\s]?\d{4}'
+                phone_match = re.search(phone_pattern, text)
+                if phone_match:
+                    data["phone"] = phone_match.group(0)
+                    
+                lines = [l.strip() for l in text.split('\n') if l.strip()]
+                if lines:
+                    first_line = lines[0]
+                    if '@' not in first_line and not re.search(r'\d{5,}', first_line):
+                        data["name"] = first_line
+        except Exception as e:
+            logger.warning(f"Erro ao ler currículo em {curriculo_path}: {e}")
     
     return data
 
 
-def apply_via_gupy(job_url: str, candidate: dict) -> dict:
-    """
-    Tenta aplicar para uma vaga da Gupy usando a API pública.
-    Nota: A Gupy exige OAuth para candidatura completa, então este método
-    retorna o link direto para candidatura rápida.
-    """
+# --- Configuração do Navegador Stealth Chrome ---
+
+def get_stealth_chrome_options():
+    """Retorna opções configuradas do Chrome para navegação furtiva (Stealth)."""
     try:
-        # A Gupy não permite candidatura 100% via API sem OAuth do candidato.
-        # Retornamos o link direto de candidatura.
-        return {
-            "success": False,
-            "method": "gupy_redirect",
-            "message": "Gupy exige login do candidato. Link direto gerado.",
-            "apply_url": job_url
-        }
+        from selenium.webdriver.chrome.options import Options
+        options = Options()
+        options.add_argument("--headless=new")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1920,1080")
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option('useAutomationExtension', False)
+        return options
+    except ImportError:
+        return None
+
+
+def take_error_screenshot(driver, prefix="error"):
+    """Salva captura de tela do navegador para diagnósticos em caso de falha."""
+    try:
+        os.makedirs("logs/screenshots", exist_ok=True)
+        filename = f"logs/screenshots/{prefix}_{int(time.time())}.png"
+        driver.save_screenshot(filename)
+        logger.info(f"Screenshot de diagnóstico salvo em: {filename}")
+        return filename
     except Exception as e:
-        logger.error(f"Erro ao aplicar via Gupy: {e}")
-        return {"success": False, "method": "error", "message": str(e)}
+        logger.warning(f"Não foi possível salvar screenshot de erro: {e}")
+        return None
+
+
+def load_cookies_to_driver(driver, cookies_file_path: str, domain: str):
+    """Carrega cookies salvos em JSON para manter a sessão autenticada no navegador."""
+    if os.path.exists(cookies_file_path):
+        try:
+            with open(cookies_file_path, "r", encoding="utf-8") as f:
+                cookies = json.load(f)
+                driver.get(domain)
+                for cookie in cookies:
+                    try:
+                        driver.add_cookie(cookie)
+                    except Exception:
+                        pass
+            logger.info(f"Cookies carregados com sucesso de {cookies_file_path}")
+            return True
+        except Exception as e:
+            logger.warning(f"Erro ao carregar cookies de {cookies_file_path}: {e}")
+    return False
+
+
+# --- Handlers Específicos por Plataforma ---
+
+class GupyAutoApplyHandler:
+    """Handler especializado em automação de candidaturas na plataforma Gupy."""
+    
+    @staticmethod
+    def apply(job_url: str, candidate: dict) -> dict:
+        cookies_path = "gupy_cookies.json"
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.common.by import By
+            from selenium.webdriver.support.ui import WebDriverWait
+            from selenium.webdriver.support import expected_conditions as EC
+            
+            options = get_stealth_chrome_options()
+            if not options:
+                return apply_via_gupy(job_url, candidate)
+
+            driver = webdriver.Chrome(options=options)
+            try:
+                driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+                load_cookies_to_driver(driver, cookies_path, "https://www.gupy.io")
+                driver.get(job_url)
+                time.sleep(3)
+                
+                # Aceita cookies/termos de uso se existirem
+                try:
+                    cookie_btn = driver.find_element(By.XPATH, "//button[contains(text(), 'Aceitar') or contains(text(), 'Concordar')]")
+                    cookie_btn.click()
+                    time.sleep(1)
+                except Exception:
+                    pass
+                
+                # Procura botões flexíveis de candidatura
+                apply_selectors = [
+                    "//button[contains(text(), 'Candidatar-se')]",
+                    "//button[contains(text(), 'Candidatar')]",
+                    "//a[contains(text(), 'Candidatar-se')]",
+                    "//button[@id='apply-button']"
+                ]
+                
+                applied = False
+                for sel in apply_selectors:
+                    try:
+                        btn = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, sel)))
+                        driver.execute_script("arguments[0].scrollIntoView(true);", btn)
+                        time.sleep(1)
+                        btn.click()
+                        applied = True
+                        logger.info("Clique no botão de candidatura da Gupy realizado com sucesso!")
+                        break
+                    except Exception:
+                        continue
+                        
+                if applied:
+                    return {
+                        "success": True,
+                        "method": "gupy_selenium",
+                        "message": "Candidatura iniciada com sucesso na Gupy.",
+                        "apply_url": job_url
+                    }
+                else:
+                    take_error_screenshot(driver, "gupy_apply_fail")
+                    return apply_via_gupy(job_url, candidate)
+                    
+            finally:
+                driver.quit()
+        except Exception as e:
+            logger.warning(f"GupyAutoApplyHandler Selenium fallback: {e}")
+            return apply_via_gupy(job_url, candidate)
+
+
+class LinkedInAutoApplyHandler:
+    """Handler especializado em automação de candidatura simplificada (Easy Apply) no LinkedIn."""
+    
+    @staticmethod
+    def apply(job_url: str, candidate: dict) -> dict:
+        cookies_path = "linkedin_cookies.json"
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.common.by import By
+            from selenium.webdriver.support.ui import WebDriverWait
+            from selenium.webdriver.support import expected_conditions as EC
+            
+            options = get_stealth_chrome_options()
+            if not options:
+                return {
+                    "success": False,
+                    "method": "linkedin_redirect",
+                    "message": "LinkedIn Easy Apply requer login. Link direto gerado.",
+                    "apply_url": job_url
+                }
+
+            driver = webdriver.Chrome(options=options)
+            try:
+                driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+                load_cookies_to_driver(driver, cookies_path, "https://www.linkedin.com")
+                driver.get(job_url)
+                time.sleep(3)
+                
+                # Procura o botão de Candidatura Simplificada
+                easy_apply_selectors = [
+                    "//button[contains(@class, 'jobs-apply-button') and contains(., 'Candidatura')]",
+                    "//button[contains(., 'Easy Apply') or contains(., 'Candidatura Simplificada')]"
+                ]
+                
+                found_easy = False
+                for sel in easy_apply_selectors:
+                    try:
+                        btn = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, sel)))
+                        btn.click()
+                        found_easy = True
+                        logger.info("Botão Candidatura Simplificada (Easy Apply) acionado!")
+                        break
+                    except Exception:
+                        continue
+                        
+                if found_easy:
+                    time.sleep(2)
+                    return {
+                        "success": True,
+                        "method": "linkedin_easy_apply",
+                        "message": "Modal de Candidatura Simplificada acionado com sucesso.",
+                        "apply_url": job_url
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "method": "linkedin_redirect",
+                        "message": "Vaga exige candidatura externa no site da empresa.",
+                        "apply_url": job_url
+                    }
+            finally:
+                driver.quit()
+        except Exception as e:
+            logger.warning(f"LinkedInAutoApplyHandler fallback: {e}")
+            return {
+                "success": False,
+                "method": "linkedin_redirect",
+                "message": f"LinkedIn candidatura redirecionada: {e}",
+                "apply_url": job_url
+            }
+
+
+# --- Funções de Fallback e Retrocompatibilidade ---
+
+def apply_via_gupy(job_url: str, candidate: dict) -> dict:
+    """Retorna resposta segura com link direto para candidatura na Gupy."""
+    return {
+        "success": False,
+        "method": "gupy_redirect",
+        "message": "Gupy exige login do candidato. Link direto gerado.",
+        "apply_url": job_url
+    }
 
 
 def apply_via_email(job: dict, candidate: dict) -> dict:
-    """
-    Verifica se a vaga contém um e-mail de contato e prepara o envio.
-    """
+    """Verifica se a vaga contém um e-mail de contato e prepara a candidatura via e-mail."""
     job_text = job.get("requirements", "") + " " + job.get("title", "")
     contact_email = extract_email_from_text(job_text)
     
@@ -95,7 +286,6 @@ def apply_via_email(job: dict, candidate: dict) -> dict:
             "message": "Nenhum e-mail de contato encontrado na vaga."
         }
     
-    # Preparar dados do e-mail (o envio real será feito via Gmail API já integrada)
     return {
         "success": True,
         "method": "email",
@@ -134,27 +324,16 @@ def auto_apply(job: dict, user_id: str = None) -> dict:
     }
     
     try:
-        # Estratégia por plataforma
         if "gupy" in platform:
-            result = apply_via_gupy(link, candidate)
-            
+            result = GupyAutoApplyHandler.apply(link, candidate)
         elif "linkedin" in platform:
-            # LinkedIn Easy Apply requer autenticação OAuth
-            result = {
-                "success": False,
-                "method": "linkedin_redirect",
-                "message": "LinkedIn Easy Apply requer login. Link direto gerado.",
-                "apply_url": link
-            }
-            
+            result = LinkedInAutoApplyHandler.apply(link, candidate)
         else:
-            # Tenta encontrar e-mail de contato na vaga
             email_result = apply_via_email(job, candidate)
             if email_result["success"]:
                 result = email_result
             else:
                 result["apply_url"] = link
-                
     except Exception as e:
         logger.error(f"Erro no Auto-Apply: {e}")
         result["message"] = f"Erro: {e}"
@@ -163,9 +342,7 @@ def auto_apply(job: dict, user_id: str = None) -> dict:
 
 
 def apply_to_job(job_link: str, resume_path: str, candidate: dict, mock_ats_url: str = None) -> bool:
-    """
-    Submits a job application with the resume PDF to the local mock ATS server.
-    """
+    """Envia candidatura com currículo anexado para ATS ou servidor de testes."""
     if isinstance(candidate, str):
         mock_ats_url = candidate
         candidate = {"name": "Diego Candidate", "email": "diego@example.com"}
@@ -174,7 +351,6 @@ def apply_to_job(job_link: str, resume_path: str, candidate: dict, mock_ats_url:
         mock_ats_url = os.getenv("MOCK_ATS_URL", "http://127.0.0.1:8081/apply")
 
     if not os.path.exists(resume_path):
-        # Create a dummy file if it doesn't exist
         with open(resume_path, "wb") as f:
             f.write(b"%PDF-1.4 Mock PDF Content")
 
@@ -186,7 +362,6 @@ def apply_to_job(job_link: str, resume_path: str, candidate: dict, mock_ats_url:
                 "name": candidate.get("name", "Diego Candidate"),
                 "email": candidate.get("email", "diego@example.com")
             }
-            # Post to the mock ATS server
             response = requests.post(mock_ats_url, data=data, files=files, timeout=5)
             if response.status_code == 200:
                 try:
@@ -196,27 +371,23 @@ def apply_to_job(job_link: str, resume_path: str, candidate: dict, mock_ats_url:
                     return False
             return False
     except Exception as e:
-        logger.warning(f"Auto-apply HTTP request to {mock_ats_url} error: {e}")
+        logger.warning(f"Auto-apply HTTP request para {mock_ats_url} erro: {e}")
         return False
 
 
 def run_auto_apply(db_path: str, resume_path: str, candidate: dict, mock_ats_url: str = None) -> int:
-    """
-    Main entry point for mock auto-apply.
-    Selects high-scoring pending/approved jobs from the db and submits them.
-    """
+    """Executa o ciclo de auto-apply no banco de dados SQLite registrando status APPLIED ou FAILED."""
     if isinstance(candidate, str):
         mock_ats_url = candidate
         candidate = {"name": "Diego Candidate", "email": "diego@example.com"}
 
     import uuid
     batch_id = str(uuid.uuid4())
-    conn = sqlite3.connect(db_path, timeout=10)
+    conn = sqlite3.connect(db_path, timeout=30)
+    conn.execute('PRAGMA busy_timeout = 30000')
     conn.execute('PRAGMA journal_mode=WAL')
     try:
         c = conn.cursor()
-        
-        # Ensure tables and columns exist
         try:
             c.execute("ALTER TABLE jobs ADD COLUMN status TEXT DEFAULT 'pending'")
         except sqlite3.OperationalError:
@@ -227,17 +398,14 @@ def run_auto_apply(db_path: str, resume_path: str, candidate: dict, mock_ats_url
         except sqlite3.OperationalError:
             pass
             
-        # Lock pending jobs for this batch to prevent race conditions
         c.execute("UPDATE jobs SET status = ? WHERE score >= 80 AND (status = 'pending' OR status IS NULL)", (f"applying_{batch_id}",))
         conn.commit()
 
-        # Retrieve jobs locked by this batch
         c.execute("SELECT link FROM jobs WHERE status = ?", (f"applying_{batch_id}",))
         jobs = c.fetchall()
         
         applied_count = 0
         for (link,) in jobs:
-            # Sync call; safe to block here if run_auto_apply is called in a threadpool
             success = apply_to_job(link, resume_path, candidate, mock_ats_url)
             if success:
                 applied_count += 1

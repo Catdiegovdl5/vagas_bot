@@ -7,7 +7,8 @@ with open('static/index.html', 'r', encoding='utf-8') as f:
 
 match = re.search(r'const PROFESSION_CATEGORIES = (\[.*?\]);', html, re.DOTALL)
 js_array_str = match.group(1)
-cleaned_str = re.sub(r"<i class='[^']*'></i>", "", js_array_str)
+cleaned_str = re.sub(r'//.*', '', js_array_str)
+cleaned_str = re.sub(r"<i class='[^']*'></i>", "", cleaned_str)
 cleaned_str = re.sub(r"id:", "'id':", cleaned_str)
 cleaned_str = re.sub(r"name:", "'name':", cleaned_str)
 cleaned_str = re.sub(r"icon:", "'icon':", cleaned_str)

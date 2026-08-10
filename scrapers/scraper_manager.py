@@ -5,7 +5,10 @@ from typing import List, Dict, Any
 
 from scrapers import gupy, linkedin, infojobs, ai_generativa
 
-# Modulos de scrapers disponiveis
+import os
+import glob
+
+# Módulos principais com import direto
 SCRAPER_MODULES = [
     gupy,
     linkedin,
@@ -13,13 +16,19 @@ SCRAPER_MODULES = [
     ai_generativa,
 ]
 
-# Tenta importar scrapers adicionais se disponiveis no ambiente
-for mod_name in ["catho", "remotar", "vagas_com", "workana", "programathor", "jooble"]:
+# Auto-descoberta dinâmica de todos os scrapers presentes na pasta scrapers/
+scrapers_dir = os.path.dirname(os.path.abspath(__file__))
+module_files = glob.glob(os.path.join(scrapers_dir, "*.py"))
+
+for file_path in module_files:
+    mod_name = os.path.splitext(os.path.basename(file_path))[0]
+    if mod_name in ["__init__", "utils", "ai_filter", "scraper_manager", "run_test"]:
+        continue
     try:
         mod = importlib.import_module(f"scrapers.{mod_name}")
-        if hasattr(mod, "scrape"):
+        if hasattr(mod, "scrape") and mod not in SCRAPER_MODULES:
             SCRAPER_MODULES.append(mod)
-    except Exception:
+    except Exception as e:
         pass
 
 async def executar_busca_global(

@@ -1,31 +1,24 @@
-# Orchestration Plan — Scraper Category Refactoring & Test Verification
+# Master Plan — vagas_bot Refactoring & Quality Assurance
 
-## Project Goals
-1. Refactor scrapers in `scrapers/` to natively support the 6 new categories:
-   - Operações Físicas
-   - Logística
-   - Administrativo
-   - Criativos de Performance
-   - Inteligência de Vendas
-   - Engenharia de IA/Dados
-2. Ensure downstream payload format compatibility (proper `profession` / `category` fields matching DB schema).
-3. Adapt/create tests in `tests/` verifying at least 3 updated scrapers against the new category queries.
-4. Pass independent Reviewer, Challenger stress-test, and Forensic Integrity Audit.
+## Overview
+This master plan outlines the project lifecycle following the Teamwork Project Pattern.
 
-## Phased Strategy
+## Scope & Requirements
+1. **R1: Diagnóstico e Correção de Inicialização (Launcher & Bat)**:
+   Fix infinite restart loop in `launcher.py` when Telegram token is missing from `.env`, ensuring FastAPI web server starts cleanly on port 8000. Ensure `iniciar_tudo.bat`, `start_bot.bat`, and `start.bat` are verified.
+2. **R2: Otimização de SEO & Schema.org (Prompt 1)**:
+   Keep `/sitemap.xml` and `/api/job/{job_id}/schema.json` active and synchronized with Schema.org JobPosting markup in `static/index.html`.
+3. **R3: Integridade de Categorias e Exclusão Estrita (Prompt 2)**:
+   Ensure job search maintains 0% category leakage using strict `NOT LIKE` exclusions, matching total count strictly with SQLite database.
+4. **R4: Resiliência do Frontend e Dashboard (Prompt 3)**:
+   Ensure web dashboard at `http://localhost:8000/` loads without console JS errors, undefined variables, or request failures.
+5. **R5: Módulo de Autocorreção e Diagnóstico de Erros (Prompt 4)**:
+   Maintain `middleware/error_reporter.py` and `core/ai_self_healer.py` recording structured logs in `logs/` and patches in `patches/`.
+6. **Git Branch & Delivery**:
+   Ensure all changes are saved and committed/pushed on git branch `refactor/organizacao-e-limpeza`.
 
-### Phase 1: Discovery & Architecture Exploration
-- Dispatch 3 Explorers:
-  - **Explorer 1 (`teamwork_preview_explorer_scrapers_1`)**: Inspect `scrapers/` directory to catalog all scrapers, their query methods, API endpoints, parameter structures, and how search keywords are passed.
-  - **Explorer 2 (`teamwork_preview_explorer_scrapers_2`)**: Inspect backend job payload models, database schemas (`database.py`, `models.py`, `bot.py`, `app.py`), and verify expected payload fields (`profession`, `category`, `source`, etc.).
-  - **Explorer 3 (`teamwork_preview_explorer_scrapers_3`)**: Inspect `tests/` folder to inventory existing scraper test scripts, fixtures, mock mechanisms, and execution frameworks.
-
-### Phase 2: Refactoring & Implementation
-- Dispatch Worker(s):
-  - Refactor at least 3 (or all major) scrapers in `scrapers/` to inject term sets for the 6 new categories directly into native platform search queries / parameters.
-  - Ensure payload formatting sets `profession`/`category` correctly.
-  - Adapt/create unit & integration tests under `tests/` validating at least 3 scrapers with new category queries.
-
-### Phase 3: Review, Stress Verification & Forensic Audit
-- Dispatch Reviewers & Challengers to inspect code and run empirical stress tests.
-- Dispatch `teamwork_preview_auditor` for Forensic Integrity verification (CLEAN verdict required).
+## Phased Workflow
+1. **Phase 0 (Survey)**: Dispatch 3 parallel Explorer subagents to map codebase state, current launcher behaviors, endpoints, queries, frontend scripts, error middleware, and git branch status.
+2. **Phase 1 (Decomposition & Test Infra)**: Aggregate survey results, construct `PROJECT.md` and `TEST_INFRA.md`, set up milestone dependencies and E2E test plan.
+3. **Phase 2 (Milestone Execution)**: Sequentially / in parallel execute Milestones M1 through M5 using Explorer -> Worker -> Reviewer -> Challenger -> Auditor iteration cycles.
+4. **Phase 3 (E2E Hardening & Victory Audit)**: Run full test suite, conduct Forensic Audit, and report completion to Sentinel.

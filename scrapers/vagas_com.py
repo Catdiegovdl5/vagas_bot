@@ -1,4 +1,5 @@
 import urllib.parse
+import hashlib
 from bs4 import BeautifulSoup
 import asyncio
 
@@ -165,11 +166,11 @@ async def scrape(keyword="Python", level="Todos", max_pages=1, location="", coun
             url = f"https://www.vagas.com.br/vagas-de-{encoded_kw}?pagina={page}"
             try:
                 if session:
-                    r = await session.get(url, headers=headers, impersonate="chrome110", timeout=15)
+                    r = await session.get(url, headers=headers, impersonate="chrome110", timeout=10.0)
                 else:
                     import httpx
-                    async with httpx.AsyncClient() as client:
-                        r = await client.get(url, headers=headers, timeout=15)
+                    async with httpx.AsyncClient(timeout=10.0) as client:
+                        r = await client.get(url, headers=headers)
                 if r.status_code == 200:
                     return r
             except Exception as e:
@@ -209,7 +210,9 @@ async def scrape(keyword="Python", level="Todos", max_pages=1, location="", coun
                     desc_el = card.find('div', class_=lambda c: c and 'detalhes' in str(c).lower())
                     desc = desc_el.text.strip() if (desc_el and getattr(desc_el, 'text', None)) else f"Vaga para {title} no Vagas.com.br."
                     
+                    job_id = hashlib.md5(link.encode('utf-8')).hexdigest()[:16]
                     job_obj = {
+                        "id": job_id,
                         "platform": "Vagas.com",
                         "title": title,
                         "company": company,
@@ -232,3 +235,4 @@ async def scrape(keyword="Python", level="Todos", max_pages=1, location="", coun
         print("Erro Vagas.com:", e)
         
     return jobs
+

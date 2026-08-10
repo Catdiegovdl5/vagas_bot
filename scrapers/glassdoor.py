@@ -1,4 +1,5 @@
 import urllib.parse
+import hashlib
 from playwright.sync_api import sync_playwright
 
 try:
@@ -294,7 +295,9 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                     if not description:
                         description = f"Vaga de {title} na empresa {company}. Acesse o link para mais detalhes e candidatura."
 
+                    job_id = hashlib.md5(link.encode('utf-8')).hexdigest()[:16]
                     job_obj = {
+                        "id": job_id,
                         "platform": "Glassdoor",
                         "title": title,
                         "company": company,
@@ -320,3 +323,4 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
             browser.close()
             
     return jobs
+

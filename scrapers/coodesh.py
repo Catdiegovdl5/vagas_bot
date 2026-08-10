@@ -1,4 +1,5 @@
 import urllib.parse
+import hashlib
 
 try:
     from curl_cffi import requests as requests_cffi
@@ -162,62 +163,76 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
         r = None
         if requests_cffi:
             try:
-                r = requests_cffi.get(api_url, headers=headers, impersonate="chrome110", timeout=15)
+                r = requests_cffi.get(api_url, headers=headers, impersonate="chrome110", timeout=10.0)
             except Exception:
                 r = None
         if r is None:
             import requests
-            r = requests.get(api_url, headers=headers, timeout=15)
+            try:
+                r = requests.get(api_url, headers=headers, timeout=10.0)
+            except Exception:
+                r = None
             
-        if r.status_code == 200:
-            data = r.json()
-            docs = data.get('docs', [])
-            for item in docs:
-                title = item.get('title', '')
-                if not title:
-                    continue
-                
-                slug = item.get('slug', '')
-                link = f"https://coodesh.com/vagas/{slug}" if slug else "https://coodesh.com/vagas"
-                
-                company_info = item.get('company')
-                company = company_info.get('company_name') if company_info else "Tech Startup (Coodesh)"
-                if not company:
-                    company = "Tech Startup (Coodesh)"
-                
-                # Trata salário/budget
-                salary = item.get('salary_range_formatted') or "A Combinar"
-                if "negoci" in salary.lower():
-                    salary = "A Combinar"
-                
-                # Trata skills/requirements
-                skills_list = [s.get('name') for s in item.get('skills', []) if s.get('name')]
-                if skills_list:
-                    reqs = ", ".join(skills_list)
-                else:
-                    reqs = f"Vaga para {title} na Coodesh."
-                
-                # Tipo de contratação
-                job_type_formatted = item.get('job_type_formatted') or "CLT/PJ"
-                
-                job_obj = {
-                    "platform": "Coodesh",
-                    "title": title,
-                    "company": company,
-                    "budget": salary,
-                    "link": link,
-                    "job_type": job_type_formatted,
-                    "profession": keyword,
-                    "level": level,
-                    "requirements": reqs
-                }
-                try:
-                    from bot import classify_job_profession
-                    job_obj = classify_job_profession(job_obj)
-                except Exception:
-                    pass
-                jobs.append(job_obj)
+        if r and getattr(r, "status_code", None) == 200:
+            try:
+                data = r.json()
+            except Exception:
+                data = {}
+            if isinstance(data, dict):
+                docs = data.get('docs')
+                if isinstance(docs, list):
+                    for item in docs:
+                        if not isinstance(item, dict):
+                            continue
+                        title = item.get('title', '')
+                        if not title:
+                            continue
+                        
+                        slug = item.get('slug', '')
+                        link = f"https://coodesh.com/vagas/{slug}" if slug else "https://coodesh.com/vagas"
+                        
+                        company_info = item.get('company')
+                        company = company_info.get('company_name') if isinstance(company_info, dict) else "Tech Startup (Coodesh)"
+                        if not company:
+                            company = "Tech Startup (Coodesh)"
+                        
+                        # Trata salário/budget
+                        salary = item.get('salary_range_formatted') or "A Combinar"
+                        if "negoci" in salary.lower():
+                            salary = "A Combinar"
+                        
+                        # Trata skills/requirements
+                        raw_skills = item.get('skills')
+                        skills_list = [s.get('name') for s in raw_skills if isinstance(s, dict) and s.get('name')] if isinstance(raw_skills, list) else []
+                        if skills_list:
+                            reqs = ", ".join(skills_list)
+                        else:
+                            reqs = f"Vaga para {title} na Coodesh."
+                        
+                        # Tipo de contratação
+                        job_type_formatted = item.get('job_type_formatted') or "CLT/PJ"
+                        
+                        job_id = hashlib.md5(link.encode('utf-8')).hexdigest()[:16]
+                        job_obj = {
+                            "id": job_id,
+                            "platform": "Coodesh",
+                            "title": title,
+                            "company": company,
+                            "budget": salary,
+                            "link": link,
+                            "job_type": job_type_formatted,
+                            "profession": keyword,
+                            "level": level,
+                            "requirements": reqs
+                        }
+                        try:
+                            from bot import classify_job_profession
+                            job_obj = classify_job_profession(job_obj)
+                        except Exception:
+                            pass
+                        jobs.append(job_obj)
     except Exception as e:
         print("Erro Coodesh:", e)
         
     return jobs
+

@@ -1,4 +1,5 @@
 import urllib.parse
+import hashlib
 from playwright.sync_api import sync_playwright
 import re
 import json
@@ -188,19 +189,29 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                     match = re.search(r'window\._initialData\s*=\s*(\{.*?\});', content, re.DOTALL)
                 
                 if match:
-                    data = json.loads(match.group(1))
-                    results = data.get("metaData", {}).get("mosaicProviderJobCardsModel", {}).get("results", [])
+                    try:
+                        data = json.loads(match.group(1))
+                    except Exception:
+                        data = {}
+                    
+                    meta_data = data.get("metaData") if isinstance(data, dict) else {}
+                    mosaic_model = meta_data.get("mosaicProviderJobCardsModel") if isinstance(meta_data, dict) else {}
+                    raw_results = mosaic_model.get("results") if isinstance(mosaic_model, dict) else []
+                    results = raw_results if isinstance(raw_results, list) else []
                     
                     detail_count = 0  # Limite de páginas de detalhe por execução
                     for r in results:
+                        if not isinstance(r, dict):
+                            continue
                         title = r.get("title", "Sem Título")
                         company = r.get("company", "Empresa Confidencial")
                         jobkey = r.get("jobkey", "")
                         link = f"https://br.indeed.com/viewjob?jk={jobkey}" if jobkey else ""
                         snippet = r.get("snippet", "")
-                        clean_snippet = re.sub('<[^<]+>', '', snippet)
-                        location = r.get("formattedLocation", "Remoto/Brasil")
-                        salary = r.get("salarySnippet", {}).get("text", "A Combinar")
+                        clean_snippet = re.sub('<[^<]+>', '', snippet) if snippet else ""
+                        location_val = r.get("formattedLocation", "Remoto/Brasil")
+                        salary_obj = r.get("salarySnippet")
+                        salary = salary_obj.get("text", "A Combinar") if isinstance(salary_obj, dict) else "A Combinar"
                         
                         if title != "Sem Título" and link:
                             description = ""
@@ -218,7 +229,7 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                                             "Referer": "https://br.indeed.com/"
                                         }
                                         detail_url = f"https://br.indeed.com/viewjob?jk={jobkey}"
-                                        resp = requests_cffi.get(detail_url, impersonate="chrome110", headers=headers, timeout=10)
+                                        resp = requests_cffi.get(detail_url, impersonate="chrome110", headers=headers, timeout=10.0)
                                         if resp.status_code == 200 and "Cloudflare" not in resp.text and "Please wait..." not in resp.text:
                                             soup = BeautifulSoup(resp.text, "html.parser")
                                             desc_el = (
@@ -270,9 +281,11 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                                 detail_count += 1
                                          
                             if not description:
-                                description = f"Local: {location}. Resumo: {clean_snippet}"
+                                description = f"Local: {location_val}. Resumo: {clean_snippet}"
                                 
+                            job_id = hashlib.md5(link.encode('utf-8')).hexdigest()[:16]
                             job_obj = {
+                                "id": job_id,
                                 "platform": "Indeed",
                                 "title": title,
                                 "company": company,
@@ -296,3 +309,4 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
         browser.close()
             
     return jobs
+

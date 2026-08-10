@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import hashlib
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
@@ -186,8 +187,10 @@ def insert_jobs(jobs):
 
                 clean_profession = str(clean_profession)
 
+                job_id = job.get('id') or hashlib.md5(link.encode('utf-8')).hexdigest()[:16]
+
                 c.execute('INSERT INTO jobs (id, title, company, budget, link, platform, job_type, profession, level, requirements, location, lat, lon, lang) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                          (link, title, job.get('company') or 'N/A', job.get('budget') or 'A combinar', link, platform, job.get('job_type') or 'CLT', clean_profession, job.get('level') or 'Todos', job.get('requirements') or 'Requisitos descritos no link da vaga.', job.get('location') or 'Remoto/Brasil', job.get('lat'), job.get('lon'), job.get('lang') or 'pt'))
+                          (job_id, title, job.get('company') or 'N/A', job.get('budget') or 'A combinar', link, platform, job.get('job_type') or 'CLT', clean_profession, job.get('level') or 'Todos', job.get('requirements') or 'Requisitos descritos no link da vaga.', job.get('location') or 'Remoto/Brasil', job.get('lat'), job.get('lon'), job.get('lang') or 'pt'))
                 inserted += 1
             except sqlite3.IntegrityError:
                 pass # duplicate

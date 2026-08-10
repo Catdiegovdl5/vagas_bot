@@ -1,4 +1,5 @@
 import urllib.parse
+import hashlib
 from bs4 import BeautifulSoup
 
 try:
@@ -155,13 +156,20 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
         
+        r = None
         if not requests_cffi:
             import requests
-            r = requests.get(url, headers=headers, timeout=15)
+            try:
+                r = requests.get(url, headers=headers, timeout=10.0)
+            except Exception:
+                r = None
         else:
-            r = requests_cffi.get(url, headers=headers, impersonate="chrome110", timeout=15)
+            try:
+                r = requests_cffi.get(url, headers=headers, impersonate="chrome110", timeout=10.0)
+            except Exception:
+                r = None
             
-        if r.status_code == 200:
+        if r and getattr(r, "status_code", None) == 200:
             soup = BeautifulSoup(r.text, 'html.parser')
             job_cards = soup.find_all('div', class_=lambda c: c and 'cell-list' in str(c).lower())
             
@@ -186,7 +194,9 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                     tags = card.find_all('span', class_=lambda c: c and 'tag' in str(c).lower())
                     tags_text = " | ".join([t.text.strip() for t in tags if getattr(t, 'text', None) and t.text.strip()])
                     
+                    job_id = hashlib.md5(link.encode('utf-8')).hexdigest()[:16]
                     job_obj = {
+                        "id": job_id,
                         "platform": "ProgramaThor",
                         "title": title,
                         "company": company,
@@ -209,3 +219,4 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
         print("Erro ProgramaThor:", e)
         
     return jobs
+

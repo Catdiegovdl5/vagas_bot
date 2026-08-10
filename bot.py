@@ -21,7 +21,7 @@ from database import (
 )
 init_db()  # Garante que as tabelas existem quando o bot inicia
 import os
-TOKEN = os.environ.get("TELEGRAM_TOKEN", "7724330024:AAFtoSLgXVDlvNmeyPCVMnkWIqbk4wvLSVg")
+TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
 
 import traceback
 from loguru import logger
@@ -2904,7 +2904,9 @@ async def _do_hunt(keyword: str, message: types.Message, callback: CallbackQuery
             if actual_level != "Todos" and not is_freelance:
                 plat_search_keyword = f"{base_keyword} {actual_level}"
                 
-            module = importlib.import_module(f"scrapers.{plat}")
+            module_map = {"99freelas": "novenove", "freelancer_com": "freelancer"}
+            mod_name = module_map.get(plat, plat)
+            module = importlib.import_module(f"scrapers.{mod_name}")
             import inspect
             sig = inspect.signature(module.scrape)
             contract_val = settings.get("contract", "Todos")

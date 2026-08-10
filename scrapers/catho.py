@@ -1,4 +1,5 @@
 import urllib.parse
+import hashlib
 from bs4 import BeautifulSoup
 import asyncio
 
@@ -52,11 +53,11 @@ async def scrape(keyword="Python", level="Todos", max_pages=10, location="", cou
             url = f"https://www.catho.com.br/vagas/{encoded_kw}/?q={encoded_kw}&page={page}"
             try:
                 if session:
-                    r = await session.get(url, headers=headers, impersonate="chrome110", timeout=15)
+                    r = await session.get(url, headers=headers, impersonate="chrome110", timeout=10.0)
                 else:
                     import httpx
-                    async with httpx.AsyncClient() as client:
-                        r = await client.get(url, headers=headers, timeout=15)
+                    async with httpx.AsyncClient(timeout=10.0) as client:
+                        r = await client.get(url, headers=headers, timeout=10.0)
                 if r.status_code == 200:
                     return r
             except Exception as e:
@@ -106,7 +107,9 @@ async def scrape(keyword="Python", level="Todos", max_pages=10, location="", cou
                         desc_el = card.find('div', class_=lambda c: c and 'description' in str(c).lower())
                     desc = desc_el.text.strip() if (desc_el and getattr(desc_el, 'text', None)) else f"Vaga para {title} na Catho."
                     
+                    job_id = hashlib.md5(link.encode('utf-8')).hexdigest()[:16]
                     job_obj = {
+                        "id": job_id,
                         "platform": "Catho",
                         "title": title,
                         "company": company,

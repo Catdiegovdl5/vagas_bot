@@ -2,7 +2,9 @@
 test_security.py — Suite Completa de Testes de Segurança, Health Check, Métricas e Webhook
 Valida Headers HTTP, Endpoints /health e /metrics, Validação e Idempotência de Webhook.
 """
+import os
 import sys
+os.environ["PAYMENT_WEBHOOK_SECRET"] = "super_secret_webhook_key_2026"
 sys.path.insert(0, '.')
 from fastapi.testclient import TestClient
 from app import app

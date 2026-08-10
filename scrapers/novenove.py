@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import urllib.parse
+import hashlib
 
 def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
     jobs = []
@@ -18,9 +19,13 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
         url = f"https://www.99freelas.com.br/projects?q={encoded_kw}"
         
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
-        response = requests.get(url, headers=headers, timeout=10)
-        
-        if response.status_code == 200:
+        response = None
+        try:
+            response = requests.get(url, headers=headers, timeout=10.0)
+        except Exception:
+            response = None
+            
+        if response and response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
             # Seleciona os links diretamente dos títulos da classe .title a ou .project-title a
             links = soup.select('.title a, .project-title a, .result-item a.title')
@@ -41,7 +46,9 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                     if desc_el and getattr(desc_el, 'text', None):
                         desc = desc_el.text.strip()
                 
-                jobs.append({
+                job_id = hashlib.md5(link.encode('utf-8')).hexdigest()[:16]
+                job_obj = {
+                    "id": job_id,
                     "platform": "99Freelas",
                     "title": title,
                     "company": "Cliente 99Freelas",
@@ -51,8 +58,15 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                     "profession": keyword,
                     "level": level,
                     "requirements": desc[:250] + "..." if len(desc) > 250 else desc
-                })
+                }
+                try:
+                    from bot import classify_job_profession
+                    job_obj = classify_job_profession(job_obj)
+                except Exception:
+                    pass
+                jobs.append(job_obj)
     except Exception as e:
         print("Erro 99Freelas:", e)
         
     return jobs
+

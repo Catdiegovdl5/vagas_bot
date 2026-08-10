@@ -1,29 +1,37 @@
+# Arquivos de ambiente e chaves privadas
 .env
+.env.local
 token.json
 credentials.json
-jobs.db
-*.log
-__pycache__/
-venv/
-.venv/
-*.pdf
-.pytest_cache/
 
-# Arquivos temporários e backups locais
-*.mine
-*.modified
-*.bak
+# Bancos de dados SQLite
+jobs.db
+jobs_test.db
+vagas.db
+*.db
+*.sqlite3
+
+# Logs, temporários e screenshots
+*.log
+logs/
+*.png
+*.pdf
 temp_html.txt
 curriculo*.txt
 repomix-output.xml
 
-# Bancos de dados de teste
-jobs_test.db
-*.sqlite3
+# Ambientes Python e caches
+__pycache__/
+venv/
+.venv/
+.pytest_cache/
 
-# Logs e imagens
-*.png
-
+# Backups locais e pastas de scratch/agentes
+*.mine
+*.modified
+*.bak
+scratch/
+.agents/
 
 # Projeto paralelo isolado
 gerar_proposta.py

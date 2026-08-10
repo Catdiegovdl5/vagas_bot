@@ -1,32 +1,53 @@
-# Project: vagas_bot Expansion — New Profession Taxonomy & Scraper Macro-Searches
+# Project: vagas_bot
 
 ## Architecture
-- **Data Flow**:
-  - Frontend (`static/index.html`): Mega-menu drawers for broad categories (Operações Físicas, Logística, Administrativo, Criativos, Inteligência de Vendas, Engenharia de Dados, etc.). Sends macro-search or category search requests to backend.
-  - Backend (`app.py` & `bot.py`):
-    - Macro-searches execute queries for broad domain keywords (e.g., "Indústria", "Logística", "Administrativo", "Vendas", "Dados", "Design").
-    - Local classification & filtering via `CO_OCCURRENCE_RULES` and `is_job_relevant` in `bot.py` matches specific sub-professions (e.g. "Pintor Industrial", "Almoxarife", "Assistente de Logística").
-  - Scrapers (`scrapers/*.py`): Receive macro-search terms, fetch job postings, and return normalized lists.
-  - Database (`database.py`): Persists jobs with assigned professions, levels, locations, and AI/rule scores.
+- FastAPI web server (`prioriti/app.py`) running on port 8000.
+- Unified launcher process (`launcher.py`) managing web server and background workers/bots.
+- Batch scripts (`iniciar_tudo.bat`, `start_bot.bat`, `start.bat`) wrapping `launcher.py`.
+- SQLite database (`jobs.db`) with category search and strict `NOT LIKE` exclusions.
+- SEO & Schema.org endpoints (`/sitemap.xml`, `/api/job/{job_id}/schema.json`) synced with `static/index.html` JSON-LD.
+- Frontend Single-Page App dashboard (`static/index.html`) on `http://localhost:8000/`.
+- Error Reporter middleware (`middleware/error_reporter.py`) logging to `logs/` & AI Self-Healer (`core/ai_self_healer.py`) generating patches in `patches/`.
 
-## Code Layout
-- `static/index.html`: Web dashboard UI, mega-menu drawers, JS constants for profession mappings.
-- `bot.py`: Telegram Bot logic, `CO_OCCURRENCE_RULES`, `blacklist`, `is_job_relevant()` filtering logic, and sub-profession classification.
-- `app.py`: FastAPI server, `/api/trigger`, `/api/search`, seed search loops, periodic background hunt loops.
-- `scrapers/`: Individual platform scrapers (`linkedin.py`, `gupy.py`, `catho.py`, `infojobs.py`, `workana.py`, etc.).
+## Feature Inventory
+| # | Feature | Description | Milestone | Source |
+|---|---------|-------------|-----------|--------|
+| 1 | Fix Launcher Restart Loop & Telegram Token Handling | `launcher.py` handles missing Telegram token without infinite restart loop, uses `load_dotenv()`, checks `TELEGRAM_TOKEN`/`TELEGRAM_BOT_TOKEN`, adds backoff/delay, ensures FastAPI starts on port 8000 | M1 | R1 |
+| 2 | Batch Scripts Unification | `iniciar_tudo.bat`, `start_bot.bat`, `start.bat` correctly launch `launcher.py` | M1 | R1 |
+| 3 | SEO & Schema.org Integration | `/sitemap.xml` & `/api/job/{job_id}/schema.json` active and synced with static `index.html` JSON-LD | M2 | R2 |
+| 4 | Category Integrity & Strict Exclusion | 0% category leakage using NOT LIKE exclusions in SQLite, total job counts match database strictly | M3 | R3 |
+| 5 | Frontend Dashboard & DOM Cleanliness | `http://localhost:8000/` clean console, remove duplicate `#slideover-copilot` block, no undefined JS variables or broken API calls | M4 | R4 |
+| 6 | Error Reporter & AI Self-Healer Module | `middleware/error_reporter.py` traps 500 errors to `logs/` and `core/ai_self_healer.py` generates patches in `patches/` | M5 | R5 |
+| 7 | E2E Test Suite & Branch Delivery | 100% pass rate on E2E test suite, changes committed/verified on git branch `refactor/organizacao-e-limpeza` | M6 | Acceptance Criteria |
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| 1 | UI Taxonomy Update | Update `static/index.html` mega-menu drawers and JS profession mapping constants | None | DONE |
-| 2 | Scraper Config & Macro-Searches | Update `bot.py`, `app.py`, and scraper keyword mapping (`CO_OCCURRENCE_RULES`, macro-search terms, local filtering) | M1 | DONE |
-| 3 | Final Verification & Integration Gate | Pass `py_compile`, unit/filter test suite, Reviewers, Challengers, and Forensic Audit | M1, M2 | DONE |
+| M1 | Launcher & Batch Script Repair | Fix `launcher.py` restart loop, `load_dotenv()`, Telegram token optionality, port 8000 FastAPI launch, batch scripts alignment | none | IN_PROGRESS |
+| M2 | SEO & Schema.org Verification | Verify and harden `/sitemap.xml` & `/api/job/{job_id}/schema.json` and JSON-LD sync | M1 | PLANNED |
+| M3 | Category Integrity & NOT LIKE Exclusions | Verify SQL category queries, 0% leakage, exact SQLite total count match | M1 | PLANNED |
+| M4 | Frontend Dashboard Cleanliness | Remove duplicate `#slideover-copilot` in `static/index.html`, verify JavaScript console cleanliness | M1 | PLANNED |
+| M5 | Error Reporter & Self-Healer Audit | Verify `middleware/error_reporter.py` logging to `logs/` and `core/ai_self_healer.py` patch generation in `patches/` | M1 | PLANNED |
+| M6 | E2E Testing & Final Victory Verification | Execute full E2E test suite (Tiers 1-4 + Tier 5 hardening), verify git branch `refactor/organizacao-e-limpeza` | M1, M2, M3, M4, M5 | PLANNED |
 
 ## Interface Contracts
-### `static/index.html` ↔ `app.py`
-- Category/Drawer selection triggers `/api/search` or `/api/trigger` with macro keyword or category name.
-- Profession filter dropdowns map category IDs to human-readable names and sub-profession lists.
+### Launcher ↔ FastAPI Server
+- FastAPI server executed via `uvicorn prioriti.app:app --host 0.0.0.0 --port 8000` or direct python launch.
+- Port 8000 must be verified available before launch or handled gracefully.
+- Telegram Bot service failure or missing token MUST NOT crash or trigger infinite restart loops for FastAPI server.
 
-### `bot.py` (`is_job_relevant`) ↔ `scrapers/*`
-- Scrapers accept broad macro-search keywords (e.g., "Indústria", "Logística", "Dados").
-- `is_job_relevant(job, keyword, settings)` filters and classifies jobs for specific sub-professions using `CO_OCCURRENCE_RULES` and `blacklist`.
+### Backend ↔ Frontend SEO / Schema.org
+- `/sitemap.xml` returns valid XML sitemap of all job pages.
+- `/api/job/{job_id}/schema.json` returns valid Schema.org `JobPosting` JSON.
+- `static/index.html` dynamically updates `<script type="application/ld+json">` on job navigation.
+
+## Code Layout
+- `launcher.py`: Main process launcher & process monitor.
+- `iniciar_tudo.bat`, `start_bot.bat`, `start.bat`: Batch entry points.
+- `prioriti/app.py`: Main FastAPI application & route definitions.
+- `static/index.html`: Frontend dashboard Single Page Application.
+- `middleware/error_reporter.py`: Error reporter middleware.
+- `core/ai_self_healer.py`: AI self-healing module.
+- `scripts/verify_category_integrity_qa.py`: Empirical QA script for category leakage verification.
+- `logs/`: Directory for JSON & MD error log reports.
+- `patches/`: Directory for AI-generated code patches.

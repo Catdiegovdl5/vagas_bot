@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import urllib.parse
+import hashlib
 
 try:
     from curl_cffi import requests as requests_cffi
@@ -44,79 +45,100 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
             "Content-type": "application/json"
         }
         
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
-        data = response.json()
-        
-        if data.get("jobs"):
-            for item in data["jobs"][:30]:
-                title = item.get("title", "Sem título")
-                j_type = "PJ" if "PJ" in title.upper() else "CLT"
-                
-                link = item.get("link", "#")
-                description = ""
-                final_url = link
-                
-                if link and link != "#":
-                    try:
-                        redirect_headers = {
-                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-                            "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7"
-                        }
+        response = None
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=10.0)
+        except Exception:
+            response = None
+            
+        if response and response.status_code == 200:
+            try:
+                data = response.json()
+            except Exception:
+                data = {}
+            if isinstance(data, dict):
+                raw_jobs = data.get("jobs")
+                if isinstance(raw_jobs, list):
+                    for item in raw_jobs[:30]:
+                        if not isinstance(item, dict):
+                            continue
+                        title = item.get("title", "Sem título")
+                        j_type = "PJ" if "PJ" in title.upper() else "CLT"
                         
-                        if requests_cffi:
-                            r = requests_cffi.get(link, headers=redirect_headers, allow_redirects=True, timeout=12, impersonate="chrome110")
-                        else:
-                            r = requests.get(link, headers=redirect_headers, allow_redirects=True, timeout=12)
-                            
-                        final_url = r.url
-                        html_content = r.text
+                        link = item.get("link", "#")
+                        description = ""
+                        final_url = link
                         
-                        if r.status_code == 200:
-                            soup = BeautifulSoup(html_content, "html.parser")
+                        if link and link != "#":
+                            try:
+                                redirect_headers = {
+                                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                                    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7"
+                                }
+                                
+                                if requests_cffi:
+                                    r = requests_cffi.get(link, headers=redirect_headers, allow_redirects=True, timeout=10.0, impersonate="chrome110")
+                                else:
+                                    r = requests.get(link, headers=redirect_headers, allow_redirects=True, timeout=10.0)
+                                    
+                                final_url = r.url
+                                html_content = r.text
+                                
+                                if r.status_code == 200:
+                                    soup = BeautifulSoup(html_content, "html.parser")
+                                    
+                                    if "gupy.io" in final_url:
+                                        desc_el = (soup.find(attrs={"data-testid": "vacancy-description-text"}) or 
+                                                   soup.find(attrs={"data-testid": "text-description"}) or
+                                                   soup.find(class_=re.compile(r"description|vacancy", re.I)))
+                                    elif "indeed.com" in final_url:
+                                        desc_el = soup.find(id="jobDescriptionText")
+                                    elif "jooble" in final_url:
+                                        desc_el = (soup.find("div", class_="job-description_description") or 
+                                                   soup.find("div", class_="description") or
+                                                   soup.find(class_=re.compile(r"description|desc", re.I)))
+                                    else:
+                                        desc_el = (soup.find(id="jobDescriptionText") or 
+                                                   soup.find("div", class_=re.compile(r"description|jobDescription|job-desc|vaga-desc|vacancy-desc", re.I)) or
+                                                   soup.find(attrs={"data-testid": re.compile(r"description|vacancy", re.I)}) or
+                                                   soup.find("article") or
+                                                   soup.find("main"))
+                                                   
+                                    if desc_el:
+                                        description = desc_el.get_text(separator="\n").strip()
+                            except Exception as redirect_e:
+                                print(f"Error following redirect for Jooble job {link}: {redirect_e}")
+                        
+                        if not description or len(description) < 150:
+                            api_snippet = item.get("snippet", "")
+                            description = api_snippet.replace('<b>', '').replace('</b>', '').replace('\n', ' ').strip()
                             
-                            if "gupy.io" in final_url:
-                                desc_el = (soup.find(attrs={"data-testid": "vacancy-description-text"}) or 
-                                           soup.find(attrs={"data-testid": "text-description"}) or
-                                           soup.find(class_=re.compile(r"description|vacancy", re.I)))
-                            elif "indeed.com" in final_url:
-                                desc_el = soup.find(id="jobDescriptionText")
-                            elif "jooble" in final_url:
-                                desc_el = (soup.find("div", class_="job-description_description") or 
-                                           soup.find("div", class_="description") or
-                                           soup.find(class_=re.compile(r"description|desc", re.I)))
-                            else:
-                                desc_el = (soup.find(id="jobDescriptionText") or 
-                                           soup.find("div", class_=re.compile(r"description|jobDescription|job-desc|vaga-desc|vacancy-desc", re.I)) or
-                                           soup.find(attrs={"data-testid": re.compile(r"description|vacancy", re.I)}) or
-                                           soup.find("article") or
-                                           soup.find("main"))
-                                           
-                            if desc_el:
-                                description = desc_el.get_text(separator="\n").strip()
-                    except Exception as redirect_e:
-                        print(f"Error following redirect for Jooble job {link}: {redirect_e}")
-                
-                if not description or len(description) < 150:
-                    api_snippet = item.get("snippet", "")
-                    description = api_snippet.replace('<b>', '').replace('</b>', '').replace('\n', ' ').strip()
-                    
-                # Guard: descartar vagas com link inválido ou sem título
-                if not title or not final_url or final_url == '#':
-                    continue
+                        # Guard: descartar vagas com link inválido ou sem título
+                        if not title or not final_url or final_url == '#':
+                            continue
 
-                jobs.append({
-                    "platform": "Jooble",
-                    "title": title,
-                    "company": item.get("company", "Confidencial"),
-                    "budget": item.get("salary") or "A Combinar",
-                    "link": final_url,
-                    "job_type": j_type,
-                    "profession": keyword,
-                    "level": level,
-                    "requirements": description
-                })
+                        job_id = hashlib.md5(final_url.encode('utf-8')).hexdigest()[:16]
+                        job_obj = {
+                            "id": job_id,
+                            "platform": "Jooble",
+                            "title": title,
+                            "company": item.get("company", "Confidencial"),
+                            "budget": item.get("salary") or "A Combinar",
+                            "link": final_url,
+                            "job_type": j_type,
+                            "profession": keyword,
+                            "level": level,
+                            "requirements": description
+                        }
+                        try:
+                            from bot import classify_job_profession
+                            job_obj = classify_job_profession(job_obj)
+                        except Exception:
+                            pass
+                        jobs.append(job_obj)
     except Exception:
         pass
         
     return jobs
+

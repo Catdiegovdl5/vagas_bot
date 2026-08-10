@@ -91,7 +91,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     if now - _last_alert_time > 300:  # Rate limit: máximo 1 alerta a cada 5 minutos
         _last_alert_time = now
         bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
-        admin_id = os.getenv("ADMIN_TELEGRAM_ID", "43991652706")
+        admin_id = os.getenv("ADMIN_TELEGRAM_ID", "").strip()
         if bot_token:
             try:
                 async with httpx.AsyncClient(timeout=10.0) as client:

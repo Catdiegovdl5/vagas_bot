@@ -1,6 +1,7 @@
 import requests
 import urllib.parse
 import os
+import hashlib
 
 def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
     jobs = []
@@ -33,7 +34,14 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
             "x-rapidapi-host": "jsearch.p.rapidapi.com"
         }
         
-        response = requests.get(url, headers=headers, timeout=10)
+        response = None
+        try:
+            response = requests.get(url, headers=headers, timeout=10.0)
+        except Exception:
+            response = None
+            
+        if not response:
+            return jobs
         
         if response.status_code == 404:
             print("JSearch: Endpoint não encontrado (404). Verifique se sua API Key é válida e está ativa no RapidAPI.")
@@ -48,43 +56,61 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
             print(f"JSearch: Erro HTTP {response.status_code}.")
             return jobs
             
-        data = response.json()
-        if "message" in data:
-            print(f"JSearch API mensagem: {data['message']}")
-            return jobs
-        
-        if data.get("data"):
-            for item in data["data"][:30]:
-                title = item.get("job_title", "Sem título")
-                j_type = "PJ" if "PJ" in title.upper() else "CLT"
-                
-                desc = item.get("job_description", "")
-                if len(desc) > 150:
-                    req_text = desc[:150].replace('\n', ' ') + "..."
-                else:
-                    req_text = desc.replace('\n', ' ')
-                
-                if not req_text.strip():
-                    req_text = "Sem descrição disponível."
-                
-                link = item.get("job_apply_link") or item.get("job_google_link") or ""
-                
-                # Guard: descartar vagas sem link válido ou sem título real
-                if not title or not link or link == "#":
-                    continue
-                
-                jobs.append({
-                    "platform": f"JSearch",
-                    "title": title,
-                    "company": item.get("employer_name", "Confidencial"),
-                    "budget": "A Combinar",
-                    "link": link,
-                    "job_type": j_type,
-                    "profession": keyword,
-                    "level": level,
-                    "requirements": req_text
-                })
+        try:
+            data = response.json()
+        except Exception:
+            data = {}
+            
+        if isinstance(data, dict):
+            if "message" in data:
+                print(f"JSearch API mensagem: {data['message']}")
+                return jobs
+            
+            raw_data = data.get("data")
+            if isinstance(raw_data, list):
+                for item in raw_data[:30]:
+                    if not isinstance(item, dict):
+                        continue
+                    title = item.get("job_title", "Sem título")
+                    j_type = "PJ" if "PJ" in title.upper() else "CLT"
+                    
+                    desc = item.get("job_description", "")
+                    if len(desc) > 150:
+                        req_text = desc[:150].replace('\n', ' ') + "..."
+                    else:
+                        req_text = desc.replace('\n', ' ')
+                    
+                    if not req_text.strip():
+                        req_text = "Sem descrição disponível."
+                    
+                    link = item.get("job_apply_link") or item.get("job_google_link") or ""
+                    
+                    # Guard: descartar vagas sem link válido ou sem título real
+                    if not title or not link or link == "#":
+                        continue
+                    
+                    jsearch_id = item.get("job_id") or link
+                    job_id = hashlib.md5(str(jsearch_id).encode('utf-8')).hexdigest()[:16]
+                    job_obj = {
+                        "id": job_id,
+                        "platform": f"JSearch",
+                        "title": title,
+                        "company": item.get("employer_name", "Confidencial"),
+                        "budget": "A Combinar",
+                        "link": link,
+                        "job_type": j_type,
+                        "profession": keyword,
+                        "level": level,
+                        "requirements": req_text
+                    }
+                    try:
+                        from bot import classify_job_profession
+                        job_obj = classify_job_profession(job_obj)
+                    except Exception:
+                        pass
+                    jobs.append(job_obj)
     except Exception as e:
         print("Erro JSearch:", e)
     
     return jobs
+

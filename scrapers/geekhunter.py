@@ -1,4 +1,5 @@
 import urllib.parse
+import hashlib
 from bs4 import BeautifulSoup
 
 try:
@@ -163,14 +164,17 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
         r = None
         if requests_cffi:
             try:
-                r = requests_cffi.get(url, headers=headers, impersonate="chrome110", timeout=15)
+                r = requests_cffi.get(url, headers=headers, impersonate="chrome110", timeout=10.0)
             except Exception:
                 r = None
         if r is None:
             import requests as req_std
-            r = req_std.get(url, headers=headers, timeout=15)
+            try:
+                r = req_std.get(url, headers=headers, timeout=10.0)
+            except Exception:
+                r = None
             
-        if r.status_code == 200:
+        if r and getattr(r, "status_code", None) == 200:
             soup = BeautifulSoup(r.text, 'html.parser')
             
             # Encontra todos os links de vaga pré-renderizados no HTML
@@ -236,7 +240,9 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
                     else:
                         reqs = f"Vaga para {title} na GeekHunter."
                         
+                    job_id = hashlib.md5(job_url.encode('utf-8')).hexdigest()[:16]
                     job_obj = {
+                        "id": job_id,
                         "platform": "GeekHunter",
                         "title": title,
                         "company": company,
@@ -259,3 +265,4 @@ def scrape(keyword="Python", level="Todos", location="", country="", **kwargs):
         print("Erro GeekHunter:", e)
         
     return jobs
+

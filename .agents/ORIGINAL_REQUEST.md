@@ -1,32 +1,35 @@
 # Original User Request
 
-## 2026-07-29T11:27:45Z
+## 2026-08-05T13:51:59Z
 
-# Teamwork Project Prompt — Draft
+# Teamwork Project Prompt
 
-> Status: Launched 🚀
-> Goal: Get user approval → delegate to teamwork_preview
+Refatoração completa, eliminação de loop de reinicialização no launcher.py e validação de integridade dos 4 Prompts do Sistema no repositório vagas_bot.
 
-**Project Description**: Refatorar os scrapers na pasta `scrapers/` (Gupy, LinkedIn, Workana, Infojobs, etc.) para garantir que eles pesquisem ativamente as vagas das 6 novas categorias profissionais com precisão máxima. Os agentes devem focar em injetar as palavras-chave diretamente nas buscas das plataformas para otimizar requisições.
-
-Working directory: `C:\Users\99196\OneDrive\Documentos\vagas_bot`
-Integrity mode: demo
-
-## Verification Resources
-The project has existing tests in the `tests/` directory which you can adapt to verify your changes.
+Working directory: C:\Users\99196\OneDrive\Documentos\vagas_bot
+Integrity mode: development
 
 ## Requirements
 
-### R1. Native Scraper Search Parameterization
-All relevant python scrapers in the `scrapers/` directory must be refactored to explicitly support querying the 6 new profession categories (Operações Físicas, Logística, Administrativo, Criativos de Performance, Inteligência de Vendas, Engenharia de IA/Dados). Wherever possible, map these new taxonomies directly into the platform's API/search parameters to prevent generic bulk scraping.
+### R1. Diagnóstico e Correção de Inicialização (Launcher & Bat)
+O inicializador unificado launcher.py e os scripts de lote (iniciar_tudo.bat, start_bot.bat, start.bat) devem rodar sem entrar em loop infinito caso o token do Telegram não esteja configurado no .env, garantindo que o Servidor Web FastAPI suba normalmente na porta 8000.
 
-### R2. Downstream Payload Compatibility
-Ensure that the output returned by the updated scrapers maintains compatibility with the existing database schema and insertion flows. The `profession` or `category` fields in the returned job objects must accurately reflect the new taxonomy mappings.
+### R2. Otimização de SEO & Schema.org (Prompt 1)
+Manter os endpoints /sitemap.xml e /api/job/{job_id}/schema.json ativos e sincronizados com a marcação JSON-LD JobPosting do Schema.org no static/index.html.
+
+### R3. Integridade de Categorias e Exclusão Estrita (Prompt 2)
+Garantir que a busca de vagas respeite 0% de vazamento de categorias irrelevantes (como vagas de Designer dentro de Tráfego Pago) e que a contagem total reflita estritamente o banco SQLite.
+
+### R4. Resiliência do Frontend e Dashboard (Prompt 3)
+Garantir que o painel web em http://localhost:8000/ carregue sem erros de console JavaScript, variáveis undefined ou falhas de requisição.
+
+### R5. Módulo de Autocorreção e Diagnóstico de Erros (Prompt 4)
+Manter o middleware middleware/error_reporter.py e o auto-healer core/ai_self_healer.py registrando logs estruturados em logs/ e patches em patches/.
 
 ## Acceptance Criteria
 
-### Objective Verification
-- [ ] At least three individual platform scrapers in `scrapers/` are updated to support the new categories natively.
-- [ ] A programmatic test (adapting an existing test from `tests/`) runs against at least 3 updated scrapers using one of the new categories (e.g., "Operador CNC" ou "Pintor Industrial").
-- [ ] The test executes successfully without API errors and returns valid job objects (or a clean empty list if no jobs are found).
-- [ ] The returned job objects correctly contain the appropriate classification fields matching the internal database structure.
+### Integridade Visual e Operacional
+- [x] O comando python launcher.py inicia o servidor FastAPI em http://localhost:8000/ sem loop de reinicialização.
+- [x] A requisição HTTP GET para http://localhost:8000/ retorna status 200 OK.
+- [x] As buscas por categoria possuem exclusão NOT LIKE para evitar vazamento de cargos incorretos.
+- [x] Alterações salvas e enviadas ao repositório GitHub (refactor/organizacao-e-limpeza).
